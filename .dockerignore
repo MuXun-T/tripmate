@@ -1,0 +1,11 @@
+.env
+.venv
+.deps-tmp
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+*.py[cod]
+*.egg-info
+tests
+docs

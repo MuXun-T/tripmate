@@ -1,0 +1,61 @@
+[build-system]
+requires = ["setuptools==80.9.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tripmate-agent"
+version = "0.1.0"
+description = "Weekend travel planning agent with PostgreSQL-authoritative reservations"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "asyncpg==0.30.0",
+  "fastapi==0.115.12",
+  "httpx==0.28.1",
+  "langchain==1.0.7",
+  "langgraph==1.0.10",
+  "langgraph-checkpoint-redis==0.5.2",
+  "numpy==2.2.6",
+  "opentelemetry-api==1.35.0",
+  "opentelemetry-exporter-otlp==1.35.0",
+  "opentelemetry-sdk==1.35.0",
+  "pydantic==2.11.7",
+  "pydantic-settings==2.10.1",
+  "redis==5.2.1",
+  "sqlalchemy==2.0.41",
+  "tzdata==2026.5",
+  "uvicorn[standard]==0.34.3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy==1.20.2",
+  "pytest==8.4.1",
+  "pytest-asyncio==1.1.0",
+  "ruff==0.12.2",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+  "integration: requires PostgreSQL and Redis Stack services",
+  "postgres: requires PostgreSQL",
+  "redis_stack: requires Redis Stack with RedisJSON and RediSearch",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+ignore = ["E501"]
+per-file-ignores = { "app/api.py" = ["B008"] }
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]

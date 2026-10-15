@@ -1,0 +1,1 @@
+"""Real-service integration contracts."""

@@ -1,0 +1,15 @@
+.env
+.venv/
+.venv312/
+.tools/
+.deps-tmp/
+.cache/
+.data/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
