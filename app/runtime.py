@@ -12,6 +12,7 @@ from app.memory.preferences import PreferenceService
 from app.memory.short_term import ShortTermMemoryService
 from app.observability.otel import initialize_telemetry
 from app.persistence.postgres.database import create_engine, session_factory
+from app.reminders.service import ReminderService
 from app.reservation.service import ReservationService
 from app.tools.gateway import ToolGateway
 from app.tools.realtime import RealtimeAdapters
@@ -32,6 +33,7 @@ class Runtime:
     preferences: PreferenceService
     short_term_memory: ShortTermMemoryService
     reservations: ReservationService
+    reminders: ReminderService
     runs: AgentRunService
     trips: TripService
     tools: ToolGateway
@@ -46,11 +48,14 @@ class Runtime:
         checkpointer = AsyncRedisSaver(redis_client=redis)
         projection = RedisInventoryProjection(redis, config, sessions)
         realtime = RealtimeAdapters(sessions, config)
-        knowledge = KnowledgeRetriever(sessions, config)
+        knowledge = KnowledgeRetriever(sessions, config, redis)
         preferences = PreferenceService(sessions, config, SystemClock(), RandomIdGenerator(), redis)
         short_term_memory = ShortTermMemoryService(redis, config, SystemClock(), sessions)
         reservations = ReservationService(
-            sessions, config, SystemClock(), RandomIdGenerator(), projection
+            sessions, config, SystemClock(), RandomIdGenerator(), projection, preferences
+        )
+        reminders = ReminderService(
+            sessions, redis, config, SystemClock(), RandomIdGenerator()
         )
         runs = AgentRunService(sessions, config, SystemClock(), RandomIdGenerator())
         trips = TripService(sessions, config, SystemClock(), RandomIdGenerator())
@@ -60,6 +65,8 @@ class Runtime:
             await projection.setup()
             await short_term_memory.setup()
             await checkpointer.setup()
+            if knowledge.vector_index is not None:
+                await knowledge.vector_index.setup()
         except Exception:
             await realtime.close()
             await redis.aclose()
@@ -77,6 +84,7 @@ class Runtime:
             preferences,
             short_term_memory,
             reservations,
+            reminders,
             runs,
             trips,
             tools,

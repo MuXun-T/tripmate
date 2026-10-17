@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import re
@@ -13,7 +14,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Res
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from opentelemetry import trace
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -23,6 +24,7 @@ from starlette.middleware.base import RequestResponseEndpoint
 from app.config import Settings, get_settings
 from app.domain.context import RequestContext
 from app.domain.errors import DomainError
+from app.persistence.postgres.migrate import MIGRATIONS
 from app.runtime import Runtime
 from app.security.auth import verify_bearer_token
 
@@ -66,12 +68,20 @@ class CreateRunBody(RequestModel):
     trip_id: UUID | None = None
 
 
+class TripConfirmBody(RequestModel):
+    expected_version: int | None = Field(default=None, ge=1)
+
+
 class ActionConfirmationBody(RequestModel):
     expected_confirmation_version: int = Field(ge=1)
 
 
 class ActionRejectBody(RequestModel):
     expected_version: int = Field(ge=1)
+
+
+class ConfirmPreferenceActionBody(RequestModel):
+    confirmation_token: str = Field(min_length=20, max_length=500)
 
 
 class HoldReservationBody(RequestModel):
@@ -259,29 +269,174 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         try:
             async with runtime.sessions() as session:
                 await session.execute(text("SELECT 1 FROM tripmate.agent_run LIMIT 1"))
+                expected_migration = sorted(path.name for path in MIGRATIONS.glob("V*__*.sql"))[-1]
+                applied_migration = await session.scalar(
+                    text("""SELECT version FROM public.tripmate_migration_history
+                        ORDER BY version DESC LIMIT 1"""),
+                )
+                checks["migrations"] = "UP" if applied_migration == expected_migration else "DOWN"
                 worker = await session.scalar(
                     text("""SELECT EXISTS(SELECT 1 FROM tripmate.worker_heartbeat
                         WHERE worker_name='agent-worker' AND heartbeat_at>now()-interval '45 seconds')""")
                 )
+                rag_alias = await session.scalar(
+                    text("""SELECT EXISTS(
+                        SELECT 1 FROM tripmate.knowledge_active_alias a
+                        JOIN tripmate.knowledge_manifest m
+                          ON m.tenant_id=a.tenant_id AND m.manifest_id=a.manifest_id
+                        WHERE a.index_alias=:alias AND m.status='ACTIVE')"""),
+                    {"alias": runtime.settings.rag_index_alias},
+                )
             checks["postgres"] = "UP"
             checks["agent_worker"] = "UP" if worker else "DOWN"
+            checks["rag_alias"] = "UP" if rag_alias else "DOWN"
         except Exception:
             checks["postgres"] = "DOWN"
             checks["agent_worker"] = "UNKNOWN"
+            checks["migrations"] = "UNKNOWN"
+            checks["rag_alias"] = "UNKNOWN"
         try:
             checks["redis"] = "UP" if await runtime.redis.ping() else "DOWN"
             checks["redis_scripts"] = (
                 "UP" if runtime.projection.project_snapshot_script is not None else "DOWN"
             )
-            checks["checkpoint_saver"] = "UP"
+            checkpoints = getattr(runtime.checkpointer, "checkpoints_index", None)
+            writes = getattr(runtime.checkpointer, "checkpoint_writes_index", None)
+            checks["checkpoint_saver"] = (
+                "UP"
+                if checkpoints is not None
+                and writes is not None
+                and await checkpoints.exists()
+                and await writes.exists()
+                else "DOWN"
+            )
+            checks["rag_vector_index"] = (
+                "UP"
+                if runtime.knowledge.vector_index is not None
+                and await runtime.knowledge.vector_index.check_ready()
+                else "DOWN"
+            )
         except Exception:
             checks["redis"] = "DOWN"
             checks["redis_scripts"] = "DOWN"
             checks["checkpoint_saver"] = "DOWN"
+            checks["rag_vector_index"] = "DOWN"
         ready = all(value == "UP" for value in checks.values())
         if not ready:
             response.status_code = 503
         return envelope(request, {"status": "UP" if ready else "DOWN", "checks": checks})
+
+    @app.get("/v1/operations/faults", tags=["operations"])
+    async def operations_faults(
+        request: Request, ctx: RequestContext = Depends(context_dependency)
+    ) -> dict[str, Any]:
+        runtime = service(request)
+        async with runtime.sessions() as session:
+            outbox_rows = await session.execute(
+                text("""SELECT status,count(*) AS count,
+                    EXTRACT(epoch FROM now()-MIN(created_at)) AS oldest_age_seconds
+                    FROM tripmate.outbox_event WHERE tenant_id=:tenant AND status IN ('PENDING','FAILED')
+                    GROUP BY status ORDER BY status"""),
+                {"tenant": ctx.tenant_id},
+            )
+            inbox_rows = await session.execute(
+                text("""SELECT status,count(*) AS count,
+                    count(*) FILTER (WHERE status='PROCESSING' AND lease_until<=now()) AS expired_leases
+                    FROM tripmate.inbox_event WHERE tenant_id=:tenant GROUP BY status ORDER BY status"""),
+                {"tenant": ctx.tenant_id},
+            )
+            dead_letters = await session.execute(
+                text("""SELECT error_code,count(*) AS count FROM tripmate.dead_letter_event
+                    WHERE tenant_id=:tenant AND status='OPEN' GROUP BY error_code ORDER BY error_code"""),
+                {"tenant": ctx.tenant_id},
+            )
+            failed_runs = await session.execute(
+                text("""SELECT last_error_code,count(*) AS count FROM tripmate.agent_run
+                    WHERE tenant_id=:tenant AND status='FAILED' GROUP BY last_error_code
+                    ORDER BY last_error_code"""),
+                {"tenant": ctx.tenant_id},
+            )
+            reminder_rows = await session.execute(
+                text("""SELECT status,count(*) AS count,
+                    count(*) FILTER (WHERE status='SENDING' AND lease_until<=now()) AS expired_leases
+                    FROM tripmate.reminder WHERE tenant_id=:tenant
+                    AND status IN ('SENDING','RETRYING','FAILED') GROUP BY status ORDER BY status"""),
+                {"tenant": ctx.tenant_id},
+            )
+        try:
+            redis_status = "UP" if await runtime.redis.ping() else "DOWN"
+        except Exception:
+            redis_status = "DOWN"
+        return envelope(
+            request,
+            {
+                "redis": redis_status,
+                "outbox": [dict(row) for row in outbox_rows.mappings()],
+                "inbox": [dict(row) for row in inbox_rows.mappings()],
+                "open_dead_letters_by_error": [dict(row) for row in dead_letters.mappings()],
+                "failed_runs_by_error": [dict(row) for row in failed_runs.mappings()],
+                "reminders": [dict(row) for row in reminder_rows.mappings()],
+            },
+        )
+
+    @app.get("/v1/operations/metrics", tags=["operations"])
+    async def operations_metrics(
+        request: Request,
+        window_hours: int = Query(default=24, ge=1, le=720),
+        ctx: RequestContext = Depends(context_dependency),
+    ) -> dict[str, Any]:
+        runtime = service(request)
+        async with runtime.sessions() as session:
+            runs = await session.execute(
+                text("""SELECT intent,status,count(*) AS count,
+                    percentile_cont(0.95) WITHIN GROUP (ORDER BY
+                      EXTRACT(epoch FROM updated_at-created_at)*1000)
+                      FILTER (WHERE status IN ('COMPLETED','FAILED')) AS p95_duration_ms
+                    FROM tripmate.agent_run WHERE tenant_id=:tenant
+                      AND created_at>=now()-make_interval(hours=>:hours)
+                    GROUP BY intent,status ORDER BY intent,status"""),
+                {"tenant": ctx.tenant_id, "hours": window_hours},
+            )
+            reservations = await session.execute(
+                text("""SELECT status,count(*) AS count FROM tripmate.reservation
+                    WHERE tenant_id=:tenant AND created_at>=now()-make_interval(hours=>:hours)
+                    GROUP BY status ORDER BY status"""),
+                {"tenant": ctx.tenant_id, "hours": window_hours},
+            )
+            inventory = await session.execute(
+                text("""SELECT count(*) AS slots,
+                    COALESCE(sum(available_quantity),0) AS available,
+                    COALESCE(sum(held_quantity),0) AS held,
+                    COALESCE(sum(confirmed_quantity),0) AS confirmed,
+                    count(*) FILTER (WHERE available_quantity+held_quantity+confirmed_quantity<>total_quantity)
+                      AS invariant_violations
+                    FROM tripmate.inventory WHERE tenant_id=:tenant"""),
+                {"tenant": ctx.tenant_id},
+            )
+            events = await session.execute(
+                text("""SELECT event_type,status,count(*) AS count FROM tripmate.outbox_event
+                    WHERE tenant_id=:tenant AND created_at>=now()-make_interval(hours=>:hours)
+                    GROUP BY event_type,status ORDER BY event_type,status"""),
+                {"tenant": ctx.tenant_id, "hours": window_hours},
+            )
+            reminders = await session.execute(
+                text("""SELECT reminder_type,status,count(*) AS count FROM tripmate.reminder
+                    WHERE tenant_id=:tenant AND created_at>=now()-make_interval(hours=>:hours)
+                    GROUP BY reminder_type,status ORDER BY reminder_type,status"""),
+                {"tenant": ctx.tenant_id, "hours": window_hours},
+            )
+            inventory_summary = inventory.mappings().one()
+        return envelope(
+            request,
+            {
+                "window_hours": window_hours,
+                "runs": [dict(row) for row in runs.mappings()],
+                "reservations": [dict(row) for row in reservations.mappings()],
+                "inventory": dict(inventory_summary),
+                "outbox_events": [dict(row) for row in events.mappings()],
+                "reminders": [dict(row) for row in reminders.mappings()],
+            },
+        )
 
     @app.post("/v1/trips", status_code=201, tags=["trips"])
     async def create_trip(
@@ -312,6 +467,32 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         ctx: RequestContext = Depends(context_dependency),
     ) -> dict[str, Any]:
         return envelope(request, await service(request).trips.get(ctx, trip_id))
+
+    @app.post("/v1/trips/{trip_id}/confirm", tags=["trips"])
+    async def confirm_trip(
+        trip_id: UUID,
+        body: TripConfirmBody,
+        request: Request,
+        ctx: RequestContext = Depends(context_dependency),
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=1, max_length=200),
+    ) -> dict[str, Any]:
+        result = await service(request).trips.confirm(
+            ctx, trip_id, expected_version=body.expected_version, idempotency_key=idempotency_key
+        )
+        return envelope(request, result)
+
+    @app.get("/v1/trips/{trip_id}/alternatives", tags=["trips"])
+    async def list_trip_alternatives(
+        trip_id: UUID,
+        request: Request,
+        slot_id: UUID = Query(),
+        limit: int = Query(default=5, ge=1, le=20),
+        ctx: RequestContext = Depends(context_dependency),
+    ) -> dict[str, Any]:
+        alternatives = await service(request).trips.alternatives(
+            ctx, trip_id, slot_id, limit=limit
+        )
+        return envelope(request, {"alternatives": alternatives})
 
     @app.get("/v1/conversations/{conversation_id}/memory", tags=["conversations"])
     async def get_conversation_memory(
@@ -351,6 +532,62 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         data = {**(result or {}), **run, "run_id": str(run_id)}
         return envelope(request, data)
 
+    @app.get("/v1/runs/{run_id}/events", tags=["runs"])
+    async def run_events(
+        run_id: UUID,
+        request: Request,
+        ctx: RequestContext = Depends(context_dependency),
+        last_event_id: str | None = Header(default=None, alias="Last-Event-ID"),
+    ) -> StreamingResponse:
+        cursor = 0
+        if last_event_id is not None:
+            try:
+                cursor = int(last_event_id)
+            except ValueError as exc:
+                raise DomainError("INVALID_ARGUMENT", "Last-Event-ID must be an integer", 400) from exc
+            if cursor < 0:
+                raise DomainError("INVALID_ARGUMENT", "Last-Event-ID must be non-negative", 400)
+        runtime = service(request)
+        await runtime.runs.get_run(ctx, run_id)
+
+        async def stream() -> Any:
+            nonlocal cursor
+            last_heartbeat = asyncio.get_running_loop().time()
+            while True:
+                batch = await runtime.runs.get_run_event_batch(
+                    ctx, run_id, after_sequence=cursor
+                )
+                events = batch["events"]
+                for item in events:
+                    cursor = int(item["event_sequence"])
+                    data = json.dumps(
+                        {
+                            "event_id": str(item["event_id"]),
+                            "run_id": str(run_id),
+                            "occurred_at": item["occurred_at"].isoformat(),
+                            "sequence": cursor,
+                            "payload": item["payload"],
+                        },
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                    )
+                    event_name = "done" if item["event_type"] == "completed" else item["event_type"]
+                    yield f"id: {cursor}\nevent: {event_name}\ndata: {data}\n\n"
+                if not events and batch["status"] in {"COMPLETED", "FAILED", "CANCELLED"}:
+                    break
+                now = asyncio.get_running_loop().time()
+                if not events and now - last_heartbeat >= 15:
+                    yield ": keep-alive\n\n"
+                    last_heartbeat = now
+                if not events:
+                    await asyncio.sleep(0.5)
+
+        return StreamingResponse(
+            stream(),
+            media_type="text/event-stream",
+            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
     @app.post("/v1/actions/{action_id}/confirmation", tags=["actions"])
     async def issue_action_confirmation(
         action_id: UUID,
@@ -380,6 +617,75 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             action_id,
             expected_version=body.expected_version,
             idempotency_key=idempotency_key,
+        )
+        return envelope(request, result)
+
+    @app.post("/v1/actions/{action_id}/preference-confirmation", tags=["actions"])
+    async def confirm_preference_action(
+        action_id: UUID,
+        body: ConfirmPreferenceActionBody,
+        request: Request,
+        ctx: RequestContext = Depends(context_dependency),
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=1, max_length=200),
+    ) -> dict[str, Any]:
+        result = await service(request).reservations.confirm_preference_action(
+            ctx,
+            action_id,
+            confirmation_token=body.confirmation_token,
+            idempotency_key=idempotency_key,
+        )
+        return envelope(request, result)
+
+    @app.post("/v1/actions/{action_id}/waitlist", status_code=201, tags=["actions"])
+    async def execute_waitlist_action(
+        action_id: UUID,
+        body: ConfirmPreferenceActionBody,
+        request: Request,
+        ctx: RequestContext = Depends(context_dependency),
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=1, max_length=200),
+    ) -> dict[str, Any]:
+        result = await service(request).reservations.execute_p1_action(
+            ctx, action_id, action_type="propose_waitlist",
+            confirmation_token=body.confirmation_token, idempotency_key=idempotency_key,
+        )
+        return envelope(request, result)
+
+    @app.get("/v1/waitlist/promotions", tags=["reservations"])
+    async def list_waitlist_promotions(
+        request: Request,
+        limit: int = Query(default=20, ge=1, le=100),
+        ctx: RequestContext = Depends(context_dependency),
+    ) -> dict[str, Any]:
+        promotions = await service(request).reservations.list_waitlist_promotions(ctx, limit=limit)
+        return envelope(request, {"simulation": True, "promotions": promotions})
+
+    @app.post("/v1/waitlist/promotions/{promotion_id}/confirm", tags=["reservations"])
+    async def confirm_waitlist_promotion(
+        promotion_id: UUID,
+        body: ConfirmPreferenceActionBody,
+        request: Request,
+        ctx: RequestContext = Depends(context_dependency),
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=1, max_length=200),
+    ) -> dict[str, Any]:
+        result = await service(request).reservations.confirm_waitlist_promotion(
+            ctx,
+            promotion_id,
+            confirmation_token=body.confirmation_token,
+            idempotency_key=idempotency_key,
+        )
+        return envelope(request, {"simulation": True, **result})
+
+    @app.post("/v1/actions/{action_id}/reminder-confirmation", status_code=201, tags=["actions"])
+    async def execute_reminder_action(
+        action_id: UUID,
+        body: ConfirmPreferenceActionBody,
+        request: Request,
+        ctx: RequestContext = Depends(context_dependency),
+        idempotency_key: str = Header(alias="Idempotency-Key", min_length=1, max_length=200),
+    ) -> dict[str, Any]:
+        result = await service(request).reservations.execute_p1_action(
+            ctx, action_id, action_type="create_reminder",
+            confirmation_token=body.confirmation_token, idempotency_key=idempotency_key,
         )
         return envelope(request, result)
 
@@ -489,6 +795,36 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     ) -> dict[str, Any]:
         return envelope(request, await service(request).preferences.list_for_user(ctx))
 
+    @app.get("/v1/preferences/cases/search", tags=["preferences"])
+    async def search_preference_cases(
+        request: Request,
+        query: str = Query(min_length=1, max_length=500),
+        limit: int = Query(default=5, ge=1, le=20),
+        ctx: RequestContext = Depends(context_dependency),
+    ) -> dict[str, Any]:
+        preferences = await service(request).preferences.list_for_user(ctx)
+        generation = max((int(item["generation"]) for item in preferences), default=1)
+        cases = await service(request).knowledge.search_private_cases(
+            ctx, query, current_generation=generation, limit=limit
+        )
+        return envelope(request, {"cases": cases})
+
+    @app.get("/v1/notifications", tags=["notifications"])
+    async def list_notifications(
+        request: Request,
+        limit: int = Query(default=50, ge=1, le=100),
+        ctx: RequestContext = Depends(context_dependency),
+    ) -> dict[str, Any]:
+        return envelope(request, await service(request).reminders.list_notifications(ctx, limit=limit))
+
+    @app.post("/v1/notifications/{notification_id}/read", tags=["notifications"])
+    async def mark_notification_read(
+        notification_id: UUID,
+        request: Request,
+        ctx: RequestContext = Depends(context_dependency),
+    ) -> dict[str, Any]:
+        return envelope(request, await service(request).reminders.mark_read(ctx, notification_id))
+
     @app.post("/v1/preferences", tags=["preferences"])
     async def save_preference(
         body: PreferenceBody,
@@ -529,8 +865,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         top_k: int = Query(default=5, ge=1, le=20),
         ctx: RequestContext = Depends(context_dependency),
     ) -> dict[str, Any]:
-        results = await service(request).knowledge.search(ctx, query, top_k=top_k)
-        return envelope(request, {"citations": [item.model_dump(mode="json") for item in results]})
+        results, diagnostics = await service(request).knowledge.search_with_diagnostics(
+            ctx, query, top_k=top_k
+        )
+        return envelope(
+            request,
+            {
+                "citations": [item.model_dump(mode="json") for item in results],
+                "diagnostics": diagnostics,
+            },
+        )
 
     def custom_openapi() -> dict[str, Any]:
         if app.openapi_schema:

@@ -18,6 +18,9 @@ class KeyCodec:
     def expiry(self, tenant_id: UUID) -> str:
         return f"{self._root(tenant_id)}:holds:expiry"
 
+    def reminders(self, tenant_id: UUID) -> str:
+        return f"{self._root(tenant_id)}:reminders:due"
+
     def conversation(self, tenant_id: UUID, user_id: UUID, conversation_id: UUID) -> str:
         return f"{self._root(tenant_id)}:memory:conversation:{user_id}:{conversation_id}"
 

@@ -1,0 +1,26 @@
+{
+  "dataset_id": "osunlp/TravelPlanner",
+  "dataset_revision": "8736504ecfc31b7f8b7e40122873c337e83fff7c",
+  "license": "CC-BY-4.0",
+  "metrics": {
+    "answerable_case_count": 12,
+    "case_count": 12,
+    "citation_correctness": 0.8056,
+    "citation_locatability": 1.0,
+    "citation_locatability_scope": "offline_memory_bundle",
+    "mrr": 0.9028,
+    "ndcg_at_5": 0.8946,
+    "recall_at_3": 0.8056,
+    "recall_at_5": 0.9444,
+    "retrieval_latency_scope": "offline_memory_ranking",
+    "retrieval_p50_ms": 7.047,
+    "retrieval_p95_ms": 8.446,
+    "unknown_case_count": 0,
+    "unknown_metrics_status": "N/A: evaluation set contains no unknown cases",
+    "unknown_precision": "N/A",
+    "unknown_recall": "N/A",
+    "unknown_score_threshold": 0.05
+  },
+  "source_version": "travelplanner-validation-8736504ecfc3",
+  "split": "validation"
+}

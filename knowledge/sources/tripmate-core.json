@@ -1,0 +1,65 @@
+{
+  "source_version": "2026-10-15-v1",
+  "documents": [
+    {
+      "external_document_id": "tripmate-authoritative-trip-data",
+      "document_type": "project_policy",
+      "source": "tripmate-curated",
+      "source_id": "authoritative-trip-data",
+      "source_url": "repo://knowledge/sources/tripmate-core.json#authoritative-trip-data",
+      "title": "行程事实与数据库权威边界",
+      "chunks": [
+        {
+          "heading": "价格、库存与开放时间",
+          "content": "行程规划中，票价、预算、可售库存、预约状态和活动开放时间以本地数据库及确定性校验结果为准。模型输出只能影响候选选择或排序，不能创建或更改这些事实。",
+          "keywords": ["价格", "票价", "预算", "库存", "余票", "开放时间", "数据库"]
+        }
+      ]
+    },
+    {
+      "external_document_id": "tripmate-confirmed-reservation-snapshots",
+      "document_type": "project_policy",
+      "source": "tripmate-curated",
+      "source_id": "confirmed-reservation-snapshots",
+      "source_url": "repo://knowledge/sources/tripmate-core.json#confirmed-reservation-snapshots",
+      "title": "已确认预约与价格快照",
+      "chunks": [
+        {
+          "heading": "重规划保留已确认预约",
+          "content": "用户修改计划或天气变化触发重规划时，已确认的预约必须保留，费用按预约记录中的价格快照计算。重规划不能覆盖、删除或改价；新的预约或取消必须先生成候选 action，再由用户确认。",
+          "keywords": ["已确认", "预约", "预订", "价格快照", "改价", "重规划", "取消", "确认"]
+        }
+      ]
+    },
+    {
+      "external_document_id": "tripmate-weather-and-indoor-planning",
+      "document_type": "project_policy",
+      "source": "tripmate-curated",
+      "source_id": "weather-and-indoor-planning",
+      "source_url": "repo://knowledge/sources/tripmate-core.json#weather-and-indoor-planning",
+      "title": "天气变化与室内偏好",
+      "chunks": [
+        {
+          "heading": "天气只用于软排序",
+          "content": "天气预报是可能缺失或变化的提示信息，不是景点开放或预约事实。用户提到下雨、降雨或天气变化时，系统重新查询计划日期的天气，并可将室内比例、步行时间和天气适配作为确定性软评分来比较方案。未知天气不得当作晴天。",
+          "keywords": ["天气", "下雨", "雨天", "降雨", "室内", "步行", "重规划", "方案比较"]
+        }
+      ]
+    },
+    {
+      "external_document_id": "tripmate-preference-consent",
+      "document_type": "project_policy",
+      "source": "tripmate-curated",
+      "source_id": "preference-consent",
+      "source_url": "repo://knowledge/sources/tripmate-core.json#preference-consent",
+      "title": "偏好保存与敏感信息",
+      "chunks": [
+        {
+          "heading": "保存偏好需要单独确认",
+          "content": "行程请求中的临时偏好只影响当前计划。长期偏好必须先创建待确认候选 action，只有用户明确确认后才写入。饮食、过敏等敏感偏好只在完成当前任务所需的边界内处理，不发送到不必要的模型上下文。",
+          "keywords": ["偏好", "保存", "确认", "饮食", "过敏", "敏感信息", "候选 action"]
+        }
+      ]
+    }
+  ]
+}

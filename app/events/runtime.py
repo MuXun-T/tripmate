@@ -132,8 +132,9 @@ class OutboxPublisher:
     ) -> int:
         """Rebuild a lost Stream from the retained outbox window; inbox deduplicates repeated event IDs."""
         start = since or datetime.now(UTC) - self.replay_window
+        stream_name = self.keys.stream(tenant_id, domain)
         count = 0
-        async with self.sessions() as session:
+        async with self.sessions() as session, session.begin():
             rows = await session.execute(
                 text("""SELECT payload FROM tripmate.outbox_event WHERE tenant_id=:tenant
                     AND status='PUBLISHED' AND published_stream=:stream AND created_at>=:since
@@ -141,7 +142,7 @@ class OutboxPublisher:
                     ORDER BY created_at,event_id"""),
                 {
                     "tenant": tenant_id,
-                    "stream": self.keys.stream(tenant_id, domain),
+                    "stream": stream_name,
                     "since": start,
                 },
             )
@@ -153,8 +154,21 @@ class OutboxPublisher:
                 )
                 envelope = EventEnvelope.model_validate(payload)
                 await self.redis.xadd(
-                    self.keys.stream(tenant_id, domain),
+                    stream_name,
                     {"event": canonical_json(envelope.model_dump(mode="json"))},
+                )
+                await session.execute(
+                    text("""INSERT INTO tripmate.outbox_replay_cursor
+                        (tenant_id,stream_name,cursor_created_at,cursor_event_id)
+                        SELECT :tenant,:stream,created_at,event_id FROM tripmate.outbox_event
+                        WHERE tenant_id=:tenant AND event_id=:event
+                        ON CONFLICT (tenant_id,stream_name) DO UPDATE SET
+                          cursor_created_at=EXCLUDED.cursor_created_at,cursor_event_id=EXCLUDED.cursor_event_id,
+                          updated_at=now()
+                        WHERE EXCLUDED.cursor_created_at > outbox_replay_cursor.cursor_created_at
+                           OR (EXCLUDED.cursor_created_at = outbox_replay_cursor.cursor_created_at
+                               AND EXCLUDED.cursor_event_id > outbox_replay_cursor.cursor_event_id)"""),
+                    {"tenant": tenant_id, "stream": stream_name, "event": envelope.event_id},
                 )
                 count += 1
         return count
@@ -199,7 +213,7 @@ class InboxProcessor:
             return False
         if envelope.tenant_id not in self._tenant_from_stream(stream):
             return False
-        claim = await self._claim(envelope, raw)
+        claim = await self._claim(envelope, raw, stream, str(message_id))
         if claim is None:
             async with self.sessions() as session:
                 status = await session.scalar(
@@ -209,6 +223,7 @@ class InboxProcessor:
                     {"event": envelope.event_id, "consumer": self.consumer},
                 )
             if status == "PROCESSED" or status == "DLQ":
+                await self._advance_watermark(stream, str(message_id))
                 await self.redis.xack(stream, self.group, message_id)
                 return True
             return False
@@ -248,6 +263,7 @@ class InboxProcessor:
                     )
                     if affected_rows(completed) != 1:
                         raise DomainError("STALE_LEASE", "Inbox completion was fenced", 409)
+            await self._advance_watermark(stream, str(message_id))
             await self.redis.xack(stream, self.group, message_id)
             return True
         except Exception as exc:
@@ -255,10 +271,68 @@ class InboxProcessor:
                 envelope, stream, str(message_id), raw, claim, exc
             )
             if terminal:
+                await self._advance_watermark(stream, str(message_id))
                 await self.redis.xack(stream, self.group, message_id)
             return False
 
-    async def _claim(self, envelope: EventEnvelope, raw: str) -> dict[str, Any] | None:
+    async def _advance_watermark(self, stream: str, message_id: str) -> None:
+        tenant = next(iter(self._tenant_from_stream(stream)), None)
+        if tenant is None:
+            return
+        message_key = self._message_id_key(message_id)
+        async with self.sessions() as session, session.begin():
+            current = await session.scalar(
+                text("""SELECT safe_message_id FROM tripmate.stream_group_watermark
+                    WHERE tenant_id=:tenant AND stream_name=:stream AND group_name=:group_name"""),
+                {"tenant": tenant, "stream": stream, "group_name": self.group},
+            )
+            if current is not None and self._message_id_key(str(current)) >= message_key:
+                return
+            start = f"({current}" if current is not None else "-"
+            entries = await self.redis.xrange(stream, min=start, max=message_id)
+            if not entries:
+                return
+            event_ids: list[UUID] = []
+            for _entry_id, fields in entries:
+                raw = fields.get("event", fields.get(b"event"))
+                try:
+                    value = raw.decode() if isinstance(raw, bytes) else str(raw)
+                    event_ids.append(EventEnvelope.model_validate_json(value).event_id)
+                except Exception:
+                    return
+            placeholders = ",".join(f":event_{index}" for index in range(len(event_ids)))
+            statuses = await session.execute(
+                text(f"""SELECT event_id,status FROM tripmate.inbox_event
+                    WHERE tenant_id=:tenant AND group_name=:group AND event_id IN ({placeholders})"""),
+                {
+                    "tenant": tenant,
+                    "group": self.group,
+                    **{f"event_{index}": event_id for index, event_id in enumerate(event_ids)},
+                },
+            )
+            status_map = {row["event_id"]: row["status"] for row in statuses.mappings()}
+            if any(status_map.get(event_id) not in {"PROCESSED", "DLQ"} for event_id in event_ids):
+                return
+            await session.execute(
+                text("""INSERT INTO tripmate.stream_group_watermark
+                    (tenant_id,stream_name,group_name,safe_message_id)
+                    VALUES(:tenant,:stream,:group_name,:message)
+                    ON CONFLICT (tenant_id,stream_name,group_name) DO UPDATE SET
+                      safe_message_id=EXCLUDED.safe_message_id,updated_at=now()"""),
+                {"tenant": tenant, "stream": stream, "group_name": self.group, "message": message_id},
+            )
+
+    @staticmethod
+    def _message_id_key(message_id: str) -> tuple[int, int]:
+        try:
+            milliseconds, sequence = message_id.split("-", 1)
+            return int(milliseconds), int(sequence)
+        except (ValueError, TypeError):
+            return (-1, -1)
+
+    async def _claim(
+        self, envelope: EventEnvelope, raw: str, stream: str, message_id: str
+    ) -> dict[str, Any] | None:
         now = datetime.now(UTC)
         claim_token = uuid4()
         payload_hash = hashlib.sha256(raw.encode("utf-8")).hexdigest()
@@ -266,13 +340,15 @@ class InboxProcessor:
             result = await session.execute(
                 text("""INSERT INTO tripmate.inbox_event
                     (event_id,consumer,tenant_id,status,attempt_count,lease_owner,lease_until,claim_token,
-                     fencing_version,payload_hash)
-                    VALUES(:event,:consumer,:tenant,'PROCESSING',1,:owner,:until,:claim,1,:hash)
+                     fencing_version,payload_hash,stream_name,group_name,stream_message_id)
+                    VALUES(:event,:consumer,:tenant,'PROCESSING',1,:owner,:until,:claim,1,:hash,
+                     :stream,:group_name,:message_id)
                     ON CONFLICT(event_id,consumer) DO UPDATE SET status='PROCESSING',
                       attempt_count=tripmate.inbox_event.attempt_count+1,lease_owner=EXCLUDED.lease_owner,
                       lease_until=EXCLUDED.lease_until,claim_token=EXCLUDED.claim_token,
                       fencing_version=tripmate.inbox_event.fencing_version+1,
-                      updated_at=now(),error_code=NULL
+                      updated_at=now(),error_code=NULL,stream_name=EXCLUDED.stream_name,
+                      group_name=EXCLUDED.group_name,stream_message_id=EXCLUDED.stream_message_id
                     WHERE tripmate.inbox_event.status NOT IN ('PROCESSED','DLQ')
                       AND (tripmate.inbox_event.status<>'PROCESSING' OR tripmate.inbox_event.lease_until<=:now)
                     RETURNING fencing_version,attempt_count"""),
@@ -284,6 +360,9 @@ class InboxProcessor:
                     "until": now + timedelta(seconds=30),
                     "claim": claim_token,
                     "hash": payload_hash,
+                    "stream": stream,
+                    "group_name": self.group,
+                    "message_id": message_id,
                     "now": now,
                 },
             )
@@ -386,7 +465,10 @@ class InboxProcessor:
         processed = 0
         for _stream, entries in messages:
             for message_id, fields in entries:
-                processed += bool(await self.process(stream, message_id, fields))
+                succeeded = bool(await self.process(stream, message_id, fields))
+                processed += succeeded
+                if not succeeded:
+                    break
         return processed
 
     async def claim_pending(self, tenant_id: UUID, domain: str, *, limit: int = 100) -> int:
@@ -404,10 +486,15 @@ class InboxProcessor:
                 count=limit,
             )
             cursor, entries = claimed[0], claimed[1]
+            blocked = False
             for message_id, fields in entries:
-                claimed_count += bool(await self.process(stream, message_id, fields))
+                succeeded = bool(await self.process(stream, message_id, fields))
+                claimed_count += succeeded
+                if not succeeded:
+                    blocked = True
+                    break
             cursor_text = cursor.decode() if isinstance(cursor, bytes) else cursor
-            if cursor_text == "0-0" or not entries:
+            if blocked or cursor_text == "0-0" or not entries:
                 break
         return claimed_count
 

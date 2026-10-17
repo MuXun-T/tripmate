@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Any
 from uuid import UUID
 
@@ -13,6 +13,7 @@ from app.domain.context import RequestContext
 from app.domain.errors import DomainError
 from app.domain.idempotency import IdempotencyScope, request_hash
 from app.domain.ports import Clock, IdGenerator
+from app.events.run_log import persist_run_event
 from app.events.schema import EventEnvelope
 from app.persistence.postgres.database import affected_rows
 from app.security.redaction import content_hash, redact_message
@@ -126,7 +127,7 @@ class AgentRunService:
                             AND t.trip_id=:trip AND (t.owner_user_id=:user OR EXISTS(
                               SELECT 1 FROM tripmate.trip_member m WHERE m.tenant_id=t.tenant_id
                               AND m.trip_id=t.trip_id AND m.user_id=:user AND m.status='ACTIVE'
-                              AND m.role IN ('OWNER','EDITOR','VIEWER'))))"""),
+                              AND m.role IN ('OWNER','EDITOR'))))"""),
                         {"tenant": ctx.tenant_id, "trip": trip_id, "user": ctx.user_id},
                     )
                     if not allowed:
@@ -195,6 +196,15 @@ class AgentRunService:
                         "event_type": envelope.event_type,
                         "payload": json.dumps(envelope.model_dump(mode="json")),
                     },
+                )
+                await self._insert_run_event(
+                    session,
+                    ctx,
+                    run_id,
+                    "run_started",
+                    {"status": "RUNNING"},
+                    event_key="run:started",
+                    occurred_at=now,
                 )
                 await session.execute(
                     text("""DELETE FROM tripmate.idempotency_record
@@ -295,6 +305,75 @@ class AgentRunService:
                 )
         return result
 
+    async def _insert_run_event(
+        self,
+        session: AsyncSession,
+        ctx: RequestContext,
+        run_id: UUID,
+        event_type: str,
+        payload: dict[str, Any],
+        *,
+        event_key: str | None = None,
+        occurred_at: datetime | None = None,
+    ) -> dict[str, Any]:
+        return await persist_run_event(
+            session,
+            ctx,
+            self.ids,
+            run_id,
+            event_type,
+            payload,
+            occurred_at=occurred_at or self.clock.now(),
+            event_key=event_key,
+        )
+
+    async def append_run_event(
+        self,
+        ctx: RequestContext,
+        run_id: UUID,
+        event_type: str,
+        payload: dict[str, Any],
+        *,
+        event_key: str | None = None,
+    ) -> dict[str, Any]:
+        async with self.sessions() as session, session.begin():
+            return await self._insert_run_event(
+                session, ctx, run_id, event_type, payload, event_key=event_key
+            )
+
+    async def get_run_event_batch(
+        self,
+        ctx: RequestContext,
+        run_id: UUID,
+        *,
+        after_sequence: int,
+        limit: int = 100,
+    ) -> dict[str, Any]:
+        if ctx.user_id is None:
+            raise DomainError("UNAUTHORIZED", "Authenticated user is required", 401)
+        async with self.sessions() as session:
+            status = await session.scalar(
+                text("""SELECT status FROM tripmate.agent_run
+                    WHERE tenant_id=:tenant AND user_id=:user AND run_id=:run"""),
+                {"tenant": ctx.tenant_id, "user": ctx.user_id, "run": run_id},
+            )
+            if status is None:
+                raise DomainError("NOT_FOUND", "Run was not found", 404)
+            result = await session.execute(
+                text("""SELECT event_sequence,event_id,event_type,occurred_at,payload
+                    FROM tripmate.agent_run_event WHERE tenant_id=:tenant AND user_id=:user
+                      AND run_id=:run AND event_sequence>:after
+                    ORDER BY event_sequence LIMIT :limit"""),
+                {
+                    "tenant": ctx.tenant_id,
+                    "user": ctx.user_id,
+                    "run": run_id,
+                    "after": after_sequence,
+                    "limit": min(max(limit, 1), 500),
+                },
+            )
+            return {"status": status, "events": [dict(row) for row in result.mappings()]}
+
     async def claim_run(
         self, tenant_id: UUID, run_id: UUID, worker_id: str, *, lease_seconds: int = 30
     ) -> dict[str, Any] | None:
@@ -305,7 +384,7 @@ class AgentRunService:
                     fencing_version=fencing_version+1,version=version+1,updated_at=:now
                     WHERE tenant_id=:tenant AND run_id=:run AND status='RUNNING'
                       AND (lease_until IS NULL OR lease_until<=:now OR lease_owner=:worker)
-                    RETURNING run_id,user_id,trip_id,thread_id,status,version,fencing_version,
+                    RETURNING run_id,tenant_id,user_id,trip_id,thread_id,status,version,fencing_version,
                         checkpoint_ref,resume_command"""),
                 {
                     "worker": worker_id,
@@ -397,7 +476,8 @@ class AgentRunService:
                 text("""UPDATE tripmate.agent_run SET status='COMPLETED',result_json=CAST(:result AS jsonb),
                     checkpoint_ref=:checkpoint,resume_command=NULL,lease_owner=NULL,lease_until=NULL,
                     version=version+1,updated_at=:now WHERE tenant_id=:tenant AND run_id=:run
-                    AND status='RUNNING' AND lease_owner=:worker AND fencing_version=:fence"""),
+                    AND status='RUNNING' AND lease_owner=:worker AND fencing_version=:fence
+                    RETURNING user_id"""),
                 {
                     "result": json.dumps(result_json),
                     "checkpoint": str(run_id),
@@ -408,7 +488,19 @@ class AgentRunService:
                     "fence": fence,
                 },
             )
-            return affected_rows(updated) == 1
+            row = updated.mappings().one_or_none()
+            if row is None:
+                return False
+            ctx = self._run_event_context(tenant_id, row["user_id"], run_id)
+            await self._insert_run_event(
+                session,
+                ctx,
+                run_id,
+                "done",
+                {"status": "COMPLETED"},
+                event_key="run:done",
+            )
+            return True
 
     async def release_waiting_run(
         self, tenant_id: UUID, run_id: UUID, worker_id: str, fence: int, result_json: dict[str, Any]
@@ -439,7 +531,7 @@ class AgentRunService:
                 text("""UPDATE tripmate.agent_run SET status='FAILED',last_error_code=:code,
                     resume_command=NULL,lease_owner=NULL,lease_until=NULL,version=version+1,updated_at=:now
                     WHERE tenant_id=:tenant AND run_id=:run AND status='RUNNING'
-                      AND lease_owner=:worker AND fencing_version=:fence"""),
+                      AND lease_owner=:worker AND fencing_version=:fence RETURNING user_id"""),
                 {
                     "code": code[:80],
                     "now": self.clock.now(),
@@ -449,7 +541,31 @@ class AgentRunService:
                     "fence": fence,
                 },
             )
-            return affected_rows(updated) == 1
+            row = updated.mappings().one_or_none()
+            if row is None:
+                return False
+            ctx = self._run_event_context(tenant_id, row["user_id"], run_id)
+            await self._insert_run_event(
+                session,
+                ctx,
+                run_id,
+                "error",
+                {"error_code": code[:80]},
+                event_key="run:error",
+            )
+            return True
+
+    def _run_event_context(self, tenant_id: UUID, user_id: UUID, run_id: UUID) -> RequestContext:
+        return RequestContext(
+            request_id=f"run:{run_id}",
+            trace_id=f"run:{run_id}",
+            tenant_id=tenant_id,
+            user_id=user_id,
+            roles=("user",),
+            deadline=self.clock.now() + timedelta(minutes=2),
+            source="worker",
+            run_id=run_id,
+        )
 
     async def get_run(self, ctx: RequestContext, run_id: UUID) -> dict[str, Any]:
         if ctx.user_id is None:

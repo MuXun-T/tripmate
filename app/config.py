@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://tripmate:tripmate@localhost:5432/tripmate"
     redis_url: str = "redis://localhost:6379/0"
     redis_prefix: str = "tm"
+    llm_base_url: str = "https://api.deepseek.com"
+    llm_model: str = "deepseek-flash"
+    llm_timeout_seconds: float = Field(default=30.0, gt=0, le=180)
     hold_ttl_seconds: int = Field(default=600, ge=60, le=3600)
     short_term_memory_ttl_seconds: int = Field(default=604800, ge=60, le=2592000)
     idempotency_ttl_seconds: int = Field(default=604800, ge=60)
@@ -28,6 +31,7 @@ class Settings(BaseSettings):
     trace_sample_ratio: float = Field(default=0.1, ge=0, le=1)
     rag_index_alias: str = "tm:knowledge:v1:dev:active"
     rag_top_k: int = Field(default=5, ge=1, le=20)
+    rag_min_score: float = Field(default=0.05, ge=-1, le=1)
     external_http_timeout_seconds: float = Field(default=5.0, gt=0, le=60)
     auth_mode: str = "signed_bearer"
     auth_signing_secret: SecretStr = SecretStr("local-tripmate-signing-secret-change-before-deploy")

@@ -1,35 +1,45 @@
-# Implementation Notes
+# 实现与验证现状
 
-## Design Conflict Log
+| 项目 | 内容 |
+|---|---|
+| 核对日期 | 2026-10-17 |
+| 项目定位 | 本地实习作品，展示 Agent 设计、确认边界和可恢复流程；不包含部署或上线 |
+| 证据规则 | 本文只记录当前源码、迁移和本轮实际命令结果；未运行的服务集成测试不计为通过 |
 
-| Conflict | Impact | Resolution |
+## 已实现能力
+
+| 能力 | 当前实现与边界 | 关键位置 |
 |---|---|---|
-| `architecture-review.md` sections 1-8 contain pre-revision designs, while section 9 and the v0.2 requirements freeze PostgreSQL-authoritative inventory, persisted approval, run outbox scheduling, and tenant-scoped constraints. | Following an earlier section could make Redis a reservation authority or replay side effects after graph resume. | Treat the v0.2 requirements and review section 9 as gates. Earlier review sections are retained as problem history only. |
-| Design prose names the saver distribution `langgraph-redis`; the configured package index exposes `langgraph-checkpoint-redis==0.5.2`, while `langgraph-redis` has no matching distribution. | A literal dependency name cannot be installed or tested. | Pin the published `langgraph-checkpoint-redis` distribution and test its `RedisSaver.setup()`, thread configuration, and resume behavior against Redis Stack before claiming the saver gate passes. |
-| Python 3.12 is the required runtime, but the current host only has Python 3.11 and has no Docker, PostgreSQL client, or Redis CLI. | Full-stack tests and the required interpreter cannot run on this host. | Keep deployment metadata on Python 3.12; run host-independent tests with the available interpreter where compatible, and retain Compose-backed real-service tests as explicit unrun gates. |
-| The pinned mypy 1.16.1 crashes inside `langsmith._openapi_client` while traversing `TypeGuardedType`. | The static type gate cannot distinguish project errors from the checker failure. | Upgrade the development pin to mypy 1.20.2, then fix the project diagnostics it reports; `mypy app` passes with this pin. |
-| Idempotency rows are retained until expiry cleanup, while the primary key continues to reserve the complete request scope after `expires_at`. | A valid request reusing an expired key could commit its business work and then fail the idempotency insert with a primary-key violation. | Under the existing complete-scope advisory lock, delete only the expired matching row in the same transaction before storing the new result; unknown-commit recovery ignores expired rows. |
+| ToolGateway 与授权 | 注册工具使用严格 Pydantic 输入；工具调用带租户/用户 scope、超时、限流、审计和稳定错误码。OWNER/EDITOR/VIEWER 矩阵由服务端判定，模型不能提供身份、价格、库存、版本或权限事实。 | `app/tools/gateway.py`、`app/domain/authorization.py`、`app/reservation/service.py` |
+| Trip API | `GET /v1/trips/{trip_id}` 返回成员、item 和预约状态聚合；`POST /v1/trips/{trip_id}/confirm` 只确认方案/候选状态，不直接扣库存；幂等和版本 CAS 由服务端执行。 | `app/api.py`、`app/trips/service.py` |
+| 预约与库存 | PostgreSQL 是库存和预约权威事实；hold/confirm/cancel/expire 使用版本 CAS、确认 token 和幂等记录。Redis 投影失败会写 `inventory_reconciliation`、暂停库存为 `RECONCILING`，worker 可从 PostgreSQL 重建。 | `app/reservation/service.py`、`app/inventory/redis_projection.py`、`migrations/V014__inventory_reconciliation_failures.sql` |
+| Outbox/Stream | 已发布事件保留 replay cursor；inbox 保存 stream/group/message scope，只有 Redis stream 中从当前游标到目标消息全部对应 `PROCESSED/DLQ` 时才前移 group watermark；重复事件由 inbox `(event_id, consumer)` 幂等。Stream trim 默认关闭。 | `app/events/runtime.py`、`migrations/V008__event_audit.sql`、`migrations/V016__inbox_stream_scope.sql` |
+| Run/checkpoint/SSE | Run 领取、续租和完成使用 fencing CAS；恢复前校验 tenant/user/thread/schema/fence/pending writes。持久化 Run event 支持 `Last-Event-ID` 续接，并按认证主体过滤。 | `app/agent/worker.py`、`app/agent/runs.py`、`app/events/run_log.py`、`app/api.py`、`migrations/V011__run_events_planning_knowledge.sql`、`migrations/V012__run_event_sse_names.sql` |
+| 规划与重规划 | 软偏好评分、UNKNOWN、多个方案、候选比较和重规划 diff 已由确定性服务端逻辑约束；已确认预约的 slot、时间和价格快照不会被重规划覆盖。路线为 Haversine 估算，天气/开放时段为本地 adapter。 | `app/agent/graph.py`、`app/domain/constraints.py`、`app/trips/service.py`、`app/tools/realtime.py` |
+| 知识索引 | 仓库内 curated fixture 可构建 manifest/chunk；PostgreSQL 保存来源、manifest 和 citation 权威事实，Redis Stack HNSW 保存可重建的 384 维向量。构建失败持久化 `FAILED` 和原因，active alias 原子切换，支持 rollback、租户过滤、删除 tombstone 后不可召回和 citation metadata；HNSW 未就绪时查询回退 PostgreSQL。`/v1/knowledge/search` 返回 active version、过滤条件、耗时、向量后端和 UNKNOWN 原因；持久化 manifest 评估会二次读取 chunk hash。评估动态报告 `recall@k`/`ndcg@k`，无 UNKNOWN 样本时标 N/A。 | `app/knowledge/index.py`、`app/knowledge/redis_index.py`、`app/knowledge/retriever.py`、`app/knowledge/evaluation.py`、`knowledge/` |
+| 候补 | 库存不足时创建 `WAITLISTED` 预约；库存恢复后 worker 创建带价格、活动、库存、预约版本和一次性 token 的升级提案，写站内通知。用户确认前不占用库存；事实变化、过期或重复确认返回稳定冲突/同一幂等结果。 | `app/reservation/service.py`、`app/agent/worker.py`、`app/api.py`、`migrations/V015__waitlist_promotions.sql` |
+| 提醒 | 站内通知为本地模拟发送；任务状态包含 `SCHEDULED/SENDING/RETRYING/SENT/FAILED`，有 lease、attempt、指数退避、过期 SENDING 重新领取和 notification ID 幂等。 | `app/reminders/service.py`、`migrations/V013__p1_waitlist_reminders_case_vectors.sql` |
+| 私有案例 | 仅从允许复用的偏好生成脱敏内容和 384 维本地向量；查询按 tenant/user/generation/tombstone 过滤。偏好删除先 tombstone 并立即停止召回，worker 再物理清理。 | `app/memory/preferences.py`、`app/knowledge/retriever.py`、`app/agent/worker.py` |
+| Readiness/观测 | `/health/live` 只表示进程存活；`/health/ready` 检查 PostgreSQL、最新 migration、worker heartbeat、活动 RAG alias、Redis、Redis HNSW 索引、投影脚本和 checkpoint saver 索引。故障面板和窗口指标 API 按 tenant 返回 outbox/inbox/DLQ/Run/预约/库存/提醒状态。 | `app/api.py` |
 
-## Work Checklist
+## 迁移
 
-- [x] Re-inspect the current workspace, project guidance, source, locks, migrations, Compose and tests. The directory has no Git metadata or `AGENTS.md`; existing project files are treated as user content.
-- [x] Implement foundation: config, request context, error model, clock/ID ports, OpenTelemetry setup and migration runner.
-- [x] Implement domain and PostgreSQL schema for tenant-safe catalog/trips/inventory/reservations/actions/runs/idempotency/audit/outbox/inbox.
-- [x] Implement hard constraints, deterministic cancellation, reservation lifecycle, idempotency and commit-unknown recovery.
-- [x] Implement Redis projection/rebuild, Lua coordination, Streams, outbox replay, inbox fencing, pending recovery and DLQ paths.
-- [x] Implement LangChain gateway, LangGraph approval/resume, Redis saver integration, run leases, citations and real-time tool boundaries.
-- [x] Implement tenant/user-scoped short-term conversation memory with RedisJSON CAS/TTL and PostgreSQL rebuild, and connect it to run planning.
-- [x] Implement fixed-case replay persistence and evaluation of intent, tool sequence, constraints, citations and reservation status; reject cases with no valid expectations.
-- [x] Implement FastAPI routes/OpenAPI, privacy deletion, health checks, Compose, fixtures and local verification commands.
-- [ ] Run the required Python 3.12 Compose stack and real PostgreSQL/Redis Stack contracts. The current host has Python 3.11.9 and no Docker/database/Redis clients; code and integration contracts exist, but these runtime gates remain unverified.
-- [ ] Run production-like concurrency, performance and RAG quality measurements. No such results are claimed.
+本轮新增前向迁移 `V014__inventory_reconciliation_failures.sql`、`V015__waitlist_promotions.sql` 和 `V016__inbox_stream_scope.sql`。旧迁移未改写；`V015` 仅扩展站内通知以支持候补提案，并增加提案的版本、token、状态和租户/用户外键；`V016` 为 inbox 增加事件流和 consumer group 进度字段。
 
-## Validation Snapshot
+## 本轮验证
 
-Executed with the project virtual environment on Python 3.11.9:
+使用项目内 `.venv312`（Python 3.12.15）执行：
 
-- `python -m compileall -q app tests`, `ruff check app tests`, and `mypy app` (mypy 1.20.2): passed; mypy checked 50 source files.
-- `pytest -q -rs`: 12 passed, 13 skipped. The integration gate was not enabled; real PostgreSQL and Redis Stack tests remain unrun.
-- OpenAPI import generated 16 paths; the OpenAPI contract tests passed. `pip check` passed, and `pip install --dry-run --require-hashes --ignore-requires-python -r requirements-dev.lock` resolved successfully.
-- PyYAML parsed `compose.yaml`. Docker is not installed, so `docker compose config --quiet` and Compose-backed services could not run.
-- Python 3.12 execution, PostgreSQL migration/application and transaction tests, RedisJSON Lua/TTL and Stream/checkpointer tests, full recovery/concurrency integration, and measured performance/RAG quality remain unverified.
+- `./.venv312/bin/pytest -q`：`51 passed, 29 skipped`。跳过项是需要 PostgreSQL/Redis 的集成用例。
+- `./.venv312/bin/pytest -q tests/api tests/unit`：`49 passed`；新增 OpenAPI、checkpoint scope、watermark 顺序、提醒文本、知识评估和 Redis 向量结果解析单测均在此范围内通过。
+- `./.venv312/bin/ruff check app tests`：通过。
+- `./.venv312/bin/mypy app`：通过。
+- `./.venv312/bin/python -m compileall -q app tests`：通过。
+- `./.venv312/bin/python -m app.knowledge.evaluation --dataset knowledge/evaluation/travelplanner-validation.json --top-k 5 --output knowledge/evaluation/travelplanner-validation.report.json`：通过；固定离线集得到 `recall@5=0.9444`、`mrr=0.9028`、`citation_correctness=0.8056`、`citation_locatability=1.0`。该集合没有 UNKNOWN 样本，UNKNOWN precision/recall 为 `N/A`，延迟字段仅表示离线内存排序。
+- `git diff --check`：通过。
+
+本轮未运行会写服务数据的 PostgreSQL/Redis 集成测试，也未运行 Compose。当前没有确认专用的测试数据库、Redis namespace、Compose project、端口和 project-local volume；因此不能把迁移升级、Lua 投影、Stream replay、真实 checkpoint 恢复、候补端到端和提醒故障测试标为通过。离线固定 fixture 的 Recall/MRR 结果由知识评估单测覆盖，但没有线上检索延迟、并发、P95 或外部天气服务可靠性测量证据；这些结果不代表生产质量或服务性能。
+
+## MVP 边界
+
+库存、候补和提醒均为本地模拟；路线是 Haversine 估算；知识来源固定为仓库内 curated fixture；没有真实库存供应商、支付、邮件短信、导航服务或生产部署。

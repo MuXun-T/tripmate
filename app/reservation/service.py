@@ -4,22 +4,26 @@ import json
 import logging
 import secrets
 from dataclasses import dataclass, replace
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any, Protocol
 from uuid import UUID
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.config import Settings
+from app.domain.authorization import require_role
 from app.domain.context import RequestContext
 from app.domain.errors import DomainError
 from app.domain.idempotency import IdempotencyScope, canonical_json, request_hash, sha256_hex
 from app.domain.models import CancellationPolicySnapshot, ReservationStatus
 from app.domain.ports import Clock, IdGenerator
+from app.events.run_log import persist_run_event
 from app.events.schema import EventEnvelope
+from app.memory.preferences import PreferenceService
 from app.persistence.postgres.database import affected_rows
 from app.reservation.policy import CancellationPolicyEvaluator
 
@@ -101,13 +105,44 @@ class ReservationService:
         clock: Clock,
         ids: IdGenerator,
         projection: ProjectionPort | None = None,
+        preferences: PreferenceService | None = None,
     ) -> None:
         self.sessions = sessions
         self.settings = settings
         self.clock = clock
         self.ids = ids
         self.projection = projection
+        self.preferences = preferences
         self.cancellation = CancellationPolicyEvaluator()
+
+    async def _record_action_event(
+        self,
+        session: AsyncSession,
+        ctx: RequestContext,
+        action_id: UUID,
+        event_type: str,
+        status: str,
+    ) -> None:
+        if ctx.user_id is None:
+            raise DomainError("UNAUTHORIZED", "Authenticated user is required", 401)
+        run_id = await session.scalar(
+            text("""SELECT r.run_id FROM tripmate.agent_action a
+                JOIN tripmate.agent_run r ON r.tenant_id=a.tenant_id AND r.run_id=a.run_id
+                WHERE a.tenant_id=:tenant AND a.action_id=:action AND r.user_id=:user"""),
+            {"tenant": ctx.tenant_id, "action": action_id, "user": ctx.user_id},
+        )
+        if run_id is None:
+            raise DomainError("NOT_FOUND", "Action was not found", 404)
+        await persist_run_event(
+            session,
+            ctx,
+            self.ids,
+            run_id,
+            event_type,
+            {"action_id": str(action_id), "status": status},
+            occurred_at=self.clock.now(),
+            event_key=f"action:{action_id}:{event_type}:{status.casefold()}",
+        )
 
     async def hold(
         self,
@@ -429,6 +464,12 @@ class ReservationService:
                     reservation_id=reservation_id,
                     parameters_hash=canonical_hash,
                 )
+                await self._record_action_event(
+                    session, ctx, action_id, "confirmation", "CONFIRMED"
+                )
+                await self._record_action_event(
+                    session, ctx, action_id, "reservation_updated", "HELD"
+                )
                 await self._insert_idempotency(
                     session,
                     ctx,
@@ -653,6 +694,12 @@ class ReservationService:
                     action_id=action_id,
                     reservation_id=reservation_id,
                     parameters_hash=reservation["parameters_hash"],
+                )
+                await self._record_action_event(
+                    session, ctx, action_id, "confirmation", "CONFIRMED"
+                )
+                await self._record_action_event(
+                    session, ctx, action_id, "reservation_updated", "CONFIRMED"
                 )
                 await self._insert_idempotency(
                     session,
@@ -945,6 +992,12 @@ class ReservationService:
                     reservation_id=reservation_id,
                     parameters_hash=reservation["parameters_hash"],
                 )
+                await self._record_action_event(
+                    session, ctx, action_id, "confirmation", "CONFIRMED"
+                )
+                await self._record_action_event(
+                    session, ctx, action_id, "reservation_updated", "CANCELLED"
+                )
                 await self._insert_idempotency(
                     session,
                     ctx,
@@ -1124,6 +1177,9 @@ class ReservationService:
             "reason",
             "reservation_id",
             "reference_ids",
+            "reminder_type",
+            "scheduled_at",
+            "timezone",
         }
         unexpected_fields = set(parameters) - allowed_fields
         if unexpected_fields:
@@ -1142,6 +1198,7 @@ class ReservationService:
             slot = UUID(str(parameters["slot_id"]))
             trip = UUID(str(parameters["trip_id"]))
             qty = int(parameters["quantity"])
+            await self._require_trip_role(ctx, trip, "plan")
             stock = await self._read_inventory(ctx.tenant_id, trip, slot)
             canonical = self._canonical_action_parameters(
                 tenant_id=ctx.tenant_id,
@@ -1156,6 +1213,72 @@ class ReservationService:
                 policy_version=str(stock["policy_version"]),
                 reason=str(parameters.get("reason", "")),
             )
+        elif action_type == "propose_waitlist":
+            required = {"trip_id", "slot_id", "quantity"}
+            if not required.issubset(parameters):
+                raise DomainError("INVALID_ARGUMENT", "Waitlist action is missing required fields", 400)
+            trip, slot, qty = UUID(str(parameters["trip_id"])), UUID(str(parameters["slot_id"])), int(parameters["quantity"])
+            if not 1 <= qty <= 100:
+                raise DomainError("INVALID_ARGUMENT", "Waitlist quantity must be between 1 and 100", 400)
+            await self._require_trip_role(ctx, trip, "plan")
+            stock = await self._read_inventory(ctx.tenant_id, trip, slot)
+            if (
+                int(stock["available_quantity"]) >= qty
+                or stock["inventory_status"] != "ACTIVE"
+                or stock["slot_status"] != "ACTIVE"
+            ):
+                raise DomainError("INVALID_ARGUMENT", "Waitlist is only available when inventory is insufficient", 409)
+            canonical = self._canonical_action_parameters(
+                tenant_id=ctx.tenant_id,
+                user_id=ctx.user_id,
+                trip_id=trip,
+                slot_id=slot,
+                quantity=qty,
+                price=Decimal(stock["price"]),
+                currency=str(stock["currency"]).strip(),
+                activity_version=int(stock["activity_version"]),
+                inventory_version=int(stock["inventory_version"]),
+                policy_version=str(stock["policy_version"]),
+                reason=str(parameters.get("reason", "")),
+            )
+        elif action_type == "create_reminder":
+            required = {"trip_id", "reminder_type", "scheduled_at", "timezone"}
+            if not required.issubset(parameters):
+                raise DomainError("INVALID_ARGUMENT", "Reminder action is missing required fields", 400)
+            trip = UUID(str(parameters["trip_id"]))
+            reminder_type = str(parameters["reminder_type"])
+            timezone = str(parameters["timezone"])
+            try:
+                scheduled_at = datetime.fromisoformat(str(parameters["scheduled_at"]))
+            except ValueError as exc:
+                raise DomainError("INVALID_ARGUMENT", "Reminder time is invalid", 400) from exc
+            if reminder_type not in {"departure", "reservation", "weather_check"} or scheduled_at.tzinfo is None:
+                raise DomainError("INVALID_ARGUMENT", "Reminder type or timezone is invalid", 400)
+            try:
+                ZoneInfo(timezone)
+            except ZoneInfoNotFoundError as exc:
+                raise DomainError("INVALID_ARGUMENT", "Reminder timezone is invalid", 400) from exc
+            if scheduled_at <= now:
+                raise DomainError("INVALID_ARGUMENT", "Reminder time must be in the future", 400)
+            async with self.sessions() as session:
+                is_member = await session.scalar(
+                    text("""SELECT EXISTS(SELECT 1 FROM tripmate.trip t WHERE t.tenant_id=:tenant
+                        AND t.trip_id=:trip AND (t.owner_user_id=:user OR EXISTS(
+                          SELECT 1 FROM tripmate.trip_member m WHERE m.tenant_id=t.tenant_id
+                          AND m.trip_id=t.trip_id AND m.user_id=:user AND m.status='ACTIVE'
+                          AND m.role IN ('OWNER','EDITOR'))))"""),
+                    {"tenant": ctx.tenant_id, "trip": trip, "user": ctx.user_id},
+                )
+            if not is_member:
+                raise DomainError("NOT_FOUND", "Trip was not found", 404)
+            canonical = {
+                "tenant_id": str(ctx.tenant_id),
+                "user_id": str(ctx.user_id),
+                "trip_id": str(trip),
+                "reminder_type": reminder_type,
+                "scheduled_at": scheduled_at.astimezone(UTC).isoformat(),
+                "timezone": timezone,
+            }
         elif action_type == "propose_cancellation":
             if "reservation_id" not in parameters:
                 raise DomainError(
@@ -1473,6 +1596,9 @@ class ReservationService:
                     action_id=action_id,
                     parameters_hash=str(action["parameters_hash"]),
                 )
+                await self._record_action_event(
+                    session, ctx, action_id, "confirmation", "TOKEN_ISSUED"
+                )
                 response = self._restore_confirmation_response(stored)
                 try:
                     await tx.commit()
@@ -1497,6 +1623,831 @@ class ReservationService:
             response = self._restore_confirmation_response(prior["result_json"])
         assert response is not None
         return response
+
+    async def confirm_preference_action(
+        self,
+        ctx: RequestContext,
+        action_id: UUID,
+        *,
+        confirmation_token: str,
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        self._require_user(ctx)
+        assert ctx.user_id is not None
+        if self.preferences is None:
+            raise DomainError("DEPENDENCY_UNAVAILABLE", "Preference service is unavailable", 503)
+        route = f"/v1/actions/{action_id}/preference-confirmation"
+        operation = "action.preference.confirm"
+        scope_key = IdempotencyScope(
+            ctx.tenant_id, ctx.user_id, route, operation, idempotency_key
+        ).key_hash()
+        token_hash = sha256_hex(confirmation_token)
+        req_hash = request_hash({"action_id": action_id, "confirmation_token_hash": token_hash})
+        now = self.clock.now()
+        response: dict[str, Any] | None = None
+        unknown_commit = False
+
+        async with self.sessions() as session:
+            tx = await session.begin()
+            try:
+                await self._lock_idempotency_scope(session, scope_key)
+                prior = await self._get_idempotency(
+                    session, ctx, route, operation, scope_key
+                )
+                if prior is not None:
+                    if prior["request_hash"] != req_hash:
+                        raise DomainError(
+                            "IDEMPOTENCY_KEY_REUSE", "Idempotency key was reused", 409
+                        )
+                    response = (
+                        prior["result_json"]
+                        if isinstance(prior["result_json"], dict)
+                        else json.loads(prior["result_json"])
+                    )
+                    await tx.rollback()
+                    return response
+
+                action = await self._load_approved_action(
+                    session,
+                    ctx,
+                    action_id,
+                    confirmation_token,
+                    now,
+                    expected_kind="save_preference",
+                )
+                parameters = action["parameters"]
+                preference = await self.preferences.save(
+                    ctx,
+                    scope=str(parameters["scope"]),
+                    key=str(parameters["key"]),
+                    value=parameters["value"],
+                    expected_version=parameters.get("expected_version"),
+                    idempotency_key=f"agent-action:{action_id}",
+                )
+                serialized_preference = json.loads(json.dumps(preference, default=str))
+                await self._consume_action_confirmation(
+                    session, ctx, action_id, confirmation_token, now
+                )
+                action_update = await session.execute(
+                    text("""UPDATE tripmate.agent_action SET status='EXECUTED',
+                        result_json=CAST(:result AS jsonb),version=version+1,updated_at=:now
+                        WHERE tenant_id=:tenant AND action_id=:action AND status='PROPOSED'
+                          AND version=:version RETURNING run_id"""),
+                    {
+                        "result": json.dumps(serialized_preference, ensure_ascii=False),
+                        "now": now,
+                        "tenant": ctx.tenant_id,
+                        "action": action_id,
+                        "version": action["version"],
+                    },
+                )
+                run_id = action_update.scalar_one_or_none()
+                if run_id is None:
+                    raise DomainError("DUPLICATE_ACTION", "Preference action changed", 409)
+                resume = {"decision": "approved", "action_id": str(action_id)}
+                run_update = await session.execute(
+                    text("""UPDATE tripmate.agent_run SET status='RUNNING',awaiting_action_id=NULL,
+                        resume_command=CAST(:resume AS jsonb),lease_owner=NULL,lease_until=NULL,
+                        fencing_version=fencing_version+1,version=version+1,updated_at=:now
+                        WHERE tenant_id=:tenant AND run_id=:run AND user_id=:user
+                          AND status='WAITING_CONFIRMATION' AND awaiting_action_id=:action
+                        RETURNING version"""),
+                    {
+                        "resume": json.dumps(resume),
+                        "now": now,
+                        "tenant": ctx.tenant_id,
+                        "run": run_id,
+                        "user": ctx.user_id,
+                        "action": action_id,
+                    },
+                )
+                run_version = run_update.scalar_one_or_none()
+                if run_version is None:
+                    raise DomainError("VERSION_CONFLICT", "Run state changed during approval", 409)
+                event_context = replace(ctx, run_id=run_id, action_id=action_id)
+                await self._insert_outbox(
+                    session,
+                    event_context,
+                    aggregate_type="agent_run",
+                    aggregate_id=run_id,
+                    aggregate_version=int(run_version),
+                    event_type="agent.run.resume_requested.v1",
+                    payload={"run_id": str(run_id), **resume},
+                )
+                await self._insert_audit(
+                    session,
+                    event_context,
+                    action="agent.preference.confirmed",
+                    result_code="EXECUTED",
+                    action_id=action_id,
+                    parameters_hash=str(action["parameters_hash"]),
+                )
+                await self._record_action_event(
+                    session, event_context, action_id, "confirmation", "CONFIRMED"
+                )
+                response = {
+                    "action_id": str(action_id),
+                    "status": "EXECUTED",
+                    "preference": serialized_preference,
+                }
+                await self._insert_idempotency(
+                    session,
+                    ctx,
+                    route,
+                    operation,
+                    scope_key,
+                    req_hash,
+                    200,
+                    response,
+                    "agent_action",
+                    action_id,
+                )
+                try:
+                    await tx.commit()
+                except DBAPIError:
+                    unknown_commit = True
+            except Exception:
+                if tx.is_active:
+                    await tx.rollback()
+                raise
+        if unknown_commit:
+            async with self.sessions() as session:
+                prior = await self._get_idempotency(
+                    session, ctx, route, operation, scope_key
+                )
+            if prior is None:
+                raise DomainError(
+                    "RECONCILIATION_REQUIRED", "Preference approval outcome is unknown", 503, True
+                )
+            if prior["request_hash"] != req_hash:
+                raise DomainError("IDEMPOTENCY_KEY_REUSE", "Idempotency key was reused", 409)
+            response = (
+                prior["result_json"]
+                if isinstance(prior["result_json"], dict)
+                else json.loads(prior["result_json"])
+            )
+        assert response is not None
+        return response
+
+    async def execute_p1_action(
+        self,
+        ctx: RequestContext,
+        action_id: UUID,
+        *,
+        action_type: str,
+        confirmation_token: str,
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        self._require_user(ctx)
+        assert ctx.user_id is not None
+        if action_type not in {"propose_waitlist", "create_reminder"}:
+            raise DomainError("TOOL_NOT_ALLOWED", "Action type is not executable here", 403)
+        route = f"/v1/actions/{action_id}/{action_type}/execute"
+        operation = f"action.{action_type}.execute"
+        key_hash = IdempotencyScope(
+            ctx.tenant_id, ctx.user_id, route, operation, idempotency_key
+        ).key_hash()
+        req_hash = request_hash(
+            {"action_id": action_id, "confirmation_token_hash": sha256_hex(confirmation_token)}
+        )
+        now = self.clock.now()
+        response: dict[str, Any] | None = None
+        unknown_commit = False
+
+        async with self.sessions() as session:
+            tx = await session.begin()
+            try:
+                await self._lock_idempotency_scope(session, key_hash)
+                prior = await self._get_idempotency(session, ctx, route, operation, key_hash)
+                if prior is not None:
+                    if prior["request_hash"] != req_hash:
+                        raise DomainError("IDEMPOTENCY_KEY_REUSE", "Idempotency key was reused", 409)
+                    response = prior["result_json"] if isinstance(prior["result_json"], dict) else json.loads(prior["result_json"])
+                    await tx.rollback()
+                    return response
+                action = await self._load_approved_action(
+                    session, ctx, action_id, confirmation_token, now, expected_kind=action_type
+                )
+                parameters = action["parameters"]
+                resource_id = self.ids.new()
+                if action_type == "propose_waitlist":
+                    trip_id = UUID(str(parameters["trip_id"]))
+                    slot_id = UUID(str(parameters["slot_id"]))
+                    quantity = int(parameters["quantity"])
+                    stock = await self._lock_inventory(session, ctx.tenant_id, slot_id)
+                    if stock["slot_status"] != "ACTIVE" or stock["inventory_status"] != "ACTIVE":
+                        raise DomainError("INVENTORY_NOT_ENOUGH", "Activity is not waitlistable", 409)
+                    if int(stock["available_quantity"]) >= quantity:
+                        raise DomainError("VERSION_CONFLICT", "Inventory is available; submit a reservation instead", 409)
+                    canonical = self._canonical_action_parameters(
+                        tenant_id=ctx.tenant_id,
+                        user_id=ctx.user_id,
+                        trip_id=trip_id,
+                        slot_id=slot_id,
+                        quantity=quantity,
+                        price=Decimal(stock["price"]),
+                        currency=str(stock["currency"]).strip(),
+                        activity_version=int(stock["activity_version"]),
+                        inventory_version=int(stock["inventory_version"]),
+                        policy_version=str(stock["policy_version"]),
+                        reason=str(parameters.get("reason", "")),
+                    )
+                    canonical_hash = sha256_hex(canonical_json(canonical))
+                    if canonical_hash != action["parameters_hash"]:
+                        raise DomainError("VERSION_CONFLICT", "Waitlist facts changed; request a new candidate", 409)
+                    policy = stock["cancellation_policy"]
+                    if isinstance(policy, str):
+                        policy = json.loads(policy)
+                    await session.execute(
+                        text("""INSERT INTO tripmate.reservation
+                            (reservation_id,tenant_id,trip_id,user_id,slot_id,quantity,price_snapshot,currency,
+                             status,route,operation,idempotency_key_hash,request_hash,parameters_hash,
+                             approved_action_id,activity_version,inventory_version,policy_version,policy_snapshot)
+                            VALUES(:id,:tenant,:trip,:user,:slot,:quantity,:price,:currency,'WAITLISTED',
+                             :route,:operation,:key_hash,:request_hash,:parameters_hash,:action,:activity_version,
+                             :inventory_version,:policy_version,CAST(:policy AS jsonb))"""),
+                        {
+                            "id": resource_id,
+                            "tenant": ctx.tenant_id,
+                            "trip": trip_id,
+                            "user": ctx.user_id,
+                            "slot": slot_id,
+                            "quantity": quantity,
+                            "price": stock["price"],
+                            "currency": str(stock["currency"]).strip(),
+                            "route": route,
+                            "operation": operation,
+                            "key_hash": key_hash,
+                            "request_hash": req_hash,
+                            "parameters_hash": canonical_hash,
+                            "action": action_id,
+                            "activity_version": stock["activity_version"],
+                            "inventory_version": stock["inventory_version"],
+                            "policy_version": stock["policy_version"],
+                            "policy": json.dumps(policy),
+                        },
+                    )
+                    resource_type = "reservation"
+                    event_context = replace(ctx, action_id=action_id)
+                    await self._insert_outbox(
+                        session, event_context, aggregate_type="reservation", aggregate_id=resource_id,
+                        aggregate_version=1, event_type="reservation.waitlisted.v1",
+                        payload={"reservation_id": str(resource_id), "slot_id": str(slot_id), "quantity": quantity},
+                    )
+                    await self._insert_audit(
+                        session, event_context, action="reservation.waitlisted", result_code="WAITLISTED",
+                        action_id=action_id, reservation_id=resource_id, parameters_hash=canonical_hash,
+                    )
+                    response = {"reservation_id": str(resource_id), "status": "WAITLISTED", "slot_id": str(slot_id), "quantity": quantity}
+                else:
+                    scheduled_at = datetime.fromisoformat(str(parameters["scheduled_at"])).astimezone(UTC)
+                    if scheduled_at <= now:
+                        raise DomainError("INVALID_ARGUMENT", "Reminder time has passed", 409)
+                    trip_id = UUID(str(parameters["trip_id"]))
+                    notification_id = self.ids.new()
+                    dedup_key = sha256_hex(canonical_json({
+                        "tenant_id": str(ctx.tenant_id), "user_id": str(ctx.user_id),
+                        "trip_id": str(trip_id), "reminder_type": parameters["reminder_type"],
+                        "scheduled_at": scheduled_at.isoformat(),
+                    }))
+                    await session.execute(
+                        text("""INSERT INTO tripmate.reminder
+                            (reminder_id,tenant_id,trip_id,user_id,action_id,notification_id,dedup_key,
+                             reminder_type,scheduled_at,timezone,status)
+                            VALUES(:id,:tenant,:trip,:user,:action,:notification,:dedup,:type,:scheduled,
+                             :timezone,'SCHEDULED')"""),
+                        {
+                            "id": resource_id, "tenant": ctx.tenant_id, "trip": trip_id,
+                            "user": ctx.user_id, "action": action_id, "notification": notification_id,
+                            "dedup": dedup_key, "type": parameters["reminder_type"],
+                            "scheduled": scheduled_at, "timezone": parameters["timezone"],
+                        },
+                    )
+                    resource_type = "reminder"
+                    event_context = replace(ctx, action_id=action_id)
+                    await self._insert_outbox(
+                        session, event_context, aggregate_type="reminder", aggregate_id=resource_id,
+                        aggregate_version=1, event_type="reminder.scheduled.v1",
+                        payload={"reminder_id": str(resource_id), "notification_id": str(notification_id),
+                                 "scheduled_at": scheduled_at.isoformat()},
+                    )
+                    await self._insert_audit(
+                        session, event_context, action="reminder.scheduled", result_code="SCHEDULED",
+                        action_id=action_id,
+                    )
+                    response = {"reminder_id": str(resource_id), "notification_id": str(notification_id), "status": "SCHEDULED", "scheduled_at": scheduled_at.isoformat()}
+
+                await self._consume_action_confirmation(session, ctx, action_id, confirmation_token, now)
+                action_update = await session.execute(
+                    text("""UPDATE tripmate.agent_action SET status='EXECUTED',result_json=CAST(:result AS jsonb),
+                        version=version+1,updated_at=:now WHERE tenant_id=:tenant AND action_id=:action
+                        AND status='PROPOSED' AND version=:version RETURNING run_id"""),
+                    {"result": json.dumps(response), "now": now, "tenant": ctx.tenant_id,
+                     "action": action_id, "version": action["version"]},
+                )
+                run_id = action_update.scalar_one_or_none()
+                if run_id is None:
+                    raise DomainError("DUPLICATE_ACTION", "Action changed during execution", 409)
+                resume = {"decision": "approved", "action_id": str(action_id), "action_type": action_type}
+                run_update = await session.execute(
+                    text("""UPDATE tripmate.agent_run SET status='RUNNING',awaiting_action_id=NULL,
+                        resume_command=CAST(:resume AS jsonb),lease_owner=NULL,lease_until=NULL,
+                        fencing_version=fencing_version+1,version=version+1,updated_at=:now
+                        WHERE tenant_id=:tenant AND run_id=:run AND user_id=:user
+                          AND status='WAITING_CONFIRMATION' AND awaiting_action_id=:action RETURNING version"""),
+                    {"resume": json.dumps(resume), "now": now, "tenant": ctx.tenant_id,
+                     "run": run_id, "user": ctx.user_id, "action": action_id},
+                )
+                run_version = run_update.scalar_one_or_none()
+                if run_version is None:
+                    raise DomainError("VERSION_CONFLICT", "Run state changed during action execution", 409)
+                event_context = replace(ctx, run_id=run_id, action_id=action_id, operation=operation)
+                await self._insert_outbox(
+                    session, event_context, aggregate_type="agent_run", aggregate_id=run_id,
+                    aggregate_version=int(run_version), event_type="agent.run.resume_requested.v1",
+                    payload={"run_id": str(run_id), **resume},
+                )
+                await self._record_action_event(session, event_context, action_id, "confirmation", "CONFIRMED")
+                await self._insert_idempotency(
+                    session, ctx, route, operation, key_hash, req_hash, 201,
+                    {"action_id": str(action_id), **response}, resource_type, resource_id,
+                )
+                try:
+                    await tx.commit()
+                except DBAPIError:
+                    unknown_commit = True
+            except Exception:
+                if tx.is_active:
+                    await tx.rollback()
+                raise
+        if unknown_commit:
+            async with self.sessions() as session:
+                prior = await self._get_idempotency(session, ctx, route, operation, key_hash)
+            if prior is None:
+                raise DomainError("RECONCILIATION_REQUIRED", "Action result is unknown; retry with the same key", 503, True)
+            if prior["request_hash"] != req_hash:
+                raise DomainError("IDEMPOTENCY_KEY_REUSE", "Idempotency key was reused", 409)
+            value = prior["result_json"] if isinstance(prior["result_json"], dict) else json.loads(prior["result_json"])
+            response = {key: item for key, item in value.items() if key != "action_id"}
+        assert response is not None
+        return {"action_id": str(action_id), **response}
+
+    async def propose_waitlist_promotions(
+        self, ctx: RequestContext, *, limit: int = 20
+    ) -> list[dict[str, Any]]:
+        """Create durable, user-confirmed proposals when waitlisted stock is available."""
+        self._require_user(ctx)
+        assert ctx.user_id is not None
+        now = self.clock.now()
+        proposals: list[dict[str, Any]] = []
+        async with self.sessions() as session, session.begin():
+            rows = await session.execute(
+                text("""SELECT r.reservation_id,r.trip_id,r.user_id,r.slot_id,r.quantity,
+                    r.approved_action_id AS action_id,
+                    r.version AS reservation_version,r.parameters_hash AS reservation_parameters_hash,
+                    i.available_quantity,i.status AS inventory_status,i.version AS inventory_version,
+                    s.price,s.currency,s.activity_version,s.status AS slot_status,
+                    s.policy_version,s.cancellation_policy
+                    FROM tripmate.reservation r
+                    JOIN tripmate.inventory i ON i.tenant_id=r.tenant_id AND i.slot_id=r.slot_id
+                    JOIN tripmate.activity_slot s ON s.tenant_id=r.tenant_id AND s.slot_id=r.slot_id
+                    WHERE r.tenant_id=:tenant AND r.user_id=:user AND r.status='WAITLISTED'
+                    ORDER BY r.created_at,r.reservation_id LIMIT :limit
+                    FOR UPDATE OF r,i"""),
+                {"tenant": ctx.tenant_id, "user": ctx.user_id, "limit": min(max(limit, 1), 100)},
+            )
+            for row in rows.mappings():
+                quantity = int(row["quantity"])
+                if (
+                    row["inventory_status"] != "ACTIVE"
+                    or row["slot_status"] != "ACTIVE"
+                    or int(row["available_quantity"]) < quantity
+                ):
+                    continue
+                policy = row["cancellation_policy"]
+                if isinstance(policy, str):
+                    policy = json.loads(policy)
+                canonical = self._canonical_action_parameters(
+                    tenant_id=ctx.tenant_id,
+                    user_id=ctx.user_id,
+                    trip_id=row["trip_id"],
+                    slot_id=row["slot_id"],
+                    quantity=quantity,
+                    price=Decimal(row["price"]),
+                    currency=str(row["currency"]).strip(),
+                    activity_version=int(row["activity_version"]),
+                    inventory_version=int(row["inventory_version"]),
+                    policy_version=str(row["policy_version"]),
+                    reason="waitlist-promotion",
+                )
+                parameters_hash = sha256_hex(canonical_json(canonical))
+                current = await session.execute(
+                    text("""SELECT * FROM tripmate.waitlist_promotion
+                        WHERE tenant_id=:tenant AND reservation_id=:reservation
+                          AND status='PROPOSED' FOR UPDATE"""),
+                    {"tenant": ctx.tenant_id, "reservation": row["reservation_id"]},
+                )
+                existing = current.mappings().one_or_none()
+                if existing is not None:
+                    same_facts = (
+                        existing["parameters_hash"] == parameters_hash
+                        and int(existing["reservation_version"]) == int(row["reservation_version"])
+                        and int(existing["activity_version"]) == int(row["activity_version"])
+                        and int(existing["inventory_version"]) == int(row["inventory_version"])
+                        and Decimal(existing["price_snapshot"]) == Decimal(row["price"])
+                        and str(existing["currency"]).strip() == str(row["currency"]).strip()
+                    )
+                    if existing["expires_at"] > now and same_facts:
+                        claims = self._confirmation_claims(
+                            ctx,
+                            row["action_id"],
+                            existing["promotion_id"],
+                            parameters_hash,
+                            int(existing["version"]),
+                            existing["expires_at"],
+                            reservation_id=row["reservation_id"],
+                            kind="waitlist_promotion",
+                        )
+                        proposals.append(
+                            self._waitlist_promotion_payload(existing, claims, replayed=True)
+                        )
+                        continue
+                    await session.execute(
+                        text("""UPDATE tripmate.waitlist_promotion SET status=:status,
+                            consumed_at=:now,version=version+1,updated_at=:now
+                            WHERE tenant_id=:tenant AND promotion_id=:promotion"""),
+                        {
+                            "status": "EXPIRED" if existing["expires_at"] <= now else "STALE",
+                            "now": now,
+                            "tenant": ctx.tenant_id,
+                            "promotion": existing["promotion_id"],
+                        },
+                    )
+                    await session.execute(
+                        text("""UPDATE tripmate.notification_inbox SET status='READ',read_at=COALESCE(read_at,:now)
+                            WHERE tenant_id=:tenant AND promotion_id=:promotion"""),
+                        {
+                            "now": now,
+                            "tenant": ctx.tenant_id,
+                            "promotion": existing["promotion_id"],
+                        },
+                    )
+                await session.execute(
+                    text("""UPDATE tripmate.reservation SET price_snapshot=:price,currency=:currency,
+                        activity_version=:activity,inventory_version=:inventory,policy_version=:policy_version,
+                        policy_snapshot=CAST(:policy AS jsonb),parameters_hash=:parameters_hash,
+                        version=version+1,updated_at=:now
+                        WHERE tenant_id=:tenant AND reservation_id=:reservation AND status='WAITLISTED'"""),
+                    {
+                        "price": row["price"],
+                        "currency": str(row["currency"]).strip(),
+                        "activity": row["activity_version"],
+                        "inventory": row["inventory_version"],
+                        "policy_version": row["policy_version"],
+                        "policy": json.dumps(policy),
+                        "parameters_hash": parameters_hash,
+                        "now": now,
+                        "tenant": ctx.tenant_id,
+                        "reservation": row["reservation_id"],
+                    },
+                )
+                promotion_id = self.ids.new()
+                expires_at = now + timedelta(seconds=self.settings.action_confirmation_ttl_seconds)
+                claims = self._confirmation_claims(
+                    ctx,
+                    row["action_id"],
+                    promotion_id,
+                    parameters_hash,
+                    1,
+                    expires_at,
+                    reservation_id=row["reservation_id"],
+                    kind="waitlist_promotion",
+                )
+                token = self._sign_confirmation_claims(claims)
+                await session.execute(
+                    text("""INSERT INTO tripmate.waitlist_promotion
+                        (promotion_id,tenant_id,reservation_id,user_id,action_id,price_snapshot,currency,
+                         activity_version,inventory_version,reservation_version,parameters_hash,token_hash,
+                         status,issued_at,expires_at)
+                        VALUES(:promotion,:tenant,:reservation,:user,:action,:price,:currency,:activity,
+                         :inventory,:reservation_version,:parameters_hash,:token_hash,'PROPOSED',:issued,:expires)"""),
+                    {
+                        "promotion": promotion_id,
+                        "tenant": ctx.tenant_id,
+                        "reservation": row["reservation_id"],
+                        "user": ctx.user_id,
+                        "action": row["action_id"],
+                        "price": row["price"],
+                        "currency": str(row["currency"]).strip(),
+                        "activity": row["activity_version"],
+                        "inventory": row["inventory_version"],
+                        "reservation_version": int(row["reservation_version"]) + 1,
+                        "parameters_hash": parameters_hash,
+                        "token_hash": sha256_hex(token),
+                        "issued": now,
+                        "expires": expires_at,
+                    },
+                )
+                notification_id = self.ids.new()
+                await session.execute(
+                    text("""INSERT INTO tripmate.notification_inbox
+                        (notification_id,tenant_id,user_id,reminder_id,promotion_id,title,body)
+                        VALUES(:notification,:tenant,:user,NULL,:promotion,:title,:body)"""),
+                    {
+                        "notification": notification_id,
+                        "tenant": ctx.tenant_id,
+                        "user": ctx.user_id,
+                        "promotion": promotion_id,
+                        "title": "候补有可确认名额",
+                        "body": f"候补时段现有库存，当前价格 {row['price']} {str(row['currency']).strip()}；确认前仍会校验库存和版本。",
+                    },
+                )
+                event_ctx = replace(ctx, reservation_id=row["reservation_id"], action_id=row["action_id"])
+                await self._insert_outbox(
+                    session,
+                    event_ctx,
+                    aggregate_type="reservation",
+                    aggregate_id=row["reservation_id"],
+                    aggregate_version=int(row["reservation_version"]) + 1,
+                    event_type="reservation.waitlist_promotion_proposed.v1",
+                    payload={
+                        "reservation_id": str(row["reservation_id"]),
+                        "promotion_id": str(promotion_id),
+                        "inventory_version": int(row["inventory_version"]),
+                        "activity_version": int(row["activity_version"]),
+                    },
+                )
+                await self._insert_audit(
+                    session,
+                    event_ctx,
+                    action="reservation.waitlist_promotion_proposed",
+                    result_code="PROPOSED",
+                    action_id=row["action_id"],
+                    reservation_id=row["reservation_id"],
+                    parameters_hash=parameters_hash,
+                )
+                proposals.append(
+                    self._waitlist_promotion_payload(
+                        {
+                            "promotion_id": promotion_id,
+                            "reservation_id": row["reservation_id"],
+                            "action_id": row["action_id"],
+                            "price_snapshot": row["price"],
+                            "currency": str(row["currency"]).strip(),
+                            "activity_version": row["activity_version"],
+                            "inventory_version": row["inventory_version"],
+                            "status": "PROPOSED",
+                            "expires_at": expires_at,
+                            "version": 1,
+                        },
+                        claims,
+                    )
+                )
+        return proposals
+
+    async def list_waitlist_promotions(
+        self, ctx: RequestContext, *, limit: int = 20
+    ) -> list[dict[str, Any]]:
+        self._require_user(ctx)
+        assert ctx.user_id is not None
+        now = self.clock.now()
+        async with self.sessions() as session:
+            rows = await session.execute(
+                text("""SELECT * FROM tripmate.waitlist_promotion
+                    WHERE tenant_id=:tenant AND user_id=:user AND status='PROPOSED'
+                    ORDER BY created_at DESC,promotion_id LIMIT :limit"""),
+                {"tenant": ctx.tenant_id, "user": ctx.user_id, "limit": min(max(limit, 1), 100)},
+            )
+            result: list[dict[str, Any]] = []
+            for row in rows.mappings():
+                if row["expires_at"] <= now:
+                    continue
+                claims = self._confirmation_claims(
+                    ctx,
+                    row["action_id"],
+                    row["promotion_id"],
+                    str(row["parameters_hash"]),
+                    int(row["version"]),
+                    row["expires_at"],
+                    reservation_id=row["reservation_id"],
+                    kind="waitlist_promotion",
+                )
+                result.append(self._waitlist_promotion_payload(row, claims))
+            return result
+
+    async def confirm_waitlist_promotion(
+        self,
+        ctx: RequestContext,
+        promotion_id: UUID,
+        *,
+        confirmation_token: str,
+        idempotency_key: str,
+    ) -> dict[str, Any]:
+        self._require_user(ctx)
+        assert ctx.user_id is not None
+        route = f"/v1/waitlist/promotions/{promotion_id}/confirm"
+        operation = "waitlist_promotion.confirm"
+        key_hash = IdempotencyScope(ctx.tenant_id, ctx.user_id, route, operation, idempotency_key).key_hash()
+        req_hash = request_hash(
+            {"promotion_id": promotion_id, "confirmation_token_hash": sha256_hex(confirmation_token)}
+        )
+        now = self.clock.now()
+        response: dict[str, Any] | None = None
+        snapshot: dict[str, Any] | None = None
+        async with self.sessions() as session:
+            tx = await session.begin()
+            try:
+                await self._lock_idempotency_scope(session, key_hash)
+                prior = await self._get_idempotency(session, ctx, route, operation, key_hash)
+                if prior is not None:
+                    if prior["request_hash"] != req_hash:
+                        raise DomainError("IDEMPOTENCY_KEY_REUSE", "Idempotency key was reused", 409)
+                    await tx.rollback()
+                    return prior["result_json"] if isinstance(prior["result_json"], dict) else json.loads(prior["result_json"])
+                result = await session.execute(
+                    text("""SELECT p.*,r.trip_id,r.slot_id,r.quantity,r.version AS current_reservation_version,
+                        r.status AS reservation_status,r.price_snapshot AS reservation_price,
+                        r.currency AS reservation_currency,r.parameters_hash AS reservation_parameters_hash
+                        FROM tripmate.waitlist_promotion p
+                        JOIN tripmate.reservation r ON r.tenant_id=p.tenant_id AND r.reservation_id=p.reservation_id
+                        WHERE p.tenant_id=:tenant AND p.promotion_id=:promotion AND p.user_id=:user
+                        FOR UPDATE OF p,r"""),
+                    {"tenant": ctx.tenant_id, "promotion": promotion_id, "user": ctx.user_id},
+                )
+                promotion = result.mappings().one_or_none()
+                if promotion is None:
+                    raise DomainError("NOT_FOUND", "Waitlist promotion was not found", 404)
+                if promotion["status"] != "PROPOSED" or promotion["reservation_status"] != "WAITLISTED":
+                    raise DomainError("RESERVATION_STATE_CONFLICT", "Waitlist promotion is no longer available", 409)
+                if promotion["expires_at"] <= now:
+                    await session.execute(
+                        text("""UPDATE tripmate.waitlist_promotion SET status='EXPIRED',consumed_at=:now,
+                            version=version+1,updated_at=:now WHERE tenant_id=:tenant AND promotion_id=:promotion"""),
+                        {"now": now, "tenant": ctx.tenant_id, "promotion": promotion_id},
+                    )
+                    raise DomainError("CONFIRMATION_EXPIRED", "Waitlist promotion has expired", 409)
+                if promotion["token_hash"] != sha256_hex(confirmation_token):
+                    raise DomainError("UNAUTHORIZED", "Waitlist promotion confirmation is invalid", 401)
+                if (
+                    int(promotion["current_reservation_version"]) != int(promotion["reservation_version"])
+                    or promotion["reservation_parameters_hash"] != promotion["parameters_hash"]
+                ):
+                    raise DomainError("VERSION_CONFLICT", "Waitlist facts changed; request a new proposal", 409)
+                stock = await self._lock_inventory(session, ctx.tenant_id, promotion["slot_id"])
+                if (
+                    int(stock["available_quantity"]) < int(promotion["quantity"])
+                    or int(stock["inventory_version"]) != int(promotion["inventory_version"])
+                    or int(stock["activity_version"]) != int(promotion["activity_version"])
+                    or Decimal(stock["price"]) != Decimal(promotion["price_snapshot"])
+                    or str(stock["currency"]).strip() != str(promotion["currency"]).strip()
+                ):
+                    raise DomainError("VERSION_CONFLICT", "Waitlist facts changed; request a new proposal", 409)
+                if int(stock["available_quantity"]) + int(stock["held_quantity"]) + int(stock["confirmed_quantity"]) != int(stock["total_quantity"]):
+                    raise DomainError("RECONCILIATION_REQUIRED", "Inventory invariant is violated", 503, True)
+                quantity = int(promotion["quantity"])
+                inventory_version = int(stock["inventory_version"]) + 1
+                updated = await session.execute(
+                    text("""UPDATE tripmate.inventory SET available_quantity=:available,
+                        confirmed_quantity=:confirmed,version=:version,updated_at=:now
+                        WHERE tenant_id=:tenant AND slot_id=:slot AND version=:old_version AND status='ACTIVE'"""),
+                    {
+                        "available": int(stock["available_quantity"]) - quantity,
+                        "confirmed": int(stock["confirmed_quantity"]) + quantity,
+                        "version": inventory_version,
+                        "now": now,
+                        "tenant": ctx.tenant_id,
+                        "slot": promotion["slot_id"],
+                        "old_version": stock["inventory_version"],
+                    },
+                )
+                if affected_rows(updated) != 1:
+                    raise DomainError("VERSION_CONFLICT", "Inventory changed while confirming waitlist", 409)
+                reservation_update = await session.execute(
+                    text("""UPDATE tripmate.reservation SET status='CONFIRMED',inventory_version=:inventory,
+                        version=version+1,updated_at=:now
+                        WHERE tenant_id=:tenant AND reservation_id=:reservation AND user_id=:user
+                          AND status='WAITLISTED' AND version=:version"""),
+                    {
+                        "inventory": inventory_version,
+                        "now": now,
+                        "tenant": ctx.tenant_id,
+                        "reservation": promotion["reservation_id"],
+                        "user": ctx.user_id,
+                        "version": promotion["reservation_version"],
+                    },
+                )
+                if affected_rows(reservation_update) != 1:
+                    raise DomainError("RESERVATION_STATE_CONFLICT", "Waitlist reservation changed", 409)
+                await self._link_trip_item(
+                    session,
+                    ctx.tenant_id,
+                    promotion["trip_id"],
+                    promotion["slot_id"],
+                    stock,
+                    promotion["reservation_id"],
+                    now,
+                )
+                await session.execute(
+                    text("""UPDATE tripmate.waitlist_promotion SET status='CONFIRMED',consumed_at=:now,
+                        version=version+1,updated_at=:now WHERE tenant_id=:tenant AND promotion_id=:promotion
+                          AND status='PROPOSED'"""),
+                    {"now": now, "tenant": ctx.tenant_id, "promotion": promotion_id},
+                )
+                await session.execute(
+                    text("""UPDATE tripmate.notification_inbox SET status='READ',read_at=COALESCE(read_at,:now)
+                        WHERE tenant_id=:tenant AND promotion_id=:promotion"""),
+                    {"now": now, "tenant": ctx.tenant_id, "promotion": promotion_id},
+                )
+                snapshot = self._inventory_snapshot(
+                    stock,
+                    int(stock["available_quantity"]) - quantity,
+                    int(stock["held_quantity"]),
+                    int(stock["confirmed_quantity"]) + quantity,
+                    inventory_version,
+                )
+                event_ctx = replace(ctx, reservation_id=promotion["reservation_id"], action_id=promotion["action_id"])
+                await self._insert_outbox(
+                    session,
+                    event_ctx,
+                    aggregate_type="reservation",
+                    aggregate_id=promotion["reservation_id"],
+                    aggregate_version=int(promotion["current_reservation_version"]) + 1,
+                    event_type="reservation.waitlist_promotion_confirmed.v1",
+                    payload={
+                        "reservation_id": str(promotion["reservation_id"]),
+                        "promotion_id": str(promotion_id),
+                        "slot_id": str(promotion["slot_id"]),
+                        "inventory_version": inventory_version,
+                        "quantity": quantity,
+                    },
+                )
+                await self._insert_audit(
+                    session,
+                    event_ctx,
+                    action="reservation.waitlist_promotion_confirmed",
+                    result_code="CONFIRMED",
+                    action_id=promotion["action_id"],
+                    reservation_id=promotion["reservation_id"],
+                    parameters_hash=promotion["parameters_hash"],
+                )
+                response = {
+                    "promotion_id": str(promotion_id),
+                    "reservation_id": str(promotion["reservation_id"]),
+                    "slot_id": str(promotion["slot_id"]),
+                    "status": "CONFIRMED",
+                    "quantity": quantity,
+                    "price_snapshot": str(Decimal(promotion["price_snapshot"])),
+                    "currency": str(promotion["currency"]).strip(),
+                    "inventory_version": inventory_version,
+                    "version": int(promotion["current_reservation_version"]) + 1,
+                }
+                await self._insert_idempotency(
+                    session, ctx, route, operation, key_hash, req_hash, 200,
+                    response, "reservation", promotion["reservation_id"],
+                )
+                try:
+                    await tx.commit()
+                except DBAPIError:
+                    response = None
+            except Exception:
+                if tx.is_active:
+                    await tx.rollback()
+                raise
+        if response is None:
+            async with self.sessions() as session:
+                prior = await self._get_idempotency(session, ctx, route, operation, key_hash)
+            if prior is None:
+                raise DomainError("RECONCILIATION_REQUIRED", "Waitlist promotion outcome is unknown", 503, True)
+            if prior["request_hash"] != req_hash:
+                raise DomainError("IDEMPOTENCY_KEY_REUSE", "Idempotency key was reused", 409)
+            response = prior["result_json"] if isinstance(prior["result_json"], dict) else json.loads(prior["result_json"])
+        if snapshot is not None:
+            await self._project_after_commit(
+                ctx.tenant_id,
+                UUID(str(response["slot_id"])),
+                UUID(str(response["reservation_id"])),
+                snapshot,
+                None,
+            )
+        return response
+
+    def _waitlist_promotion_payload(
+        self, promotion: Any, claims: dict[str, Any], *, replayed: bool = False
+    ) -> dict[str, Any]:
+        return {
+            "promotion_id": str(promotion["promotion_id"]),
+            "reservation_id": str(promotion["reservation_id"]),
+            "action_id": str(promotion["action_id"]),
+            "status": str(promotion["status"]),
+            "price_snapshot": str(Decimal(promotion["price_snapshot"])),
+            "currency": str(promotion["currency"]).strip(),
+            "activity_version": int(promotion["activity_version"]),
+            "inventory_version": int(promotion["inventory_version"]),
+            "version": int(promotion["version"]),
+            "expires_at": promotion["expires_at"].isoformat(),
+            "confirmation_token": self._sign_confirmation_claims(claims),
+            "replayed": replayed,
+        }
 
     async def _issue_confirmation_legacy(
         self, ctx: RequestContext, action_id: UUID, *, expected_version: int | None = None
@@ -1740,6 +2691,9 @@ class ReservationService:
                     action_id=action_id,
                     parameters_hash=action["parameters_hash"],
                 )
+                await self._record_action_event(
+                    session, ctx, action_id, "confirmation", "REJECTED"
+                )
                 await self._insert_idempotency(
                     session,
                     ctx,
@@ -1908,12 +2862,20 @@ class ReservationService:
             raise DomainError(
                 "RECONCILIATION_REQUIRED", "Inventory invariant is violated", 503, True
             )
+        if row["inventory_status"] != "ACTIVE":
+            raise DomainError(
+                "RECONCILIATION_REQUIRED",
+                "Inventory is paused until its Redis projection is reconciled",
+                503,
+                True,
+            )
         return row
 
     async def _read_inventory(self, tenant_id: UUID, trip_id: UUID, slot_id: UUID) -> Any:
         async with self.sessions() as session:
             result = await session.execute(
-                text("""SELECT i.*,s.price,s.currency,s.activity_version,s.status AS slot_status,
+                text("""SELECT i.*,i.version AS inventory_version,i.status AS inventory_status,
+                    s.price,s.currency,s.activity_version,s.status AS slot_status,
                     s.policy_version,s.cancellation_policy FROM tripmate.inventory i
                     JOIN tripmate.activity_slot s ON s.tenant_id=i.tenant_id AND s.slot_id=i.slot_id
                     JOIN tripmate.trip t ON t.tenant_id=s.tenant_id AND t.tenant_id=i.tenant_id
@@ -2137,18 +3099,41 @@ class ReservationService:
         reservation_id: UUID,
         now: datetime,
     ) -> None:
+        # Reuse an unreserved plan item; otherwise append one with a stable reservation link.
+        await session.execute(
+            text("""SELECT 1 FROM tripmate.trip
+                WHERE tenant_id=:tenant AND trip_id=:trip FOR UPDATE"""),
+            {"tenant": tenant_id, "trip": trip_id},
+        )
+        updated = await session.execute(
+            text("""UPDATE tripmate.trip_item SET reservation_id=:reservation,
+                    constraint_status='PASS',version=version+1,updated_at=:now
+                WHERE tenant_id=:tenant AND trip_id=:trip AND slot_id=:slot
+                  AND reservation_id IS NULL"""),
+            {
+                "reservation": reservation_id,
+                "now": now,
+                "tenant": tenant_id,
+                "trip": trip_id,
+                "slot": slot_id,
+            },
+        )
+        if affected_rows(updated) > 0:
+            return
         await session.execute(
             text("""INSERT INTO tripmate.trip_item
                 (trip_item_id,tenant_id,trip_id,sequence_no,attraction_id,slot_id,start_at,end_at,
-                 cost,currency,constraint_status)
-                SELECT :id,:tenant,:trip,COALESCE(MAX(sequence_no),0)+1,:attraction,:slot,:start,:end,
-                    :price,:currency,'PASS' FROM tripmate.trip_item
-                WHERE tenant_id=:tenant AND trip_id=:trip
+                 cost,currency,constraint_status,reservation_id)
+                VALUES(:id,:tenant,:trip,
+                    COALESCE((SELECT MAX(sequence_no) FROM tripmate.trip_item
+                        WHERE tenant_id=:tenant AND trip_id=:trip),0)+1,
+                    :attraction,:slot,:start,:end,:price,:currency,'PASS',:reservation)
                 ON CONFLICT (tenant_id,trip_id,sequence_no) DO NOTHING"""),
             {
                 "id": self.ids.new(),
                 "tenant": tenant_id,
                 "trip": trip_id,
+                "reservation": reservation_id,
                 "attraction": stock["attraction_id"],
                 "slot": slot_id,
                 "start": stock["start_at"],
@@ -2261,6 +3246,7 @@ class ReservationService:
                 hold=hold,
             )
         except Exception:
+            await self._record_projection_failure(tenant_id, slot_id, reservation_id, snapshot)
             logger.warning(
                 "redis_projection_pending",
                 extra={
@@ -2269,6 +3255,39 @@ class ReservationService:
                     "slot_id": str(slot_id),
                 },
             )
+
+    async def _record_projection_failure(
+        self,
+        tenant_id: UUID,
+        slot_id: UUID,
+        reservation_id: UUID,
+        snapshot: dict[str, Any],
+    ) -> None:
+        """Persist a retryable marker after PostgreSQL has already committed."""
+        try:
+            async with self.sessions() as session, session.begin():
+                await session.execute(
+                    text("""UPDATE tripmate.inventory SET status='RECONCILING',version=version+1,updated_at=:now
+                        WHERE tenant_id=:tenant AND slot_id=:slot AND status='ACTIVE'"""),
+                    {"now": self.clock.now(), "tenant": tenant_id, "slot": slot_id},
+                )
+                await session.execute(
+                    text("""INSERT INTO tripmate.inventory_reconciliation
+                        (tenant_id,slot_id,reservation_id,expected_generation,expected_version,status,
+                         attempt_count,next_attempt_at,last_error_code,last_error_message)
+                        VALUES(:tenant,:slot,:reservation,:generation,:version,'PENDING',0,now(),
+                         'REDIS_PROJECTION_FAILED','Redis projection write failed')
+                        ON CONFLICT DO NOTHING"""),
+                    {
+                        "tenant": tenant_id,
+                        "slot": slot_id,
+                        "reservation": reservation_id,
+                        "generation": int(snapshot.get("generation", 0)),
+                        "version": int(snapshot.get("version", 1)),
+                    },
+                )
+        except Exception:
+            logger.exception("inventory_reconciliation_marker_failed")
 
     @staticmethod
     async def _assert_agent_lease(
@@ -2291,6 +3310,23 @@ class ReservationService:
         )
         if result is None:
             raise DomainError("STALE_LEASE", "Agent run lease is no longer current", 409, True)
+
+    async def _require_trip_role(self, ctx: RequestContext, trip_id: UUID, operation: str) -> None:
+        if ctx.user_id is None:
+            raise DomainError("UNAUTHORIZED", "Authenticated user is required", 401)
+        async with self.sessions() as session:
+            role = await session.scalar(
+                text("""SELECT CASE WHEN t.owner_user_id=:user THEN 'OWNER' ELSE m.role END
+                    FROM tripmate.trip t LEFT JOIN tripmate.trip_member m
+                      ON m.tenant_id=t.tenant_id AND m.trip_id=t.trip_id AND m.user_id=:user
+                      AND m.status='ACTIVE'
+                    WHERE t.tenant_id=:tenant AND t.trip_id=:trip
+                      AND (t.owner_user_id=:user OR m.user_id IS NOT NULL)"""),
+                {"tenant": ctx.tenant_id, "trip": trip_id, "user": ctx.user_id},
+            )
+        if role is None:
+            raise DomainError("NOT_FOUND", "Trip was not found", 404)
+        require_role(str(role), operation)
 
     @staticmethod
     def _confirmation_claims(

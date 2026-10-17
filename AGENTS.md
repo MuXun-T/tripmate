@@ -1,5 +1,9 @@
 # TripMate project workspace rules
 
+## Project purpose
+
+- TripMate is a local internship portfolio project focused on Agent design. Do not add deployment, hosting, or production operations work unless explicitly requested.
+
 - Keep all TripMate project files and project-managed tooling on drive E under `E:\code\agent\tripmate-agent`.
 - Put virtual environments, Python runtimes, package/download caches, generated artifacts, local service data, logs, and backups inside this project directory (for example, `.venv`, `.tools`, and `.cache`). Configure tools to use these locations instead of user-profile or system-drive defaults where possible.
 - Do not install or store TripMate dependencies or data in `C:\` or in sibling projects. Do not modify `peakdispatch-agent` or other projects while working on TripMate.

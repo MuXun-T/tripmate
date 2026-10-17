@@ -5,7 +5,7 @@
 | 项目名称 | TripMate 周末出游管家 Agent |
 | 文档类型 | 概要设计说明书 |
 | 文档版本 | 0.2 |
-| 设计状态 | 评审修订后的编码前概要设计基线；实现验证待完成 |
+| 设计状态 | 目标概要设计；本地实现现状见 `docs/implementation-notes.md` |
 | 需求基线 | `docs/requirements-analysis.md` v0.2 |
 | 技术栈 | Python 3.12、FastAPI、LangChain、LangGraph、Redis Stack、PostgreSQL、OpenTelemetry、Docker Compose |
 
@@ -14,6 +14,8 @@
 ### 1.1 文档目标
 
 本文把需求分析中的业务边界、FR-*、NFR-*、状态机、验收标准和 V 模型追踪关系转换为可直接指导详细设计、编码、联调、测试和演示的系统结构。文档给出服务边界、持久化模型、事件契约、Agent 状态图、工具契约、API、错误处理、一致性边界和部署方式，但不直接实现业务源码。
+
+本文是目标架构说明，不是现状描述。TripMate 仅作为本地实习作品，不要求上线；已经实现或尚缺的能力以 `docs/implementation-notes.md` 为准。
 
 ### 1.2 设计范围
 
@@ -94,40 +96,29 @@ flowchart LR
 | 景点政策/介绍 | RAG active index 对应 manifest | 新索引构建期间继续旧版本 | 构建失败回滚 alias，返回来源版本 |
 | Agent 状态 | PostgreSQL `agent_run` + Redis checkpoint | checkpoint 和数据库事件异步同步 | 恢复时校验 run 版本和人工确认状态 |
 
-## 3. 部署架构、模块划分与包结构
+## 3. 本地运行架构、模块划分与包结构
 
-### 3.1 Docker Compose 部署架构
+### 3.1 本地依赖架构
 
 ```mermaid
 flowchart TB
-    subgraph Host[Docker Compose 单主机/演示环境]
-      C[tripmate-client]
-      A[tripmate-api<br/>FastAPI + Agent]
-      K[knowledge-sync]
-      W[stream-worker]
-      RW[reminder-worker]
-      R[(redis-stack<br/>RedisJSON/Search/Streams)]
-      P[(postgresql)]
-      O[otel-collector]
-      M[外部模拟服务<br/>inventory/mock-weather]
+    C[REST 客户端] --> A
+    subgraph Host[Compose 本地服务]
+      I[init<br/>migration + demo seed]
+      A[api<br/>FastAPI]
+      W[worker<br/>Agent Run + Stream]
+      R[(Redis Stack<br/>JSON/Search/Streams/checkpoint)]
+      P[(PostgreSQL)]
     end
-    C --> A
     A --> R
     A --> P
-    A --> M
-    K --> R
-    K --> P
     W --> R
     W --> P
-    RW --> R
-    RW --> P
-    A --> O
-    W --> O
-    K --> O
-    RW --> O
+    I --> P
+    W --> M[Open-Meteo]
 ```
 
-生产环境可将 API、Worker、同步器、Redis 和 PostgreSQL 分离扩展；Compose 文件至少定义 healthcheck、启动顺序、持久卷、网络、环境变量和资源限制。Redis 与 PostgreSQL 不在公网暴露，外部数据访问只经适配器 allowlist。
+Compose 仅用于本机启动 API、worker、PostgreSQL 和 Redis Stack 等开发依赖，不构成生产部署目标。此作品不要求扩容、集群或公网服务；外部数据访问由适配器限制。知识同步器、独立提醒 worker 和 OTel collector 仍是目标设计组件，不在当前 Compose 拓扑中。
 
 ### 3.2 模块划分
 
@@ -844,6 +835,8 @@ flowchart LR
 
 ## 22. 未决问题与后续需确认的设计决策
 
+本地实习作品无需解决生产配额、集群、备份恢复目标和生产容量等问题；当前 Agent 迭代优先明确本地模型接入方式与评测案例。
+
 1. 首期演示城市、时区、币种和默认语言；是否启用 PostGIS。
 2. Redis Stack 和 PostgreSQL 的具体版本、单机 Compose 资源上限、是否需要 Redis Cluster/哨兵演示。
 3. hold TTL、幂等结果保留期、Stream 重试阈值、DLQ 审批和数据保留周期。
@@ -856,9 +849,9 @@ flowchart LR
 10. 是否在 P1 实现候补自动转正；若实现，需要补充用户再次确认、价格变化和活动版本变更规则。
 11. 真实第三方库存接入前，需要重新确认供应商幂等契约、库存预占语义、退改规则和合规审查。
 
-## 23. 评审修订后的编码门禁
+## 23. 设计契约与实现状态
 
-本节是对前述示例的强制解释；与旧示例冲突时以本节、需求分析 v0.2 和详细设计 v0.2 为准。
+以下是目标设计契约，不表示所有条款均已实现或验证。与现状有关的结论以 `docs/implementation-notes.md` 为准。
 
 1. **库存事实**：PostgreSQL 在一个事务中锁定 `inventory -> reservation`，维护 `available/held/confirmed` 和 Reservation 状态，满足 `available + held + confirmed = total`；Redis Lua 只维护可重建协调投影。confirm/expire/cancel 先由同一 PostgreSQL CAS 决定胜负，再更新 Redis。
 2. **审批恢复**：action 持久化和 `WAITING_CONFIRMATION` CAS 是幂等可重放步骤；调用 `interrupt()` 的节点只读 action。恢复从节点起点重跑也不会创建 action、发布重复审批或执行工具副作用。
@@ -866,8 +859,7 @@ flowchart LR
 4. **租户和幂等**：跨表使用复合租户外键；幂等键保存 request hash，scope 为 tenant/user/route/operation/key；action、HTTP 幂等键、confirmation token、hold token 和 event_id 分开管理。
 5. **事件恢复**：inbox 有业务 lease/fencing；Stream 裁剪按所有 group 安全水位；已发布 outbox 有 replay watermark，Redis 丢失后可重建；外部通知使用稳定 dedup key。
 6. **RAG 隐私和规则**：用户案例向量带 tenant/user、generation 和 tombstone；删除先阻断召回再物理清理；政策 citation 不能替代版本化确定性退改规则。
-7. **运行拓扑**：MVP 只承诺单机 Redis Stack + PostgreSQL Compose。Cluster、热门租户分片和容量数字必须以固定环境压测报告确认。
-8. **依赖矩阵**：编码前在锁文件冻结 Python 3.12.x、PostgreSQL 16.x、Redis Stack digest、`langgraph-redis 0.5.2`、`langgraph 1.0.10`、`redis-py 5.2.1` 及 FastAPI/LangChain 版本，并以真实 saver/Vector Search/Lua/interrupt 契约构建验证。评审核查版本是候选基线，不是当前仓库已安装证据。
+7. **本地运行**：PostgreSQL、Redis Stack 和 Compose 用于本机验证，不是上线拓扑；集群、分片和容量指标不属于当前作品范围。
+8. **依赖矩阵**：仓库已锁定 Python 3.12、PostgreSQL/Redis 服务镜像及 Python 依赖；Redis checkpoint 包名为 `langgraph-checkpoint-redis`。测试覆盖情况见实现现状记录。
 
-完成这些门禁的设计冻结不等于源码、migration、Compose 或测试已经实现；实现阶段必须把每条门禁转成可执行契约测试。
-
+设计中列出的 Redis Vector Search、RAG 数据流水线和 SSE 已有本地实现；真实 Redis Stack/Compose 集成、故障恢复和性能指标仍需按实现说明中的隔离验证证据确认，不应据本文单独宣称达标。

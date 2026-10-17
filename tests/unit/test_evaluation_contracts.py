@@ -8,6 +8,8 @@ def test_evaluation_checks_tool_sequence_constraints_citations_and_order() -> No
         "allowed_tools": ["get_trip_context", "get_weather"],
         "constraint_state": "PASS",
         "required_citation_ids": ["citation-1"],
+        "selected_slot_ids": ["slot-1", "slot-2"],
+        "required_preference_keys": ["travel_style.tags"],
         "reservation_status": None,
     }
     actual = {
@@ -15,6 +17,8 @@ def test_evaluation_checks_tool_sequence_constraints_citations_and_order() -> No
         "tools": ["get_trip_context"],
         "constraint_state": "PASS",
         "citation_ids": ["citation-1", "citation-2"],
+        "selected_slot_ids": ["slot-1", "slot-2"],
+        "preference_keys": ["travel_style.tags", "indoor_ratio.min"],
         "reservation_status": None,
     }
     assert all(compare_case(expected, actual).values())
@@ -22,6 +26,9 @@ def test_evaluation_checks_tool_sequence_constraints_citations_and_order() -> No
     actual["tools"] = ["confirm_reservation"]
     assert not compare_case(expected, actual)["tool_allowlist"]
     assert not compare_case(expected, actual)["tool_sequence"]
+
+    actual["selected_slot_ids"] = ["slot-2", "slot-1"]
+    assert not compare_case(expected, actual)["selected_slot_ids"]
 
 
 def test_evaluation_unknown_is_only_accepted_when_case_allows_it() -> None:

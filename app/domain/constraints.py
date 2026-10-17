@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import timedelta
 from decimal import Decimal
 from zoneinfo import ZoneInfo
 
@@ -35,6 +36,9 @@ def validate_trip_plan(
     unknown = False
     if plan.end_date < plan.start_date:
         raise DomainError("TRIP_INFEASIBLE", "Trip end date precedes its start date", 422)
+    if not plan.items:
+        hard_failed = True
+        checks.append({"code": "NO_ACTIVITY", "state": "FAIL"})
     ordered = sorted(plan.items, key=lambda item: (item.window.start_at, item.sequence_no))
     previous = None
     total = Decimal("0")
@@ -46,6 +50,15 @@ def validate_trip_plan(
         if previous is not None and item.window.start_at < previous.window.end_at:
             hard_failed = True
             checks.append({"code": "TIME_OVERLAP", "state": "FAIL"})
+        if previous is not None:
+            if item.route_from_previous_minutes is None:
+                unknown = True
+                checks.append({"code": "ROUTE_UNKNOWN", "state": "UNKNOWN"})
+            elif previous.window.end_at + timedelta(
+                minutes=item.route_from_previous_minutes
+            ) > item.window.start_at:
+                hard_failed = True
+                checks.append({"code": "ROUTE_TIME_CONFLICT", "state": "FAIL"})
         if item.slot_id is not None and open_slot_ids is not None:
             if str(item.slot_id) not in open_slot_ids:
                 hard_failed = True
@@ -55,9 +68,15 @@ def validate_trip_plan(
             if fact is None or not fact.queried:
                 unknown = True
                 checks.append({"code": "INVENTORY_UNKNOWN", "state": "UNKNOWN"})
-            elif fact.available_quantity < plan.party_size:
+            elif (
+                str(item.slot_id) not in confirmed_slot_ids
+                and fact.available_quantity < plan.party_size
+            ):
                 hard_failed = True
                 checks.append({"code": "INVENTORY_NOT_ENOUGH", "state": "FAIL"})
+        if item.cost.currency != plan.total_cost.currency:
+            hard_failed = True
+            checks.append({"code": "CURRENCY_MISMATCH", "state": "FAIL"})
         total += item.cost.amount
         previous = item
     plan_slots = {str(item.slot_id) for item in plan.items if item.slot_id is not None}

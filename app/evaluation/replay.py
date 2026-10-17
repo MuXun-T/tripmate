@@ -28,6 +28,8 @@ class EvaluationExpectations(BaseModel):
     constraint_state: str | None = Field(default=None, min_length=1)
     allow_unknown: bool = False
     required_citation_ids: list[str] | None = Field(default=None, max_length=100)
+    selected_slot_ids: list[str] | None = Field(default=None, max_length=100)
+    required_preference_keys: list[str] | None = Field(default=None, max_length=20)
     reservation_status: str | None = None
 
     @model_validator(mode="after")
@@ -64,6 +66,14 @@ def compare_case(expected: dict[str, Any], actual: dict[str, Any]) -> dict[str, 
     if "required_citation_ids" in fields:
         checks["citations"] = set(expectations.required_citation_ids or []) <= set(
             actual.get("citation_ids", [])
+        )
+    if "selected_slot_ids" in fields:
+        checks["selected_slot_ids"] = actual.get("selected_slot_ids", []) == (
+            expectations.selected_slot_ids or []
+        )
+    if "required_preference_keys" in fields:
+        checks["preference_keys"] = set(expectations.required_preference_keys or []) <= set(
+            actual.get("preference_keys", [])
         )
     if "reservation_status" in fields:
         checks["reservation_status"] = actual.get("reservation_status") == expectations.reservation_status
@@ -150,6 +160,7 @@ class EvaluationReplayer:
             raise DomainError("RUN_NOT_COMPLETE", "Evaluation requires a completed run", 409, True)
         stored = _as_mapping(run.get("result_json"))
         report = _as_mapping(stored.get("result"))
+        plan = _as_mapping(stored.get("trip_plan") or report.get("trip_plan"))
         constraints = _as_mapping(stored.get("constraint_result") or report.get("constraint_result"))
         citations_value = stored.get("citations") or report.get("citations") or []
         citations = citations_value if isinstance(citations_value, list) else []
@@ -198,6 +209,16 @@ class EvaluationReplayer:
             ],
             "reservation_status": reservations[-1] if reservations else None,
             "reservation_statuses": reservations,
+            "selected_slot_ids": [
+                str(item["slot_id"])
+                for item in plan.get("items", [])
+                if isinstance(item, dict) and item.get("slot_id")
+            ],
+            "preference_keys": [
+                str(item["key"])
+                for item in plan.get("soft_preferences", [])
+                if isinstance(item, dict) and item.get("key")
+            ],
         }
         expected = _as_mapping(case["expected_json"])
         assertions = compare_case(expected, actual)
@@ -212,7 +233,7 @@ class EvaluationReplayer:
                 text("""SELECT tenant_id,case_id,case_version,user_id,conversation_id,trip_id,
                     input_json,expected_json FROM tripmate.evaluation_case
                     WHERE tenant_id=:tenant AND case_id=:case AND active
-                      AND (:case_version IS NULL OR case_version=:case_version)
+                      AND (CAST(:case_version AS integer) IS NULL OR case_version=:case_version)
                     ORDER BY case_version DESC LIMIT 1"""),
                 {"tenant": tenant_id, "case": case_id, "case_version": case_version},
             )

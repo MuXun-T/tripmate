@@ -17,7 +17,7 @@ from app.domain.models import (
     TripPlan,
 )
 from app.events.runtime import event_domain
-from app.events.schema import EventEnvelope
+from app.events.schema import EventEnvelope, RunEvent
 from app.inventory.keys import KeyCodec
 from app.memory.short_term import MemoryPatch
 from app.tools.gateway import SearchAttractionsInput
@@ -65,6 +65,22 @@ def test_event_envelope_rejects_tokens_and_raw_message_content() -> None:
     event["payload"] = {"raw_message": "private user text"}
     with pytest.raises(ValidationError):
         EventEnvelope.model_validate(event)
+
+
+def test_run_events_reject_secrets_sensitive_preferences_and_raw_user_text() -> None:
+    with pytest.raises(ValidationError):
+        RunEvent.model_validate(
+            {"event_type": "confirmation", "payload": {"confirmation_token": "secret"}}
+        )
+    with pytest.raises(ValidationError):
+        RunEvent.model_validate(
+            {"event_type": "citation", "payload": {"dietary_restriction_tags": ["peanut"]}}
+        )
+
+    event = RunEvent.model_validate(
+        {"event_type": "citation", "payload": {"chunk_id": str(uuid4()), "index_version": "v1"}}
+    )
+    assert event.event_type == "citation"
 
 
 def test_stream_domains_include_every_p0_outbox_producer() -> None:
@@ -158,6 +174,48 @@ def test_trip_constraints_fail_closed_on_unknown_inventory_and_overlap() -> None
     )
     assert overlap.state == "FAIL"
     assert "TIME_OVERLAP" in {check["code"] for check in overlap.checks}
+
+    confirmed = validate_trip_plan(
+        plan,
+        inventory={str(item.slot_id): InventoryFact(str(item.slot_id), 0, 1)},
+        confirmed_slot_ids=frozenset({str(item.slot_id)}),
+        open_slot_ids=frozenset({str(item.slot_id)}),
+    )
+    assert confirmed.state == "PASS"
+
+    routed_item = ActivityPlanItem(
+        sequence_no=2,
+        title="Next stop",
+        window=TimeWindow(
+            start_at=start + timedelta(hours=2, minutes=30),
+            end_at=start + timedelta(hours=3, minutes=30),
+            timezone="Asia/Shanghai",
+        ),
+        cost=Money(amount=Decimal("35.00"), currency="CNY"),
+        route_from_previous_minutes=30,
+    )
+    routed_plan = plan.model_copy(
+        update={
+            "items": (item, routed_item),
+            "total_cost": Money(amount=Decimal("70.00"), currency="CNY"),
+        }
+    )
+    route_fits = validate_trip_plan(
+        routed_plan,
+        inventory={str(item.slot_id): InventoryFact(str(item.slot_id), 2, 1)},
+    )
+    assert route_fits.state == "PASS"
+
+    route_conflict = routed_plan.model_copy(
+        update={
+            "items": (item, routed_item.model_copy(update={"route_from_previous_minutes": 31}))
+        }
+    )
+    route_fails = validate_trip_plan(
+        route_conflict,
+        inventory={str(item.slot_id): InventoryFact(str(item.slot_id), 2, 1)},
+    )
+    assert "ROUTE_TIME_CONFLICT" in {check["code"] for check in route_fails.checks}
 
 
 def test_cancellation_uses_fixed_snapshot_and_cutoff_boundary() -> None:

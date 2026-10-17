@@ -5,7 +5,7 @@
 | 项目名称 | TripMate 周末出游管家 Agent |
 | 文档类型 | 软件需求规格说明书 / V 模型需求基线 |
 | 文档版本 | 0.2 |
-| 文档状态 | 评审修订基线；实现和性能指标仍需通过编码测试确认 |
+| 文档状态 | 本地实习作品的目标需求基线；当前实现状态见 `docs/implementation-notes.md` |
 | 目标读者 | 开发人员、测试人员、评审人员和面试演示人员 |
 | 技术路线 | Python、FastAPI、LangChain、LangGraph、Redis Stack、PostgreSQL |
 
@@ -14,6 +14,8 @@
 本文定义 TripMate 的业务目标、用户场景、功能需求、数据边界、工具契约、状态约束、非功能要求和验收方法，并建立从需求到测试的 V 模型追踪关系。本文是概要设计、详细设计、编码、测试和项目演示的共同基线。
 
 本文中的吞吐量、延迟、检索准确率和预约正确率均为首期验收目标，不能在未完成固定数据集和压测前宣称已经达到。评审修订后，本文同时冻结跨 PostgreSQL、Redis、LangGraph 和 Stream 的业务契约；实现不得用缓存、模型输出或自然语言解释替代这些契约。
+
+本文描述目标能力，不是已完成情况清单。TripMate 是本地实习作品，重点在 Agent 设计和核心流程；不要求部署或上线。已实现、部分实现和未实现项以 `docs/implementation-notes.md` 为准。
 
 ## 2. 项目背景与目标
 
@@ -331,6 +333,8 @@ TripMate 按以下 V 模型执行：
 
 ### 13.1 需求到测试追踪
 
+下表中的测试路径是目标测试规划，不保证当前均已创建。现有可执行测试和覆盖边界见 `docs/implementation-notes.md`。
+
 | 需求集合 | 设计产物 | 验证层级 | 测试/报告 |
 |---|---|---|---|
 | FR-USER、FR-MEM | 用户/偏好模型、Redis memory、删除流程 | 单元 + 系统 | `tests/unit/test_memory_policy.py`、`tests/system/test_preference_recall.py` |
@@ -372,15 +376,15 @@ MVP 必须满足以下条件：
 9. 固定评估集能输出 RAG、规划、记忆、工具和并发指标报告。
 10. 所有性能数值以实际压测报告为准，未压测前只能标注为目标值。
 
-## 15. 实施阶段
+## 15. 本地作品待办
 
-1. **P0 基础领域**：用户/租户、景点、活动时段、行程、预约、库存、Run、action、状态机和 PostgreSQL migration；冻结复合租户外键、库存守恒、幂等和 outbox。
-2. **P0 预约与事件闭环**：PostgreSQL 库存/预约事务、Redis Lua 协调与对账、confirm/expire/cancel、Stream、outbox/inbox lease/fencing、pending 恢复和 DLQ。
-3. **P0 Agent 闭环**：LangGraph、真实 Redis checkpoint saver、reducer/串行节点、用户确认、interrupt/resume、Run outbox 调度、worker lease 和同 thread 串行化。
-4. **P0 RAG 与工具边界**：官方景点规则、OSM 数据、政策版本和 citation；实时天气/开放时间/库存工具；模型不得提供价格、库存版本或身份字段。
-5. **P0 隐私与可观测性**：短记忆、偏好删除 tombstone/向量 generation、租户过滤、统一 EventEnvelope/OpenAPI、低基数指标和审计。
-6. **P1 增强能力**：方案比较、天气重规划、长期偏好案例向量、候补/替代、提醒渠道、完整 SSE 展示、知识回滚演示和容量面板；不得弱化上述 P0 语义。
+本节是目标需求的实施顺序，不代表下列能力都尚未编码，也不包含上线/部署任务；逐项现状见 `docs/implementation-notes.md`。
 
-设计文档进入业务编码的门禁已经满足。业务编码和联调阶段必须建立以下实现门禁，并在合入或发布前通过：真实 PostgreSQL 并发迁移测试、真实 Redis Stack + LangGraph saver 的 interrupt/resume 测试、202 Run 重启/lease 测试、Stream replay/trim/claim 测试，以及 OpenAPI/EventEnvelope/工具 schema 契约测试。当前仓库没有实现和测试，因此本需求文档不宣称运行时门禁已通过。
+1. **Agent 核心**：接入 LLM，补结构化意图和槽位识别、模型受控工具调用，以及使用偏好和实时事实的多景点规划。
+2. **规划与检索**：把开放时间、路线和天气用于约束/重规划；补知识索引流程、语义检索和固定评测集。
+3. **闭环验证**：补完整 Agent 图的确认/拒绝、checkpoint 恢复、偏好候选处理和固定案例评测。
+4. **演示增强**：按展示需要实现多方案比较或 SSE；真实提醒渠道、集群容量、生产级压测等不属于本项目必做项。
 
-本文完成后，概要设计必须逐项引用需求 ID；详细设计、代码提交和测试用例不得引入无法追溯的隐式业务行为。
+已有 PostgreSQL、Redis Stack、Run worker 和工具边界的集成测试应作为 Agent 迭代的回归门禁；本地测试通过不等于达到文中的性能或检索质量目标。
+
+概要和详细设计按需求 ID 追踪目标能力；代码与测试的实际覆盖范围见 `docs/implementation-notes.md`，不得把目标条款当作已实现证据。

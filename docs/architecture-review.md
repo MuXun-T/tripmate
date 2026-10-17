@@ -4,6 +4,8 @@
 > 评审范围：`requirements-analysis.md`、`overview-design.md`、`detailed-design.md`，以及当前工作区可见的工程物料。  
 > 评审性质：架构和详细设计评审，不是业务代码实现。
 
+> 历史快照说明：本报告第 1-9 节记录 2026-10-13 的设计评审过程；其中“没有源码、测试或运行物料”等陈述只适用于当日。2026-10-15 的代码实现核对和测试结果见第 10 节及 `docs/implementation-notes.md`。
+
 ## 1. 评审结论（修订前基线）
 
 以下结论记录本报告首次评审时的设计状态，后续修订结果见第 9 节。首次评审结论为：**暂不能进入业务编码阶段**。当时只能进入设计修订、数据库/Redis 契约原型和测试夹具准备阶段；需要先完成 AR-BLK-001 至 AR-BLK-003 的设计修订。
@@ -14,7 +16,7 @@
 2. 设计承诺恢复时从 `reservation_execute` 开始而不重跑 interrupt 前代码，但锁定版本的 LangGraph 官方源码明确规定：恢复从包含 `interrupt()` 的节点起点重新执行该节点的全部逻辑。当前 `approval_required` 在 interrupt 前创建 action，恢复可能重复创建或重复执行节点副作用。
 3. 202 响应后的 Run 没有明确的持久化调度事件、租约和同一 `thread_id` 的串行化机制。API 进程在返回 202 后退出，或两个不同消息同时更新同一 thread，都可能留下 RUNNING 但无人执行或互相覆盖的 Run。
 
-当前工作区 `tripmate-agent` 只有三份设计 Markdown 文档（另有本评审报告），没有 `AGENTS.md`、`pyproject.toml`/锁定依赖、源码、migration、tests 或 Compose 文件。因此不存在可运行实现可供本地验证；报告中引用的测试文件名是设计中计划的名字，不是已存在的测试。外部 GitHub 资料已通过锁定 SHA 的 raw 文件核查；未读取的候选仓库不作为结论依据。
+截至 2026-10-13，评审工作区只有设计 Markdown 文档，没有可运行实现；当时引用的测试文件名是计划路径。此段是历史记录，不描述当前工作区。
 
 严重程度定义：`阻断` 表示违反 P0 正确性/恢复约束，修订前不能编码；`高` 表示可能越权、错误订单或不可恢复，需要在 MVP 编码前修订；`中` 表示契约或实现缺口，需要在对应模块编码前冻结；`低` 表示可选优化或压测假设。
 
@@ -345,9 +347,9 @@ GitHub REST API 在本环境返回 403；上述资料通过 GitHub raw 文件和
 5. OpenAPI、EventEnvelope、工具 schema、错误码和状态迁移生成契约测试通过。
 6. 性能与 RAG 只报告固定环境实测值；500 并发、P95、Recall/MRR 在报告前均标记为目标或待验证。
 
-## 8. 待验证事项和明确限制
+## 8. 待验证事项和明确限制（截至 2026-10-13）
 
-- 没有 TripMate 源码、migration、测试和 Compose，无法验证文档是否已被实现，也无法执行本地单元/集成/压测。
+- 当日没有 TripMate 源码、migration、测试和 Compose，无法验证文档是否已被实现；该结论已由第 10 节更新。
 - Redis Stack 单机与 Cluster 的 Vector Search、checkpoint saver、Stream trimming 和 key slot 行为必须在锁定镜像上运行契约测试；当前仅核查了上游源码/示例的适用边界。
 - `langgraph-redis` 的 `0.5.2` 与 `langgraph>=1.0.10` 是核查提交的依赖事实，不等于 TripMate 的最终选型；最终版本必须写入锁定依赖并在 Python 3.12 上构建。
 - 500 并发、不超卖、API/Agent P95、RAG Recall/MRR、提醒重复率都没有实测证据，不能从参考项目的测试或 README 推断。
@@ -366,4 +368,12 @@ GitHub REST API 在本环境返回 403；上述资料通过 GitHub raw 文件和
 - EventEnvelope、OpenAPI 和工具 schema 已统一方向；inbox claim/fencing、outbox replay watermark、按所有 Consumer Group 安全水位裁剪、DLQ replay 和外部通知幂等均已落到设计/测试门禁。RAG 用户案例包含 tenant/user、tombstone/generation，删除先阻断召回；退改由固化的 policy version/snapshot 和版本化确定性规则判断。
 - MVP 拓扑明确为单机 Redis Stack + PostgreSQL Compose；Cluster 热租户容量只是待压测假设；依赖矩阵和 Compose 物料在编码前冻结，真实 migration、Redis saver、Stream replay 和并发故障测试作为实现/合入门禁。
 
-因此，**设计已达到进入业务编码的文档门禁**：可以开始交付 migration、Compose、领域实现和对应契约测试。此结论只表示设计契约已修订到可编码状态，不表示功能已经实现或测试已通过；当前工作区仍没有源码、migration、Compose、锁定依赖和可执行测试，必须在编码阶段完成第 7.3 节列出的真实依赖和故障门禁后，才能声称运行时正确性和性能达标。
+因此，截至 2026-10-13，**设计已达到进入业务编码的文档门禁**：可以开始交付 migration、Compose、领域实现和对应契约测试。当日结论只表示设计契约已修订到可编码状态；后续实现和测试情况见第 10 节。
+
+## 10. 当前实现核对（2026-10-15）
+
+第 9 节的“仍没有源码”等结论已被后续实现取代。当前仓库已有应用代码、10 份 PostgreSQL migration、Compose、本地依赖锁和单元/API/集成测试；本地默认验证为 26 项通过、14 项集成用例跳过，Ruff 和 mypy 通过。该结果只覆盖实际运行的测试，不证明性能或检索质量目标。
+
+Agent 目前具备 LangGraph 流程、结构化 LLM 意图识别、DeepSeek 对服务端候选 slot ID 的排序、会话记忆、PostgreSQL 文本检索及 citations、工具网关、硬约束校验、预约/取消/偏好候选动作、interrupt/checkpoint 和 Run worker 恢复路径。规划最多包含 6 项；步行上限、室内比例和游玩风格只作为排序提示，天气只查行程首日并作为提示，开放时段和路线估算通过 ToolGateway 查询，价格、库存、时间和预算由服务端及确定性校验决定。完整能力仍未达到目标设计：没有通用的模型驱动工具选择循环、多方案比较或修改后的重规划；没有完整步行/室内偏好评分、向量检索和知识同步流水线；偏好确认及 Agent 恢复的集成故障覆盖有限；未提供 SSE。
+
+TripMate 的目标是本地实习作品，不需要生产部署、集群扩容或生产级容量压测。当前实现矩阵和待做顺序以 `docs/implementation-notes.md` 为准。

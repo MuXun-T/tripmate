@@ -94,14 +94,20 @@ class RealtimeAdapters:
             }
 
     async def get_opening_hours(
-        self, ctx: RequestContext, attraction_id: UUID, visit_date: date
+        self, ctx: RequestContext, attraction_id: UUID, visit_date: date, timezone: str = "UTC"
     ) -> dict[str, Any]:
         async with self.sessions() as session:
             rows = await session.execute(
                 text("""SELECT slot_id,start_at,end_at,status,activity_version FROM tripmate.activity_slot
-                    WHERE tenant_id=:tenant AND attraction_id=:attraction AND start_at::date=:visit_date
+                    WHERE tenant_id=:tenant AND attraction_id=:attraction
+                      AND (start_at AT TIME ZONE :timezone)::date=:visit_date
                       AND status='ACTIVE' ORDER BY start_at"""),
-                {"tenant": ctx.tenant_id, "attraction": attraction_id, "visit_date": visit_date},
+                {
+                    "tenant": ctx.tenant_id,
+                    "attraction": attraction_id,
+                    "visit_date": visit_date,
+                    "timezone": timezone,
+                },
             )
             slots = [dict(row) for row in rows.mappings()]
             return {

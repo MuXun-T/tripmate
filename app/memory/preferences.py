@@ -14,6 +14,7 @@ from app.domain.idempotency import IdempotencyScope, canonical_json, request_has
 from app.domain.ports import Clock, IdGenerator
 from app.events.schema import EventEnvelope
 from app.inventory.keys import KeyCodec
+from app.knowledge.embedding import embed_text
 from app.persistence.postgres.database import affected_rows
 from redis.asyncio import Redis
 
@@ -135,6 +136,28 @@ class PreferenceService:
                     )
                     if affected_rows(updated) != 1:
                         raise DomainError("VERSION_CONFLICT", "Preference changed concurrently", 409)
+                if key in {"walking_limit.max_minutes", "indoor_ratio.min", "travel_style.tags"}:
+                    content = f"{key}: {json.dumps(canonical_value, ensure_ascii=False, sort_keys=True)}"
+                    await session.execute(
+                        text("""INSERT INTO tripmate.private_case_vector
+                            (vector_id,tenant_id,user_id,source_preference_id,generation,content_redacted,
+                             content_hash,embedding)
+                            VALUES(:id,:tenant,:user,:preference,:generation,:content,:hash,:embedding)
+                            ON CONFLICT (tenant_id,source_preference_id)
+                                WHERE source_preference_id IS NOT NULL AND tombstoned_at IS NULL
+                            DO UPDATE SET generation=EXCLUDED.generation,content_redacted=EXCLUDED.content_redacted,
+                                content_hash=EXCLUDED.content_hash,embedding=EXCLUDED.embedding,created_at=now()"""),
+                        {
+                            "id": self.ids.new(),
+                            "tenant": ctx.tenant_id,
+                            "user": ctx.user_id,
+                            "preference": pref_id,
+                            "generation": generation,
+                            "content": content,
+                            "hash": sha256_hex(content),
+                            "embedding": embed_text(content),
+                        },
+                    )
                 await self._write_event(
                     session,
                     ctx,
@@ -328,7 +351,13 @@ class PreferenceService:
         if prior["request_hash"] != expected_hash:
             raise DomainError("IDEMPOTENCY_KEY_REUSE", "Idempotency key was reused", 409)
         result = prior["result_json"]
-        return result if isinstance(result, dict) else json.loads(result)
+        replayed = result if isinstance(result, dict) else json.loads(result)
+        if isinstance(replayed.get("preference_id"), str):
+            replayed["preference_id"] = UUID(replayed["preference_id"])
+        for key in ("effective_at", "deleted_at"):
+            if isinstance(replayed.get(key), str):
+                replayed[key] = datetime.fromisoformat(replayed[key])
+        return replayed
 
     async def _store_idempotency(
         self,

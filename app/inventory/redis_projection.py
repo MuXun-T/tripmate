@@ -1,4 +1,5 @@
 from collections.abc import Awaitable
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
 from uuid import UUID
@@ -8,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.config import Settings
 from app.inventory.keys import KeyCodec
+from app.persistence.postgres.database import affected_rows
 from redis.asyncio import Redis
 
 SCRIPT_DIR = Path(__file__).resolve().parents[2] / "redis" / "scripts"
@@ -177,6 +179,78 @@ class RedisInventoryProjection:
         for tenant_id in tenants:
             rebuilt += await self.rebuild_tenant(tenant_id)
         return rebuilt
+
+    async def reconcile_pending(
+        self, worker_id: str, *, tenant_id: UUID | None = None, limit: int = 100
+    ) -> int:
+        """Rebuild marked slots from PostgreSQL and clear each marker after Redis succeeds."""
+        if self.sessions is None:
+            raise RuntimeError("PostgreSQL sessions are required for reconciliation")
+        now = datetime.now(UTC)
+        async with self.sessions() as session, session.begin():
+            rows = await session.execute(
+                text("""SELECT reconciliation_id,tenant_id,slot_id FROM tripmate.inventory_reconciliation
+                    WHERE ((status IN ('PENDING','FAILED') AND next_attempt_at<=:now)
+                       OR (status='PROCESSING' AND lease_until<=:now))
+                      AND (:tenant IS NULL OR tenant_id=:tenant)
+                    ORDER BY next_attempt_at,reconciliation_id FOR UPDATE SKIP LOCKED LIMIT :limit"""),
+                {"now": now, "tenant": tenant_id, "limit": min(max(limit, 1), 500)},
+            )
+            tasks = [dict(row) for row in rows.mappings()]
+            for task in tasks:
+                await session.execute(
+                    text("""UPDATE tripmate.inventory_reconciliation SET status='PROCESSING',
+                        lease_owner=:worker,lease_until=:until,attempt_count=attempt_count+1,updated_at=:now
+                        WHERE tenant_id=:tenant AND reconciliation_id=:id"""),
+                    {"worker": worker_id, "until": now + timedelta(seconds=30), "now": now,
+                     "tenant": task["tenant_id"], "id": task["reconciliation_id"]},
+                )
+        resolved = 0
+        for task in tasks:
+            try:
+                async with self.sessions() as session, session.begin():
+                    updated = await session.execute(
+                        text("""UPDATE tripmate.inventory SET
+                            reconciliation_generation=reconciliation_generation+1,version=version+1,updated_at=:now
+                            WHERE tenant_id=:tenant AND slot_id=:slot AND status='RECONCILING'"""),
+                        {"now": datetime.now(UTC), "tenant": task["tenant_id"], "slot": task["slot_id"]},
+                    )
+                    if affected_rows(updated) != 1:
+                        raise ValueError("inventory slot is not pending reconciliation")
+                await self.rebuild_tenant(task["tenant_id"])
+                async with self.sessions() as session, session.begin():
+                    activated = await session.execute(
+                        text("""UPDATE tripmate.inventory SET status='ACTIVE',updated_at=:now
+                            WHERE tenant_id=:tenant AND slot_id=:slot AND status='RECONCILING'"""),
+                        {"now": datetime.now(UTC), "tenant": task["tenant_id"], "slot": task["slot_id"]},
+                    )
+                    if affected_rows(activated) != 1:
+                        raise ValueError("inventory slot changed during reconciliation")
+                    await session.execute(
+                        text("""UPDATE tripmate.inventory_reconciliation SET status='RESOLVED',
+                            lease_owner=NULL,lease_until=NULL,last_error_code=NULL,last_error_message=NULL,updated_at=:now
+                            WHERE tenant_id=:tenant AND reconciliation_id=:id AND lease_owner=:worker"""),
+                        {"now": datetime.now(UTC), "tenant": task["tenant_id"],
+                         "id": task["reconciliation_id"], "worker": worker_id},
+                    )
+                resolved += 1
+            except Exception as exc:
+                async with self.sessions() as session, session.begin():
+                    await session.execute(
+                        text("""UPDATE tripmate.inventory SET status='RECONCILING',updated_at=:now
+                            WHERE tenant_id=:tenant AND slot_id=:slot"""),
+                        {"now": datetime.now(UTC), "tenant": task["tenant_id"], "slot": task["slot_id"]},
+                    )
+                    await session.execute(
+                text("""UPDATE tripmate.inventory_reconciliation SET status='FAILED',
+                            lease_owner=NULL,lease_until=NULL,next_attempt_at=:next,last_error_code='REBUILD_FAILED',
+                            last_error_message=:message,updated_at=:now
+                    WHERE tenant_id=:tenant AND reconciliation_id=:id AND lease_owner=:worker"""),
+                        {"next": datetime.now(UTC) + timedelta(seconds=30), "message": str(exc)[:500],
+                         "now": datetime.now(UTC), "tenant": task["tenant_id"],
+                         "id": task["reconciliation_id"], "worker": worker_id},
+                    )
+        return resolved
 
     async def ping(self) -> bool:
         return bool(await self.client.ping())

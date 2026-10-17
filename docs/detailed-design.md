@@ -5,7 +5,7 @@
 | 项目名称 | TripMate 周末出游管家 Agent |
 | 文档类型 | 详细设计说明书 |
 | 文档版本 | 0.2 |
-| 设计状态 | 评审修订后的编码前详细设计基线；实现和性能数字待验证 |
+| 设计状态 | 目标详细设计；当前实现和验证状态见 `docs/implementation-notes.md` |
 | 需求基线 | `docs/requirements-analysis.md` v0.2 |
 | 概要设计基线 | `docs/overview-design.md` v0.2 |
 | 技术栈 | Python 3.12、FastAPI、LangChain、LangGraph、Redis Stack、PostgreSQL、OpenTelemetry、Docker Compose |
@@ -15,6 +15,8 @@
 ### 1.1 目的
 
 本文是概要设计到编码、单元测试和集成测试之间的详细设计基线。它把服务边界、领域规则、数据库字段、Redis 序列化、Lua 投影/协调操作、LangGraph 节点、工具 schema、API 请求/响应、事件消费和故障恢复细化到可以由开发人员直接实现和由测试人员直接编写夹具的程度。
+
+本文描述目标设计，不代表所有设计点均已编码或经过测试。项目定位是本地实习作品，重点为 Agent 设计，不要求上线；现状以 `docs/implementation-notes.md` 为准。
 
 本文给出接口、数据结构、SQL/Lua/伪代码和测试设计，不直接实现业务源码。任何实现行为必须可以追溯到需求分析中的 `FR-*`/`NFR-*` 或概要设计章节，不能把模型输出当作库存、金额、时间冲突、权限或订单事实。
 
@@ -2027,8 +2029,7 @@ RAG 评估至少输出 Recall@5、MRR、citation 可定位率、citation 正确�
 - [ ] 每个需求 ID 在第 19 节有设计、数据、接口、测试和验收断言。
 - [ ] 性能、RAG 质量和容量数值仅在固定环境报告后标记为达标。
 
-设计门禁状态：上述条款已写入设计基线，当前工作区仍没有 migration、Compose、源码和测试；可以据此开始业务编码。编码和联调阶段必须按第 18 节建立对应的真实依赖契约测试，并在合入或发布前通过。
-
+实现状态：上述条款是设计目标。migration、Compose、源码和部分真实 PostgreSQL/Redis Stack 契约测试已经存在；测试范围有限，不能据此认定全部设计条款均已实现。当前可确认的实现、缺口和验证结果见 `docs/implementation-notes.md`。本地作品不设置上线或发布门禁。
 
 
 

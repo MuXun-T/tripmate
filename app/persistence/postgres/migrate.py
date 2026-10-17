@@ -4,13 +4,14 @@ from pathlib import Path
 
 from sqlalchemy import text
 
+from app.config import Settings
 from app.persistence.postgres.database import create_engine
 
 MIGRATIONS = Path(__file__).resolve().parents[3] / "migrations"
 
 
-async def apply_migrations() -> list[str]:
-    engine = create_engine()
+async def apply_migrations(settings: Settings | None = None) -> list[str]:
+    engine = create_engine(settings)
     applied: list[str] = []
     try:
         async with engine.connect() as connection:
@@ -44,7 +45,9 @@ async def apply_migrations() -> list[str]:
                                     f"Applied migration checksum changed: {path.name}"
                                 )
                             continue
-                        await connection.exec_driver_sql(sql)
+                        raw_connection = await connection.get_raw_connection()
+                        assert raw_connection.driver_connection is not None
+                        await raw_connection.driver_connection.execute(sql)
                         await connection.execute(
                             text(
                                 "INSERT INTO public.tripmate_migration_history(version, checksum) "

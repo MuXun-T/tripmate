@@ -14,6 +14,7 @@ from sqlalchemy import text
 from app.config import Settings
 from app.domain.context import RequestContext
 from app.domain.ports import SystemClock
+from app.persistence.postgres.migrate import apply_migrations
 from app.runtime import Runtime
 
 
@@ -28,9 +29,11 @@ async def runtime() -> AsyncIterator[Runtime]:
         database_url=database_url,
         redis_url=redis_url,
         auth_signing_secret=SecretStr("tripmate-integration-secret-0123456789"),
+        db_statement_timeout_ms=30000,
         pending_claim_idle_ms=1000,
         stream_auto_trim=False,
     )
+    await apply_migrations(settings)
     runtime = await Runtime.create(settings)
     try:
         yield runtime
@@ -75,7 +78,7 @@ class IntegrationScope:
         )
 
 
-@pytest_asyncio.fixture
+@pytest_asyncio.fixture(loop_scope="module")
 async def tenant_scope(runtime: Runtime) -> AsyncIterator[IntegrationScope]:
     tenant_id, user_id, attraction_id, trip_id, slot_id, run_id = (uuid4() for _ in range(6))
     thread_id = f"tenant:{tenant_id}:user:{user_id}:conversation:{uuid4()}"
@@ -180,10 +183,23 @@ async def tenant_scope(runtime: Runtime) -> AsyncIterator[IntegrationScope]:
         if keys:
             await runtime.redis.delete(*keys)
         async with runtime.sessions() as session, session.begin():
+            await session.execute(
+                text("UPDATE tripmate.agent_run SET awaiting_action_id=NULL WHERE tenant_id=:tenant"),
+                {"tenant": tenant_id},
+            )
             for table in (
+                "notification_inbox",
+                "waitlist_promotion",
+                "reminder",
                 "evaluation_result",
+                "knowledge_evaluation_run",
+                "knowledge_active_alias",
+                "knowledge_chunk",
+                "knowledge_document",
+                "knowledge_manifest",
                 "audit_log",
                 "agent_tool_call",
+                "agent_run_event",
                 "dead_letter_event",
                 "inbox_event",
                 "stream_group_watermark",
@@ -197,8 +213,8 @@ async def tenant_scope(runtime: Runtime) -> AsyncIterator[IntegrationScope]:
                 "conversation_message",
                 "agent_run",
                 "outbox_event",
-                "user_preference",
                 "private_case_vector",
+                "user_preference",
                 "evaluation_case",
                 "trip_member",
                 "inventory",

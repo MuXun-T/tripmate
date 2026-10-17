@@ -27,6 +27,19 @@ from redis.asyncio import Redis
 
 logger = logging.getLogger(__name__)
 _TOOL_CONTEXT: ContextVar[RequestContext] = ContextVar("tripmate_tool_context")
+READ_ONLY_TOOL_IDS = frozenset(
+    {
+        "search_attractions",
+        "get_weather",
+        "get_opening_hours",
+        "estimate_route_time",
+        "check_ticket_inventory",
+        "search_travel_knowledge",
+        "get_trip_context",
+        "get_reservation_history",
+        "calculate_trip_budget",
+    }
+)
 
 
 class StrictInput(BaseModel):
@@ -46,6 +59,7 @@ class WeatherInput(StrictInput):
 class OpeningHoursInput(StrictInput):
     attraction_id: UUID
     visit_date: date
+    timezone: str = Field(default="UTC", min_length=1, max_length=80)
 
 
 class RouteInput(StrictInput):
@@ -69,9 +83,7 @@ class TripInput(StrictInput):
 
 
 class BudgetInput(StrictInput):
-    unit_prices: list[Decimal] = Field(min_length=1, max_length=100)
-    quantity: int = Field(ge=1, le=100)
-    currency: str = Field(default="CNY", pattern=r"^[A-Z]{3}$")
+    trip_id: UUID
 
 
 class ProposeReservationInput(StrictInput):
@@ -203,6 +215,26 @@ class ToolGateway:
             self._propose_preference,
         )
 
+    def readonly_tool_schemas(self) -> list[dict[str, Any]]:
+        return [
+            {
+                "tool_id": tool_id,
+                "description": self.registry[tool_id][2].description,
+                "parameters": self.registry[tool_id][0].model_json_schema(),
+            }
+            for tool_id in sorted(READ_ONLY_TOOL_IDS)
+            if tool_id in self.registry
+        ]
+
+    async def invoke_readonly(
+        self, tool_id: str, arguments: dict[str, Any], ctx: RequestContext
+    ) -> Any:
+        if tool_id not in READ_ONLY_TOOL_IDS or tool_id not in self.registry:
+            raise DomainError("TOOL_NOT_ALLOWED", "Tool is not registered as read-only", 403)
+        schema = self.registry[tool_id][0]
+        parsed = schema.model_validate(arguments)
+        return await self.invoke(tool_id, parsed.model_dump(mode="json"), ctx)
+
     async def invoke(self, name: str, arguments: dict[str, Any], ctx: RequestContext) -> Any:
         spec = self.registry.get(name)
         if spec is None:
@@ -236,6 +268,12 @@ class ToolGateway:
         except DomainError as exc:
             result_code = exc.code
             raise
+        except Exception as exc:
+            result_code = "TOOL_PROVIDER_ERROR"
+            raise DomainError(
+                result_code, "Tool provider failed", 503, True,
+                details={"provider": type(exc).__name__},
+            ) from exc
         finally:
             await self._audit_tool_call(
                 ctx,
@@ -306,7 +344,9 @@ class ToolGateway:
 
     async def _get_opening_hours(self, ctx: RequestContext, data: BaseModel) -> Any:
         args = OpeningHoursInput.model_validate(data)
-        return await self.realtime.get_opening_hours(ctx, args.attraction_id, args.visit_date)
+        return await self.realtime.get_opening_hours(
+            ctx, args.attraction_id, args.visit_date, args.timezone
+        )
 
     async def _estimate_route(self, ctx: RequestContext, data: BaseModel) -> Any:
         args = RouteInput.model_validate(data)
@@ -410,12 +450,29 @@ class ToolGateway:
 
     async def _calculate_budget(self, ctx: RequestContext, data: BaseModel) -> Any:
         args = BudgetInput.model_validate(data)
-        total = sum(args.unit_prices, Decimal("0")) * args.quantity
+        async with self.sessions() as session:
+            result = await session.execute(
+                text("""SELECT t.currency,t.party_size,
+                    COALESCE(SUM(CASE WHEN r.status='CONFIRMED'
+                      THEN r.price_snapshot*r.quantity ELSE ti.cost*t.party_size END),0) AS total
+                    FROM tripmate.trip t
+                    LEFT JOIN tripmate.trip_item ti ON ti.tenant_id=t.tenant_id AND ti.trip_id=t.trip_id
+                    LEFT JOIN tripmate.reservation r ON r.tenant_id=ti.tenant_id AND r.reservation_id=ti.reservation_id
+                    WHERE t.tenant_id=:tenant AND t.trip_id=:trip
+                      AND (t.owner_user_id=:user OR EXISTS(SELECT 1 FROM tripmate.trip_member m
+                        WHERE m.tenant_id=t.tenant_id AND m.trip_id=t.trip_id AND m.user_id=:user AND m.status='ACTIVE'))
+                    GROUP BY t.currency,t.party_size"""),
+                {"tenant": ctx.tenant_id, "trip": args.trip_id, "user": ctx.user_id},
+            )
+            row = result.mappings().one_or_none()
+        if row is None:
+            raise DomainError("NOT_FOUND", "Trip was not found", 404)
+        total = Decimal(row["total"])
         return {
             "total": str(total.quantize(Decimal("0.01"))),
-            "currency": args.currency,
-            "quantity": args.quantity,
-            "source": "deterministic Decimal arithmetic",
+            "currency": (row["currency"] or "CNY").strip(),
+            "party_size": int(row["party_size"]),
+            "source": "postgres trip and reservation price snapshots",
         }
 
     async def _propose_reservation(self, ctx: RequestContext, data: BaseModel) -> Any:
@@ -464,6 +521,15 @@ class ToolGateway:
             raise DomainError("INVALID_ARGUMENT", "Preference proposal requires an AgentRun", 400)
         args = PreferenceInput.model_validate(data)
         validated = self.preferences._validate_value(args.key, args.value)
+        current = next(
+            (
+                item
+                for item in await self.preferences.list_for_user(ctx)
+                if item["scope"] == args.scope and item["preference_key"] == args.key
+            ),
+            None,
+        )
+        expected_version = int(current["version"]) if current is not None else None
         parameters_hash = sha256_hex(
             canonical_json(
                 {
@@ -474,6 +540,7 @@ class ToolGateway:
                     "scope": args.scope,
                     "value": validated,
                     "reason": args.reason,
+                    "expected_version": expected_version,
                 }
             )
         )
@@ -502,6 +569,7 @@ class ToolGateway:
                             "key": args.key,
                             "value": validated,
                             "reason": args.reason,
+                            "expected_version": expected_version,
                         }
                     ),
                     "hash": parameters_hash,
@@ -512,12 +580,15 @@ class ToolGateway:
             run_update = await session.execute(
                 text("""UPDATE tripmate.agent_run SET status='WAITING_CONFIRMATION',awaiting_action_id=:action,
                     version=version+1,updated_at=now() WHERE tenant_id=:tenant AND run_id=:run
-                    AND user_id=:user AND status='RUNNING' RETURNING version"""),
+                    AND user_id=:user AND status='RUNNING' AND lease_owner=:owner
+                    AND fencing_version=:fence AND lease_until>now() RETURNING version"""),
                 {
                     "action": action_id,
                     "tenant": ctx.tenant_id,
                     "run": ctx.run_id,
                     "user": ctx.user_id,
+                    "owner": ctx.lease_owner,
+                    "fence": ctx.fencing_version,
                 },
             )
             run_version = run_update.scalar_one_or_none()
@@ -528,7 +599,12 @@ class ToolGateway:
                     ),
                     {"tenant": ctx.tenant_id, "run": ctx.run_id},
                 )
-                if existing != "WAITING_CONFIRMATION":
+                current_action = await session.scalar(
+                    text("""SELECT awaiting_action_id FROM tripmate.agent_run
+                        WHERE tenant_id=:tenant AND run_id=:run"""),
+                    {"tenant": ctx.tenant_id, "run": ctx.run_id},
+                )
+                if existing != "WAITING_CONFIRMATION" or current_action != action_id:
                     raise DomainError("VERSION_CONFLICT", "Run is not available for approval", 409)
             else:
                 envelope = EventEnvelope(

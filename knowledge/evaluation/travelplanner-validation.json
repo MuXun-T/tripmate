@@ -1,0 +1,967 @@
+{
+  "dataset_id": "osunlp/TravelPlanner",
+  "dataset_url": "https://huggingface.co/datasets/osunlp/TravelPlanner",
+  "dataset_revision": "8736504ecfc31b7f8b7e40122873c337e83fff7c",
+  "license": "CC-BY-4.0",
+  "split": "validation",
+  "source_files": {
+    "validation.csv": "0e54b26b13c0b6d50e8683765e930bffca949488c44634e530da899914d40e80",
+    "validation_ref_info.jsonl": "0555348b457226a7cff866a7ec1962b60105fd90bb9e5c030b9e9ec3f2aff1d0"
+  },
+  "source_version": "travelplanner-validation-8736504ecfc3",
+  "documents": [
+    {
+      "external_document_id": "travelplanner-validation-row-000-attractions-in-myrtle-beach",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:0",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Myrtle Beach",
+      "chunks": [
+        {
+          "heading": "Attractions in Myrtle Beach",
+          "content": "                                     Name  Latitude  Longitude                                                                         Address          Phone                                                                    Website         City\n                    SkyWheel Myrtle Beach 33.694026 -78.877372                                  1110 N Ocean Blvd, Myrtle Beach, SC 29577, USA (843) 839-9200                                                     http://skywheelmb.com/ Myrtle Beach\n                 WonderWorks Myrtle Beach 33.716820 -78.884306                                 1313 Celebrity Cir, Myrtle Beach, SC 29577, USA (843) 626-9962                              http://www.wonderworksonline.com/myrtle-beach Myrtle Beach\n            Family Kingdom Amusement Park 33.682392 -78.891932                                   300 S Ocean Blvd, Myrtle Beach, SC 29577, USA (843) 626-3447                                           http://www.familykingdomfun.com/ Myrtle Beach\n                     Hollywood Wax Museum 33.717142 -78.891257                             1808 21st Ave N unit a, Myrtle Beach, SC 29577, USA (843) 444-0091     https://www.hollywoodwaxentertainment.com/myrtle-beach-sc-attractions/ Myrtle Beach\n        Ripley's Aquarium of Myrtle Beach 33.715737 -78.877941                                 1110 Celebrity Cir, Myrtle Beach, SC 29577, USA (843) 916-0888                               https://www.ripleyaquariums.com/myrtlebeach/ Myrtle Beach\n                    Broadway at the Beach 33.715617 -78.881949                                 1325 Celebrity Cir, Myrtle Beach, SC 29577, USA (843) 444-3200                                        https://www.broadwayatthebeach.com/ Myrtle Beach\n              Ripley's Believe It or Not! 33.692454 -78.879754                                   901 N Ocean Blvd, Myrtle Beach, SC 29577, USA (843) 916-0888                                         http://www.ripleys.com/myrtlebeach Myrtle Beach\n               Ripley's Haunted Adventure 33.693229 -78.878922                                   915 N Ocean Blvd, Myrtle Beach, SC 29577, USA (843) 916-0888                     https://www.ripleys.com/myrtlebeach/haunted-adventure/ Myrtle Beach\n     Myrtle Beach Boardwalk and Promenade 33.693287 -78.877580 Myrtle Beach, Myrtle Beach Boardwalk and Promenade, Myrtle Beach, SC 29577, USA (843) 918-1000                                        http://www.myrtlebeachdowntown.com/ Myrtle Beach\n                           Soar + Explore 33.716660 -78.884005                                 1313 Celebrity Cir, Myrtle Beach, SC 29577, USA (843) 626-9962 http://www.wonderworksonline.com/myrtle-beach/the-experience/soar-explore/ Myrtle Beach\n                    Free Fall Thrill Park 33.694606 -78.877455                                  1201 N Ocean Blvd, Myrtle Beach, SC 29577, USA (843) 444-8255                                                   http://freefallpark.com/ Myrtle Beach\n                     Ripley's Mirror Maze 33.693229 -78.878922                                   913 N Ocean Blvd, Myrtle Beach, SC 29577, USA (843) 916-0888                   https://www.ripleys.com/myrtlebeach/ripleys-mirror-maze/ Myrtle Beach\n                  Myrtle Beach State Park 33.651198 -78.930625                                   4401 S Kings Hwy, Myrtle Beach, SC 29575, USA (843) 238-5325                                https://southcarolinaparks.com/myrtle-beach Myrtle Beach\n                 Hannah's Maze of Mirrors 33.717275 -78.891301                             1808 21st Ave N Unit C, Myrtle Beach, SC 29577, USA (843) 444-0091     https://www.hollywoodwaxentertainment.com/myrtle-beach-sc-attractions/ Myrtle Beach\nMyrtle Beach Safari (by reservation only) 33.695161 -78.969232                                 851 Folly Ranch Ln, Myrtle Beach, SC 29588, USA (843) 361-4552                                            https://docantlesdaysafari.com/ Myrtle Beach\n                                 Dinopark 33.715499 -78.877514                                 1112 Celebrity Cir, Myrtle Beach, SC 29577, USA (843) 808-9619                                                 http://www.dinoparkmb.com/ Myrtle Beach\n                    Backstage Mirror Maze 33.717882 -78.882896                            1314 Celebrity Cir #165, Myrtle Beach, SC 29577, USA (843) 712-1794                                        http://www.backstagemirrormaze.com/ Myrtle Beach\n                       The Pavilion Parks 33.715617 -78.881949                                 1325 Celebrity Cir, Myrtle Beach, SC 29577, USA (843) 839-0303                                                 https://pavilionparks.com/ Myrtle Beach\n                       Gardens By The Sea 33.725774 -78.838028                            5506 N Ocean Blvd #5504, Myrtle Beach, SC 29577, USA        Unknown                                                                    Unknown Myrtle Beach\n                            Pavilion Park 33.692441 -78.881687                                      205 9th Ave N, Myrtle Beach, SC 29577, USA (843) 839-0303                                                 https://pavilionparks.com/ Myrtle Beach",
+          "keywords": [
+            "Myrtle Beach",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-000-restaurants-in-myrtle-beach",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:0",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Myrtle Beach",
+      "chunks": [
+        {
+          "heading": "Restaurants in Myrtle Beach",
+          "content": "                             Name  Average Cost                                                   Cuisines  Aggregate Rating         City\n                     Exotic India            81                                     Indian, BBQ, Fast Food               4.1 Myrtle Beach\n                Catfish Charlie's            14                                     Tea, Chinese, Desserts               3.3 Myrtle Beach\n                   d' Curry House            33                          Tea, Chinese, Desserts, Fast Food               3.6 Myrtle Beach\n                           Twigly            55                        Tea, Bakery, Mediterranean, Seafood               4.6 Myrtle Beach\n                        First Eat            21                                    Tea, Mexican, Fast Food               4.0 Myrtle Beach\n                            Nagai            19     Desserts, Pizza, Mexican, Fast Food, American, Seafood               4.3 Myrtle Beach\n                  La Pino'z Pizza            14                                   Cafe, Seafood, Fast Food               3.5 Myrtle Beach\n               Eat Street Express           100                             Fast Food, Pizza, BBQ, Italian               4.0 Myrtle Beach\n                    Punjabi Tadka            73                   Bakery, BBQ, Fast Food, Chinese, Seafood               2.8 Myrtle Beach\n      Kedarnath Prem Chand Halwai            61 Desserts, Tea, Fast Food, American, Mediterranean, Seafood               3.7 Myrtle Beach\n                    The Night Owl            12           Desserts, Tea, American, Bakery, Indian, Seafood               0.0 Myrtle Beach\n                  Negi Restaurant            46                                Tea, Bakery, Pizza, Seafood               0.0 Myrtle Beach\n          Turning Point Fast Food            32                                             Pizza, Seafood               0.0 Myrtle Beach\n     Cafe Coffee Day - The Lounge            71                         Mexican, Bakery, Desserts, Seafood               2.6 Myrtle Beach\nTapas - Jaypee Vasant Continental            90                                BBQ, Mediterranean, Seafood               3.2 Myrtle Beach\n                Caravan Resto Bar            57                 Desserts, Tea, BBQ, Mediterranean, Seafood               3.2 Myrtle Beach\n               Bikaner Restaurant            96                                             BBQ, Fast Food               0.0 Myrtle Beach\n                       Rollacious            85                  Desserts, French, Bakery, Indian, Seafood               0.0 Myrtle Beach\n              Milan Shudh Vaishno            97                                       Tea, Bakery, Seafood               0.0 Myrtle Beach\n                 Admission Lounge            32                                     BBQ, Desserts, Italian               2.7 Myrtle Beach\n                           Allure            71                  Desserts, Tea, BBQ, Indian, Mediterranean               2.8 Myrtle Beach\n                  Dimsum Vs Sushi            83                               Tea, Desserts, American, BBQ               3.4 Myrtle Beach\n         Rasoi - The Indian Zaika            88                                         Tea, American, BBQ               0.0 Myrtle Beach\n       GBar - The Grand New Delhi            88                   Desserts, Italian, Cafe, Indian, Seafood               3.3 Myrtle Beach\n              Nizam's Kathi Kabab            32            Desserts, Cafe, Pizza, French, Chinese, Seafood               3.0 Myrtle Beach\n                  Dakshin Platter            56                                      Cafe, Bakery, Italian               0.0 Myrtle Beach\n                       Be Bhukkad            96                                   Tea, French, Bakery, BBQ               3.6 Myrtle Beach\n                    Bread & Pasta            37                                   Tea, Desserts, Fast Food               0.0 Myrtle Beach",
+          "keywords": [
+            "Myrtle Beach",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-000-accommodations-in-myrtle-beach",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:0",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Myrtle Beach",
+      "chunks": [
+        {
+          "heading": "Accommodations in Myrtle Beach",
+          "content": "                                              NAME  price       room type                                  house_rules  minimum nights  maximum occupancy  review rate number         city\n      Cozy Brooklyn Room - Next to Pratt Institute  418.0    Private room  No smoking & No children under 10 & No pets             5.0                  2                 2.0 Myrtle Beach\n                       Greenwich Village Apartment  781.0 Entire home/apt                         No parties & No pets             3.0                  6                 4.0 Myrtle Beach\n  Studio with Private Terrace on Central Park West  453.0 Entire home/apt                     No smoking & No visitors            30.0                  4                 2.0 Myrtle Beach\n                                  Brooklyn Bliss 3  953.0    Private room                                  No visitors             2.0                  1                 2.0 Myrtle Beach\n  Bright, renovated apartment close to subway+city 1131.0 Entire home/apt                                  No visitors             2.0                 10                 3.0 Myrtle Beach\n  Spacious Private Room, lots of character & light 1087.0    Private room                         No parties & No pets             1.0                  1                 3.0 Myrtle Beach\n   A WONDERFUL Place is Waiting 4U in Brooklyn !!!  160.0 Entire home/apt                                  No visitors             3.0                  2                 3.0 Myrtle Beach\n     Modern & Spacious Apartment in Central Harlem 1059.0 Entire home/apt                                      No pets             3.0                  9                 3.0 Myrtle Beach\n               Adorable Prospect Heights 1 Bedroom  107.0 Entire home/apt                         No children under 10            31.0                  2                 3.0 Myrtle Beach\n   ⭐️Walk + Transit Score 97⭐️8min to Yankee Std⭐️ 1130.0 Entire home/apt                         No pets & No smoking             2.0                  2                 1.0 Myrtle Beach\n Williamsburg Domino Park Prime Location 2 bedroom  461.0 Entire home/apt                                   No parties             7.0                  4                 5.0 Myrtle Beach\n       Private Room in Fort Green BK close to city  631.0    Private room                         No pets & No smoking             5.0                  2                 1.0 Myrtle Beach\n               Grande chambre lumineuse à bushwick  468.0    Private room           No visitors & No children under 10             2.0                  1                 4.0 Myrtle Beach\n               Bright & Sunny FULLY FURNISHED Room  847.0    Private room                         No parties & No pets             7.0                  2                 5.0 Myrtle Beach\n                                  Yellow submarine  179.0    Private room No pets & No visitors & No children under 10             2.0                  2                 5.0 Myrtle Beach\n                                Location Angel Boy  198.0    Private room                         No children under 10            31.0                  1                 1.0 Myrtle Beach\n               Fabulous bedroom in the heart of BK  530.0    Private room                         No children under 10             1.0                  1                 5.0 Myrtle Beach\nAdorable Polly Pocket-Sized Prospect Heights Space  397.0 Entire home/apt            No children under 10 & No smoking             2.0                  3                 5.0 Myrtle Beach\n               Great Space in Williamsburg's Heart  736.0    Private room  No smoking & No pets & No children under 10             1.0                  2                 4.0 Myrtle Beach",
+          "keywords": [
+            "Myrtle Beach",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-001-attractions-in-tucson",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:1",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Tucson",
+      "chunks": [
+        {
+          "heading": "Attractions in Tucson",
+          "content": "                                      Name  Latitude   Longitude                                                Address          Phone                                                                        Website   City\n                   Pima Air & Space Museum 32.139959 -110.864970              6000 E Valencia Rd, Tucson, AZ 85756, USA (520) 574-0462                                                       https://www.pimaair.org/ Tucson\n                             Reid Park Zoo 32.209855 -110.920744                   3400 E Zoo Ct, Tucson, AZ 85716, USA (520) 791-3204 https://reidparkzoo.org/?utm_source=google&utm_medium=organic&utm_campaign=GMB Tucson\nThe Mini Time Machine Museum of Miniatures 32.265461 -110.895641           4455 E Camp Lowell Dr, Tucson, AZ 85712, USA (520) 881-0606                                                https://theminitimemachine.org/ Tucson\n                  Tucson Botanical Gardens 32.248523 -110.908785             2150 N Alvernon Way, Tucson, AZ 85712, USA (520) 326-9686                                                http://www.tucsonbotanical.org/ Tucson\n                                Old Tucson 32.218314 -111.128928                   201 Kinney Rd, Tucson, AZ 85735, USA (520) 883-0100                                                          http://oldtucson.com/ Tucson\n                San Xavier del Bac Mission 32.106964 -111.008780            1950 W San Xavier Rd, Tucson, AZ 85746, USA (520) 294-2624                                               http://www.sanxaviermission.org/ Tucson\n                           Trail Dust Town 32.247434 -110.852929          6541 E Tanque Verde Rd, Tucson, AZ 85715, USA (520) 296-4551                                                  http://www.traildusttown.com/ Tucson\n              Arizona-Sonora Desert Museum 32.244013 -111.168174                2021 N Kinney Rd, Tucson, AZ 85743, USA (520) 883-1380                                                  https://www.desertmuseum.org/ Tucson\n                  Children's Museum Tucson 32.219192 -110.969338                   200 S 6th Ave, Tucson, AZ 85701, USA (520) 792-9985                                         https://www.childrensmuseumtucson.org/ Tucson\n    Presidio San Agustín del Tucson Museum 32.224195 -110.973774                 196 N Court Ave, Tucson, AZ 85701, USA (520) 622-0594                                                 http://www.tucsonpresidio.com/ Tucson\n             International Wildlife Museum 32.234636 -111.067056 4800 West Gates Pass, Boulevard, Tucson, AZ 85745, USA (520) 629-0100                                              http://www.thewildlifemuseum.org/ Tucson\n                        Fort Lowell Museum 32.259687 -110.874732             2900 N Craycroft Rd, Tucson, AZ 85712, USA (520) 885-3832                                                                        Unknown Tucson\n                              Tumamoc Hill 32.225462 -111.001621                 Tumamoc Hill Rd, Tucson, AZ 85745, USA        Unknown                                                    http://tumamoc.arizona.edu/ Tucson\n                      Tucson Museum Of Art 32.223449 -110.975441                  140 N Main Ave, Tucson, AZ 85701, USA (520) 624-2333                                              http://www.tucsonmuseumofart.org/ Tucson\n            Rincon Mountain Visitor Center 32.180219 -110.736296        3693 S Old Spanish Trail, Tucson, AZ 85730, USA (520) 733-5153                                              http://www.nps.gov/sagu/index.htm Tucson\n   Flandrau Science Center and Planetarium 32.232338 -110.947870          1601 E University Blvd, Tucson, AZ 85721, USA (520) 621-4516                                                          https://flandrau.org/ Tucson\n                      Arizona State Museum 32.232551 -110.955744          1013 E University Blvd, Tucson, AZ 85721, USA (520) 621-6302                                          https://statemuseum.arizona.edu/visit Tucson\n                Tucson Rodeo Parade Museum 32.164315 -110.967814                  4823 S 6th Ave, Tucson, AZ 85714, USA (520) 294-3636                                  https://www.tucsonrodeoparade.com/the-museum/ Tucson\n                        Valley of the Moon 32.275029 -110.933962                 2544 E Allen Rd, Tucson, AZ 85716, USA (520) 323-1331                                          http://www.tucsonvalleyofthemoon.com/ Tucson\n             Sabino Canyon Recreation Area 32.322364 -110.809863         5700 N Sabino Canyon Rd, Tucson, AZ 85750, USA (520) 749-8700                  https://www.fs.usda.gov/recarea/coronado/recarea/?recid=75425 Tucson",
+          "keywords": [
+            "Tucson",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-001-restaurants-in-tucson",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:1",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Tucson",
+      "chunks": [
+        {
+          "heading": "Restaurants in Tucson",
+          "content": "                            Name  Average Cost                                              Cuisines  Aggregate Rating   City\n                    Villa Tevere            37           Mexican, Mediterranean, Desserts, Fast Food               4.1 Tucson\n              Consort Restaurant            54                       Bakery, Pizza, Indian, Desserts               3.0 Tucson\n                 Magic Spice Wok            31                   Cafe, Bakery, BBQ, Chinese, Seafood               0.0 Tucson\n                    Pizza Street            22                            Fast Food, Bakery, Seafood               2.6 Tucson\n                        La Plage            93                    Seafood, Bakery, Desserts, Italian               4.6 Tucson\n                        iKitchen            69                               Seafood, Pizza, Italian               0.0 Tucson\n                      Chai Point            62                        Tea, Bakery, Mexican, American               2.4 Tucson\n                     Bakers Oven            71                            Bakery, American, Desserts               3.6 Tucson\n                           Mocha            53                                       Cafe, Fast Food               4.6 Tucson\n      Selfie Lounge Restro & Bar            32                                    Seafood, Fast Food               3.2 Tucson\n                       Bhagat Ji            51                         Tea, Chinese, Bakery, Seafood               0.0 Tucson\n                  Domino's Pizza            84                                          Cafe, Bakery               3.3 Tucson\n                      Ooh Lala !            70                                 Chinese, Bakery, Cafe               4.0 Tucson\nChutneez Restaurant Lounge & Bar            86                           Fast Food, Seafood, Italian               2.4 Tucson\n  Uttaranchal Dhaba & Restaurant            39                             French, Bakery, Fast Food               2.9 Tucson\n                         Giani's            63 Desserts, Tea, Cafe, American, Mediterranean, Seafood               3.1 Tucson\n                   Punjabi Zaika            34                        Tea, Bakery, Mexican, American               3.3 Tucson\n                Pirates of Grill            52               French, Bakery, BBQ, Fast Food, Chinese               4.1 Tucson\n              Canteen Till I Die            24                             Tea, BBQ, Pizza, Desserts               3.9 Tucson\n                   Ramu Ka Dhaba            90                    Tea, Mexican, BBQ, Fast Food, Cafe               0.0 Tucson\n          Channi Pishori Chicken            55                       Tea, Mexican, Desserts, Italian               3.3 Tucson\n                   Sai Ann Kutir            80                 Pizza, Mexican, Bakery, Cafe, Seafood               2.8 Tucson\n                           Uraki            12                               Cafe, Bakery, Fast Food               2.7 Tucson\n                     Delhi Foods            25              Desserts, Tea, Mexican, Bakery, American               0.0 Tucson\n                    Eating Point           100                            Tea, Bakery, Mediterranean               0.0 Tucson\n                     Mood 4 Food            20                    Pizza, Bakery, Desserts, Fast Food               3.1 Tucson\n     Culture Club - Bar De Tapas            92                              American, BBQ, Fast Food               4.5 Tucson",
+          "keywords": [
+            "Tucson",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-001-accommodations-in-tucson",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:1",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Tucson",
+      "chunks": [
+        {
+          "heading": "Accommodations in Tucson",
+          "content": "                                           NAME  price       room type                       house_rules  minimum nights  maximum occupancy  review rate number   city\n Cozy place to stay 7 minutes from Manhattan...  912.0    Private room                           No pets             3.0                  2                 3.0 Tucson\n                  Room for rent shared bathroom  557.0    Private room                        No smoking             1.0                  2                 5.0 Tucson\n          Huge, New and Green Oasis in Brooklyn  318.0 Entire home/apt              No children under 10             2.0                  2                 3.0 Tucson\n             Private room with private bathroom   58.0    Private room                        No smoking             2.0                  2                 3.0 Tucson\nSunny, Quiet top-floor 2 bedroom in Cobble Hill  707.0 Entire home/apt                        No smoking             1.0                  3                 2.0 Tucson\n Private and Quiet Room in the Perfect Location  431.0    Private room           No smoking & No parties             1.0                  2                 5.0 Tucson\n               Bright Apartment in Clinton Hill 1144.0 Entire home/apt                           No pets             5.0                  4                 3.0 Tucson\n                 Furnished Room in Williamsburg  331.0    Private room                        No parties             1.0                  2                 1.0 Tucson\n                     HARLEM CLEAN & COMFY SPACE  373.0    Private room No pets & No smoking & No parties             1.0                  2                 5.0 Tucson\n              Smart Home in the Heart of Harlem  499.0 Entire home/apt No children under 10 & No smoking             2.0                  3                 2.0 Tucson\n                      Studio in Sunny Sanctuary  691.0    Private room                           No pets             2.0                  1                 1.0 Tucson\n          Bright, spacious room in Williamsburg  415.0    Private room                        No smoking             2.0                  2                 2.0 Tucson\n    Large 7 Bed minutes from Midtown Manhattan! 1030.0 Entire home/apt              No parties & No pets             2.0                  2                 2.0 Tucson",
+          "keywords": [
+            "Tucson",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-002-attractions-in-atlanta",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:2",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Atlanta",
+      "chunks": [
+        {
+          "heading": "Attractions in Atlanta",
+          "content": "                                            Name  Latitude  Longitude                                                   Address          Phone                                                      Website    City\n                        Atlanta Botanical Garden 33.789957 -84.372599              1345 Piedmont Ave NE, Atlanta, GA 30309, USA (404) 876-5859                                   https://www.atlantabg.org/ Atlanta\n                              World of Coca-Cola 33.762556 -84.392436                   121 Baker St NW, Atlanta, GA 30313, USA (404) 676-5151                            https://www.worldofcoca-cola.com/ Atlanta\n                                Georgia Aquarium 33.763382 -84.395110                   225 Baker St NW, Atlanta, GA 30313, USA (404) 581-4000                             https://www.georgiaaquarium.org/ Atlanta\nMartin Luther King, Jr. National Historical Park 33.756674 -84.373180                 450 Auburn Ave NE, Atlanta, GA 30312, USA (404) 331-5190                           https://www.nps.gov/malu/index.htm Atlanta\n                                   Piedmont Park 33.787926 -84.372168                                    Atlanta, GA 30309, USA (404) 875-7275                                    https://piedmontpark.org/ Atlanta\n                              High Museum of Art 33.790063 -84.385552              1280 Peachtree St NE, Atlanta, GA 30309, USA (404) 733-4400                                        https://www.high.org/ Atlanta\n                                 SkyView Atlanta 33.758938 -84.391692                  168 Luckie St NW, Atlanta, GA 30303, USA (678) 949-9023                               http://www.skyviewatlanta.com/ Atlanta\n                         Centennial Olympic Park 33.760463 -84.393083                                    Atlanta, GA 30313, USA (404) 223-4412                https://www.gwcca.org/centennial-olympic-park Atlanta\n                                     Zoo Atlanta 33.733759 -84.371660               800 Cherokee Ave SE, Atlanta, GA 30315, USA (404) 624-5600                                      https://zooatlanta.org/ Atlanta\n                          Atlanta History Center 33.841880 -84.386253           130 W Paces Ferry Rd NW, Atlanta, GA 30305, USA (404) 814-4000                         http://www.atlantahistorycenter.com/ Atlanta\n                   LEGO Discovery Center Atlanta 33.853343 -84.363044    3500 Peachtree Rd NE Suite G-1, Atlanta, GA 30326, USA (404) 848-9252                 https://atlanta.legolanddiscoverycenter.com/ Atlanta\n                              Krog Street Tunnel 33.752995 -84.363648                      1 Krog St NE, Atlanta, GA 30307, USA (404) 492-0847 https://discoveratlanta.com/things-to-do/krog-street-tunnel/ Atlanta\n           Fernbank Museum | 3D Theater | Forest 33.773925 -84.327998                    767 Clifton Rd, Atlanta, GA 30307, USA (404) 929-6300                              https://www.fernbankmuseum.org/ Atlanta\n                                     Fox Theatre 33.772600 -84.385468               660 Peachtree St NE, Atlanta, GA 30308, USA (855) 285-8499                                   http://www.foxtheatre.org/ Atlanta\n                             Delta Flight Museum 33.656073 -84.422354                   1060 Delta Blvd, Atlanta, GA 30354, USA (404) 715-7886                                      http://deltamuseum.org/ Atlanta\n                                  Tiny Doors ATL 33.792726 -84.397871   1380 Atlantic Dr NW Suite 14100, Atlanta, GA 30363, USA (404) 528-8017                                 http://www.tinydoorsatl.com/ Atlanta\n                Original Selfie Museum | Atlanta 33.751529 -84.399449    116 Centennial Olympic Park Dr, Atlanta, GA 30313, USA (404) 566-5778                             http://originalselfiemuseum.com/ Atlanta\n                                   Folk Art Park 33.764049 -84.384035                   Courtland St NE, Atlanta, GA 30308, USA        Unknown                                                      Unknown Atlanta\n                             Underground Atlanta 33.753217 -84.390581               50 Upper Alabama St, Atlanta, GA 30303, USA        Unknown                               http://www.undergroundatl.com/ Atlanta\n                    Children's Museum of Atlanta 33.762571 -84.391733 275 Centennial Olympic Park Dr NW, Atlanta, GA 30313, USA (404) 659-5437                          https://childrensmuseumatlanta.org/ Atlanta",
+          "keywords": [
+            "Atlanta",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-002-restaurants-in-atlanta",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:2",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Atlanta",
+      "chunks": [
+        {
+          "heading": "Restaurants in Atlanta",
+          "content": "                               Name  Average Cost                                         Cuisines  Aggregate Rating    City\n                            Saffron            39                    Tea, Cafe, Fast Food, Seafood               4.1 Atlanta\n                               Adda            22                             Tea, Mexican, Bakery               3.8 Atlanta\n                              Ahata            17                            Tea, Indian, Desserts               0.0 Atlanta\n                       Baba Au Rhum            27         Desserts, Pizza, Mexican, BBQ, Fast Food               4.5 Atlanta\n                       Asian Bistro            27                             Tea, Bakery, Seafood               3.8 Atlanta\n                         Chef Style            59               Pizza, American, Desserts, Seafood               3.8 Atlanta\n                      Pizza Central            75    Cafe, Bakery, BBQ, Fast Food, Chinese, Indian               4.1 Atlanta\n                   Daawat-e-Kashmir            19                   Cafe, Pizza, American, Seafood               4.2 Atlanta\n                Shri Ram Restaurant            55                  Tea, Mexican, Indian, Fast Food               3.1 Atlanta\n                    Sizzler's Ranch            36                       Tea, Cafe, Indian, Italian               3.8 Atlanta\n                Bengali Sweet House            39                   Desserts, American, BBQ, Pizza               3.6 Atlanta\n    Chaina Ram Sindhi Confectioners            34     Desserts, Pizza, BBQ, Mediterranean, Seafood               4.2 Atlanta\n                       Jagram Dhaba            69                           Cafe, Mexican, Seafood               0.0 Atlanta\n            Caboose X Cafe & Lounge            23      Bakery, Fast Food, Chinese, Indian, Seafood               3.2 Atlanta\n                        Bunty Dhaba            99                  Seafood, BBQ, Desserts, Italian               2.8 Atlanta\n                      Chawla Snacks            48                                       Tea, Pizza               2.9 Atlanta\n                 Beliram Degchiwala            14                                      Cafe, Pizza               3.5 Atlanta\n                        Radhe Shyam            32                                 Pizza, Fast Food               2.8 Atlanta\n                           The Krib            45                            Seafood, BBQ, Italian               3.2 Atlanta\n                    Taste of Vishal            13 Desserts, Tea, American, Bakery, Indian, Seafood               2.9 Atlanta\n            Deepika Khaitan's Cakes            41                  Tea, Mexican, Bakery, Fast Food               2.9 Atlanta\n                             Barkat            78          Bakery, Indian, Mediterranean, Desserts               3.4 Atlanta\n      Sethi's Restaurant & Barbeque            19   Pizza, American, Bakery, Cafe, Indian, Seafood               3.7 Atlanta\n      The Chinese & Thai Restaurant            57        Desserts, Tea, Italian, Bakery, Fast Food               0.0 Atlanta\n        Anand Ji de Choley Bhatoore            83                  Fast Food, Cafe, Pizza, Italian               2.7 Atlanta\n                        Shri Rudram            35                     Tea, Chinese, Cafe, Desserts               3.1 Atlanta\nArriba - Mexican Grill & Tequileria            99                                   Tea, Fast Food               4.1 Atlanta\n                             Bimbos            13          Pizza, Italian, BBQ, Fast Food, Seafood               3.1 Atlanta\n          Sahib Jhatka Chicken Shop            26                 Bakery, Mexican, Indian, Seafood               0.0 Atlanta\n                  Punjab Restaurant            30   Desserts, BBQ, Chinese, Mediterranean, Seafood               3.2 Atlanta\n                         Chai Thela            82                 French, BBQ, Desserts, Fast Food               0.0 Atlanta\n                    Sam and Scrooge            95               Pizza, BBQ, Mediterranean, Italian               3.9 Atlanta\n                    Hungry Minister            97                             Bakery, BBQ, Italian               3.5 Atlanta\n                          China Hot            13                                   Tea, Cafe, BBQ               2.9 Atlanta\n                     Chocadoodledoo            24                     BBQ, Pizza, Indian, Desserts               0.0 Atlanta\n                   Shaivi's Kitchen            77                           French, Pizza, Seafood               0.0 Atlanta\n                    Saut愆ed Stories            36       Desserts, Tea, Fast Food, Chinese, Seafood               4.2 Atlanta\n                             Nawaab            24               Desserts, Tea, Pizza, French, Cafe               3.9 Atlanta\n                       El Pistolero            90                       Pizza, American, Fast Food               4.3 Atlanta",
+          "keywords": [
+            "Atlanta",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-002-accommodations-in-atlanta",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:2",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Atlanta",
+      "chunks": [
+        {
+          "heading": "Accommodations in Atlanta",
+          "content": "                                             NAME  price       room type                                 house_rules  minimum nights  maximum occupancy  review rate number    city\n                       Fantastic Room in Bushwick 1069.0    Private room                        No children under 10             2.0                  2                 3.0 Atlanta\n                 FABULOUS SUNNY BEDROOM IN HARLEM  587.0    Private room                                  No parties            20.0                  2                 3.0 Atlanta\n   Bright, Modern, Clean, Spacious, Brooklyn Home 1034.0 Entire home/apt                        No children under 10             3.0                  4                 5.0 Atlanta\n              Sunny, Friendly, Brooklyn Apartment  874.0    Private room                                     No pets             1.0                  2                 4.0 Atlanta\n      Stunning ! All new near U.N. & Central Park  675.0 Entire home/apt                                     No pets            30.0                  3                 4.0 Atlanta\n               1bd in a sunny 2 bd Ft. Greene Apt 1056.0    Private room                       No visitors & No pets             1.0                  1                 4.0 Atlanta\n                    Charming Carroll Gardens 2 BR  576.0 Entire home/apt                                  No parties             1.0                  4                 2.0 Atlanta\n                             Unique 2BR Apartment  394.0 Entire home/apt No parties & No pets & No children under 10             2.0                  3                 3.0 Atlanta\n  Bright central designer's apt - steps to train! 1019.0 Entire home/apt                    No visitors & No smoking             5.0                 10                 5.0 Atlanta\n                        THE WHITE HOUSE BEDROOM 1  654.0    Private room                        No parties & No pets             3.0                  2                 5.0 Atlanta\nSpacious private room close St. Barnabas Hospital  144.0    Private room                                  No smoking             2.0                  1                 4.0 Atlanta",
+          "keywords": [
+            "Atlanta",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-003-attractions-in-honolulu",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:3",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Honolulu",
+      "chunks": [
+        {
+          "heading": "Attractions in Honolulu",
+          "content": "                                              Name  Latitude   Longitude                                                  Address          Phone                                                                                     Website     City\n                                     Iolani Palace 21.306757 -157.858770                   364 S King St, Honolulu, HI 96813, USA (808) 522-0822                                                               https://www.iolanipalace.org/ Honolulu\n                                     Bishop Museum 21.332919 -157.870613                 1525 Bernice St, Honolulu, HI 96817, USA (808) 847-3511                                                               https://www.bishopmuseum.org/ Honolulu\n                                       Aloha Tower 21.307124 -157.866027 Aloha Tower, 155 Ala Moana Blvd, Honolulu, HI 96813, USA (808) 544-1453                                                                     https://alohatower.com/ Honolulu\n                                      Honolulu Zoo 21.271090 -157.821479                151 Kapahulu Ave, Honolulu, HI 96815, USA (808) 926-3191                                                           https://www.honolulu.gov/zoo.html Honolulu\n                                  Waikiki Aquarium 21.265798 -157.821648               2777 Kalākaua Ave, Honolulu, HI 96815, USA (808) 923-9741                                                            https://www.waikikiaquarium.org/ Honolulu\n                                     Waikīkī Beach 21.276235 -157.827318                         Waikiki, Honolulu, HI 96815, USA        Unknown         https://noahlangphotography.com/blog/best-waikiki-beach-hotels-and-food-oahu-hawaii Honolulu\n                                 Honolulu festival 21.281318 -157.830506          2131-2141 Kalākaua Ave, Honolulu, HI 96815, USA        Unknown                                                                                     Unknown Honolulu\n                     Honolulu Museum of Art (HoMA) 21.303799 -157.848701             900 S Beretania St., Honolulu, HI 96814, USA (808) 532-8700                                                                 https://honolulumuseum.org/ Honolulu\n                       Duke Paoa Kahanamoku Statue 21.275520 -157.825324                    Kalākaua Ave, Honolulu, HI 96815, USA        Unknown     https://www.publicartinpublicplaces.info/duke-paoa-kahanamoku-1990-by-jan-gordon-fisher Honolulu\n                                    Lānaʻi Lookout 21.276477 -157.685611          8102 Kalanianaʻole Hwy, Honolulu, HI 96825, USA        Unknown                                                                                     Unknown Honolulu\nShangri La Museum of Islamic Art, Culture & Design 21.257099 -157.794996                   4055 Pāpū Cir, Honolulu, HI 96816, USA (808) 734-1941                                                             http://www.shangrilahawaii.org/ Honolulu\n                                     Spitting Cave 21.259508 -157.707677                    7 Lumahai St, Honolulu, HI 96825, USA        Unknown                                                                                     Unknown Honolulu\n                    Pearl Harbor National Memorial 21.367598 -157.938858           1 Arizona Memorial Pl, Honolulu, HI 96818, USA (808) 422-3399                                                          https://www.nps.gov/perl/index.htm Honolulu\n         Tantalus Lookout - Puu Ualakaa State Park 21.313433 -157.822847                     Nutridge St, Honolulu, HI 96822, USA (808) 587-0300                            http://dlnr.hawaii.gov/dsp/parks/oahu/puu-ualakaa-state-wayside/ Honolulu\n                                     Don Ho Statue 21.277747 -157.826877               2324 Kalākaua Ave, Honolulu, HI 96815, USA        Unknown                                                                                     Unknown Honolulu\n                           Foster Botanical Garden 21.316814 -157.859031              50 N Vineyard Blvd, Honolulu, HI 96817, USA (808) 768-7135 http://www.honolulu.gov/cms-dpr-menu/site-dpr-sitearticles/568-foster-botanical-garden.html Honolulu\n                           Ala Moana Regional Park 21.289969 -157.847657             1201 Ala Moana Blvd, Honolulu, HI 96814, USA (808) 768-4611                                                               http://www.honolulu.gov/parks Honolulu\n                                       Kūhiō Beach 21.272772 -157.823812               2453 Kalākaua Ave, Honolulu, HI 96815, USA (808) 768-3003                                         http://www.honolulu.gov/parks/default/about-us.html Honolulu\n                        King David Kalākaua Statue 21.283933 -157.831693               2050 Kalākaua Ave, Honolulu, HI 96815, USA        Unknown                                                                                     Unknown Honolulu\n                           Fort DeRussy Beach Park 21.279644 -157.834251                   2055 Kālia Rd, Honolulu, HI 96815, USA        Unknown                                                                                     Unknown Honolulu",
+          "keywords": [
+            "Honolulu",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-003-restaurants-in-honolulu",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:3",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Honolulu",
+      "chunks": [
+        {
+          "heading": "Restaurants in Honolulu",
+          "content": "                     Name  Average Cost                                            Cuisines  Aggregate Rating     City\n          Bait El Khetyar            28                                       Cafe, Seafood               4.0 Honolulu\n       Crystal Restaurant            57              Tea, Pizza, Bakery, Fast Food, Chinese               3.4 Honolulu\n                   Subway            90                      Tea, French, Desserts, Seafood               3.1 Honolulu\n           Viva Hyderabad            29                                         Bakery, BBQ               2.5 Honolulu\n Burger Unlimited Kitchen            60                                Chinese, Bakery, BBQ               3.2 Honolulu\n           Dunkin' Donuts            97                                     Pizza, Desserts               3.4 Honolulu\n            Eastern Spice            39                                  Tea, Pizza, Bakery               3.5 Honolulu\n  Sikka Chinese Fast Food            71           Fast Food, Indian, Mediterranean, Seafood               0.0 Honolulu\n                      KFC            94                                       Pizza, Bakery               3.7 Honolulu\n          The Sugar Story            60                         Pizza, Bakery, BBQ, Seafood               3.3 Honolulu\n                   Nimtho            31    Pizza, Mexican, Bakery, BBQ, Cafe, Mediterranean               4.0 Honolulu\n    Evergreen Sweet House            18                            BBQ, Desserts, Fast Food               3.5 Honolulu\n                Hot & Hot            97                         Tea, Bakery, Pizza, Italian               2.9 Honolulu\n              Chinese Hut           100 Desserts, Italian, Mexican, BBQ, Fast Food, Seafood               2.8 Honolulu\n                      FNV            90          Desserts, Tea, Bakery, Cafe, Mediterranean               0.0 Honolulu\n       Stop My Starvation            64                 Desserts, BBQ, Bakery, Cafe, Indian               4.3 Honolulu\n             Curry Shurry            47                                  Tea, BBQ, Desserts               3.3 Honolulu\n                Take Away            21           Seafood, Bakery, Mediterranean, Fast Food               2.9 Honolulu\nShere Hind Chicken Corner            38               Desserts, Pizza, French, BBQ, Seafood               0.0 Honolulu\n      Angelena Restaurant            38                     Cafe, Mexican, Bakery, Desserts               0.0 Honolulu\n   Mama's Chinese Kitchen            13                       Tea, Pizza, Desserts, Italian               3.0 Honolulu\n  Pandit Ji Ki Apni Rasoi            83                    Tea, Bakery, BBQ, Cafe, American               2.4 Honolulu\n    Chinese Hut Fast Food            55      Desserts, Cafe, Pizza, French, Bakery, Chinese               3.0 Honolulu\n          Cafe Coffee Day            86     Tea, Mexican, Fast Food, Mediterranean, Seafood               0.0 Honolulu\n               Taj Sweets            23                          Bakery, Mediterranean, BBQ               3.1 Honolulu\n                   1990's            85             Tea, Pizza, Italian, Fast Food, Seafood               3.3 Honolulu\n            Pind Balluchi            92                                    Cafe, Pizza, BBQ               3.3 Honolulu\n                Momo Milk            57                   Cafe, Chinese, BBQ, Mediterranean               3.7 Honolulu\n                  Dishoom            63                           Chinese, Bakery, Desserts               4.5 Honolulu\n             Cafe Beverly            43                     Seafood, Pizza, Bakery, Italian               4.1 Honolulu",
+          "keywords": [
+            "Honolulu",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-003-accommodations-in-honolulu",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:3",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Honolulu",
+      "chunks": [
+        {
+          "heading": "Accommodations in Honolulu",
+          "content": "                                              NAME  price       room type                                     house_rules  minimum nights  maximum occupancy  review rate number     city\n                   Park, Subway & All Conveniences  754.0 Entire home/apt                           No pets & No visitors             2.0                  4                 2.0 Honolulu\n                  Harlem 1 BR, Private Master Bath  396.0    Private room                                         No pets             2.0                  1                 1.0 Honolulu\nUnion Square Industrial Loft Apartment - 1 Bedroom 1093.0 Entire home/apt                                     No visitors             1.0                  9                 2.0 Honolulu\n      Williamsburg Apartment with Private Backyard  343.0 Entire home/apt                                      No parties             2.0                  3                 4.0 Honolulu\n        Sunny Room in Renovated Brooklyn Townhouse  626.0    Private room                           No pets & No visitors             3.0                  2                 3.0 Honolulu\n               Central Williamsburg Fab Large Room  764.0    Private room           No smoking & No parties & No visitors             1.0                  1                 3.0 Honolulu\n                         Relaxing Stay in Brooklyn  838.0 Entire home/apt                         No smoking & No parties             1.0                  5                 3.0 Honolulu\n Perfect Spot Between Bryant Park and Times Square 1046.0    Private room                         No parties & No smoking             1.0                  2                 3.0 Honolulu\n  Cozy and home feeling, 1-bedroom apt near subway  969.0    Private room               No children under 10 & No parties             1.0                  1                 4.0 Honolulu\n Bright, airy west village retreat!Great location!  466.0 Entire home/apt                                      No parties             3.0                  4                 2.0 Honolulu\n      Bushwick, Spacious Private Room with Balcony  311.0    Private room No children under 10 & No visitors & No smoking             4.0                  1                 3.0 Honolulu\n         Large 1 bed w/big kitchen & exposed brick 1005.0 Entire home/apt                        No smoking & No visitors            10.0                  9                 2.0 Honolulu\n                Gr8 views in heart of Williamsburg  451.0    Private room                                         No pets             2.0                  2                 5.0 Honolulu\n  Bright, private room in the HEART of Williamburg  711.0    Private room     No parties & No children under 10 & No pets            25.0                  2                 3.0 Honolulu\n                     BEAUTIFUL NEW Renovated Apt!!  314.0 Entire home/apt                            No children under 10             1.0                  2                 2.0 Honolulu\n                Spacious, Sunny Room in Park Slope  338.0    Private room                            No pets & No smoking             2.0                  1                 5.0 Honolulu\n                              Unique 2BR Apartment  394.0 Entire home/apt                                         No pets             2.0                  2                 3.0 Honolulu\n       Sonder | 180 Water | Pleasant 2BR + Rooftop  394.0 Entire home/apt                        No smoking & No visitors            29.0                  3                 2.0 Honolulu",
+          "keywords": [
+            "Honolulu",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-005-attractions-in-san-diego",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:5",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in San Diego",
+      "chunks": [
+        {
+          "heading": "Attractions in San Diego",
+          "content": "                                      Name  Latitude   Longitude                                                   Address          Phone                                                                                      Website      City\n                Cabrillo National Monument 32.672256 -117.241609       1800 Cabrillo Memorial Dr, San Diego, CA 92106, USA (619) 523-4285                                                           https://www.nps.gov/cabr/index.htm San Diego\n                      La Jolla Shores Park 32.858154 -117.256103              8300 Camino Del Oro, La Jolla, CA 92037, USA (619) 221-8899                                           https://www.sandiego.gov/lifeguards/beaches/shores San Diego\n                          California Tower 32.731609 -117.152167 California Tower, 1350 El Prado, San Diego, CA 92101, USA (619) 239-2001                                            https://museumofus.org/exhibits/california-tower/ San Diego\n                        SeaWorld San Diego 32.764296 -117.226440               500 Sea World Dr., San Diego, CA 92109, USA (619) 222-4732 https://seaworld.com/san-diego?utm_source=google&utm_medium=organic&utm_campaign=gbp_listing San Diego\n                        Old Town San Diego 32.755827 -117.197261                    2829 Juan St, San Diego, CA 92110, USA        Unknown                                                             https://www.oldtownsandiego.org/ San Diego\n                               Balboa Park 32.734148 -117.144553                                        San Diego, CA, USA (619) 239-0512                                                                   http://www.balboapark.org/ San Diego\n                           Seaport Village 32.709064 -117.170937                 849 W Harbor Dr, San Diego, CA 92101, USA (619) 530-0704                                                                  https://seaportvillage.com/ San Diego\n               The San Diego Museum of Art 32.732158 -117.150430                   1450 El Prado, San Diego, CA 92102, USA (619) 232-7931                                                                      https://www.sdmart.org/ San Diego\n                         USS Midway Museum 32.713740 -117.175127                 910 N Harbor Dr, San Diego, CA 92101, USA (619) 544-9600                                                                      https://www.midway.org/ San Diego\n                                  Skytower 32.765423 -117.226662               500 Sea World Dr., San Diego, CA 92109, USA        Unknown                                                                                      Unknown San Diego\n                             Dolphin Point 32.765390 -117.227412               500 Sea World Dr., San Diego, CA 92109, USA (915) 525-4772                                                                                      Unknown San Diego\n                             San Diego Zoo 32.736035 -117.150985                     2920 Zoo Dr, San Diego, CA 92101, USA (619) 231-1515                                                                 https://zoo.sandiegozoo.org/ San Diego\n                          Mission Bay Park 32.764107 -117.226265                                  San Diego, CA 92109, USA (619) 525-8213                                        https://www.sandiego.gov/locations/seaworld-san-diego San Diego\n                       Whaley House Museum 32.752904 -117.194510              2476 San Diego Ave, San Diego, CA 92110, USA (619) 786-1143                                                         https://www.whaleyhousesandiego.com/ San Diego\n                Sunset Cliffs Natural Park 32.715915 -117.255168                       Ladera St, San Diego, CA 92107, USA (619) 525-8213                 https://www.sandiego.gov/park-and-recreation/parks/regional/shoreline/sunset San Diego\n             Old Town San Diego State Park 32.754906 -117.197641                 4002 Wallace St, San Diego, CA 92110, USA (619) 220-5422                                                         http://www.parks.ca.gov/?page_id=663 San Diego\n           Martin Luther King Jr Promenade 32.708357 -117.161993                 326 W Harbor Dr, San Diego, CA 92101, USA (619) 525-8213                                           https://www.sandiego.gov/park-and-recreation/parks San Diego\n                      Balboa Park Carousel 32.734576 -117.146707                     1889 Zoo Pl, San Diego, CA 92101, USA (619) 232-2282                                                               http://balboaparkcarousel.org/ San Diego\n                       San Diego Free Tour 32.707586 -117.160287                   200 Fifth Ave, San Diego, CA 92101, USA (415) 503-7199                                                                      https://freesftour.com/ San Diego\nMission Beach Boardwalk | Ocean Front Walk 32.771432 -117.252831                W Mission Bay Dr, San Diego, CA 92109, USA (619) 232-3101                                                                    https://www.sandiego.gov/ San Diego",
+          "keywords": [
+            "San Diego",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-005-restaurants-in-san-diego",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:5",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in San Diego",
+      "chunks": [
+        {
+          "heading": "Restaurants in San Diego",
+          "content": "                          Name  Average Cost                                              Cuisines  Aggregate Rating      City\n                     Open Yard            33                        Chinese, Pizza, Cafe, Desserts               3.3 San Diego\n           Jetha Lal Ka Dhabha            22                            Tea, Cafe, Indian, Italian               3.1 San Diego\n               The Lost Mughal            74                                    Tea, Cafe, Italian               3.8 San Diego\n                   Burger King            20            Pizza, Italian, French, Fast Food, Seafood               3.8 San Diego\n                Bikaner Sweets            37                      Bakery, Pizza, Indian, Fast Food               2.8 San Diego\n      Momos Hut & Chinese Food            94                                  Tea, Cafe, Fast Food               2.4 San Diego\n            Chaudhary Di Hatti            30              Desserts, Pizza, Italian, BBQ, Fast Food               3.3 San Diego\n                        Gopala            98                Pizza, Mexican, BBQ, American, Seafood               3.3 San Diego\n           Armaan's Restaurant            29                     Fast Food, Cafe, Seafood, Italian               2.8 San Diego\n                  Bun Intended            91                        Cafe, Pizza, Desserts, Seafood               3.9 San Diego\n                     Chawlas 2            67                        Bakery, Pizza, Indian, Seafood               0.0 San Diego\n                 Duggal Snacks            82     Desserts, Pizza, Italian, Fast Food, Cafe, Indian               3.6 San Diego\nDabas Ke Special Chole Bhature            35                          BBQ, Pizza, Bakery, Desserts               0.0 San Diego\n                Midnight Bites            63                                  Bakery, Indian, Cafe               3.1 San Diego\n                Baskin Robbins            48                 Italian, Bakery, BBQ, Fast Food, Cafe               3.5 San Diego\n                     Chawlas 2            91 Desserts, Fast Food, American, Mediterranean, Seafood               3.0 San Diego\n                      Burgrill            54              Desserts, Tea, Pizza, Fast Food, Chinese               4.4 San Diego\n            Harry's Bar + Cafe            55                      Fast Food, French, Cafe, Seafood               3.6 San Diego\n                    Dragon Way            77            Desserts, Mexican, Cafe, American, Seafood               0.0 San Diego\n               Hum Sabki Rasoi            63              Pizza, BBQ, Fast Food, American, Seafood               3.3 San Diego\n              Aamantran Bangla            33               Pizza, Italian, Bakery, Fast Food, Cafe               2.7 San Diego\n                        Meraki            51                                          Tea, Seafood               4.0 San Diego",
+          "keywords": [
+            "San Diego",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-005-accommodations-in-san-diego",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:5",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in San Diego",
+      "chunks": [
+        {
+          "heading": "Accommodations in San Diego",
+          "content": "                                             NAME  price       room type                                    house_rules  minimum nights  maximum occupancy  review rate number      city\nSpacious Room in Large 2 Bedroom Prewar Apartment  585.0    Private room                       No parties & No visitors             1.0                  2                 4.0 San Diego\n                 Big room near Prospect Park! NY!  752.0    Private room              No parties & No smoking & No pets             7.0                  1                 2.0 San Diego\n    Luxury 4BR Home, Spacious & Central to Trains  392.0 Entire home/apt                                     No parties             3.0                  3                 5.0 San Diego\n                 Cozy 1.5BD in Parkslope Brooklyn 1093.0 Entire home/apt                                     No parties             3.0                 10                 2.0 San Diego\n      Spacious & Homey Williamsburg 1BR Apartment 1004.0 Entire home/apt                                     No parties             5.0                  4                 3.0 San Diego\n                    Upper East Side 1 Bedroom Gem  692.0     Shared room No children under 10 & No parties & No smoking             2.0                  1                 3.0 San Diego\n                  Organic Oasis Duplex (EMF-free) 1186.0 Entire home/apt                       No visitors & No smoking            60.0                  4                 4.0 San Diego\n Harlem Garden Oasis in  New York City Brownstone  368.0 Entire home/apt                                    No visitors            31.0                  3                 5.0 San Diego\n  Conveniently located 2 BR Time Square Apartment  502.0 Entire home/apt No parties & No smoking & No children under 10             2.0                  4                 5.0 San Diego\n  LargeBedroom gem in historic Red Hook Brooklyn!  787.0    Private room                                    No visitors             4.0                  2                 3.0 San Diego\n            The Perfect Upper East Side Apartment  847.0 Entire home/apt                                    No visitors             1.0                  2                 3.0 San Diego\n                                 CHIC EVENT SPACE 1068.0 Entire home/apt                                    No visitors             1.0                  2                 5.0 San Diego",
+          "keywords": [
+            "San Diego",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-006-attractions-in-dallas",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:6",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Dallas",
+      "chunks": [
+        {
+          "heading": "Attractions in Dallas",
+          "content": "                                     Name  Latitude  Longitude                                         Address          Phone                                                                                           Website   City\n                The Dallas World Aquarium 32.783474 -96.805358        1801 N Griffin St, Dallas, TX 75202, USA (214) 720-2224                                                                           https://www.dwazoo.com/ Dallas\n   The Sixth Floor Museum at Dealey Plaza 32.779819 -96.808484               411 Elm St, Dallas, TX 75202, USA (214) 747-6660                                                                              https://www.jfk.org/ Dallas\n                            Reunion Tower 32.775506 -96.808857       300 Reunion Blvd E, Dallas, TX 75207, USA (214) 296-9950                                                                      http://www.reuniontower.com/ Dallas\n                     Dallas Museum of Art 32.787696 -96.801044        1717 N Harwood St, Dallas, TX 75201, USA (214) 922-1200                                                                              https://www.dma.org/ Dallas\nThe Dallas Arboretum and Botanical Garden 32.823618 -96.716624          8525 Garland Rd, Dallas, TX 75218, USA (214) 515-6615                                                                  https://www.dallasarboretum.org/ Dallas\n                               Dallas Zoo 32.740970 -96.815320  650 S R.L. Thornton Fwy, Dallas, TX 75203, USA (469) 554-7501                                                                        https://www.dallaszoo.com/ Dallas\n                        Klyde Warren Park 32.789364 -96.801618 2012 Woodall Rodgers Fwy, Dallas, TX 75201, USA (214) 716-4500                                                                       http://klydewarrenpark.org/ Dallas\n                            Old City Park 32.772753 -96.786544        1515 S Harwood St, Dallas, TX 75215, USA (214) 421-5141                                                                 http://www.oldcityparkdallas.org/ Dallas\n       Perot Museum of Nature and Science 32.786943 -96.806584          2201 N Field St, Dallas, TX 75201, USA (214) 428-5555                                                                      https://www.perotmuseum.org/ Dallas\n                            Pioneer Plaza 32.776632 -96.801199            1428 Young St, Dallas, TX 75202, USA        Unknown                          http://www.dallasparks.org/Facilities/Facility/Details/Pioneer-Plaza-624 Dallas\n                  Nasher Sculpture Center 32.788182 -96.800157            2001 Flora St, Dallas, TX 75201, USA (214) 242-5100                                                             http://www.nashersculpturecenter.org/ Dallas\n                            Giant Eyeball 32.781406 -96.798312             1601 Main St, Dallas, TX 75201, USA        Unknown https://artandseek.org/2021/03/18/why-is-there-a-giant-eyeball-in-downtown-dallas-we-take-a-look/ Dallas\n           John F. Kennedy Memorial Plaza 32.778725 -96.806451              646 Main St, Dallas, TX 75202, USA (214) 747-6660                                                https://www.jfk.org/john-f-kennedy-memorial-plaza/ Dallas\n                             Dealey Plaza 32.778818 -96.808299                           Dallas, TX 75202, USA (214) 670-4100                           http://www.dallasparks.org/Facilities/Facility/Details/Dealey-Plaza-462 Dallas\n        African American Museum of Dallas 32.779057 -96.764414           3536 Grand Ave, Dallas, TX 75210, USA (214) 565-9026                                                                         http://www.aamdallas.org/ Dallas\n               Frontiers of Flight Museum 32.842602 -96.835202          6911 Lemmon Ave, Dallas, TX 75209, USA (214) 350-3600                                                                      http://www.flightmuseum.com/ Dallas\n                     White Rock Lake Park 32.836514 -96.721612        8300 E Lawther Dr, Dallas, TX 75218, USA (214) 660-1100                                                                     http://www.whiterocklake.org/ Dallas\n             Leonhardt Lagoon Nature Walk 32.777830 -96.761946             1121 1st Ave, Dallas, TX 75210, USA (214) 426-3400                                  https://eventseeker.com/venue/1132302-leonhardt-lagoon-dallas-tx Dallas\n       George W. Bush Presidential Center 32.841183 -96.778198       2943 SMU Boulevard, Dallas, TX 75205, USA (214) 200-4300                                                                        http://www.bushcenter.org/ Dallas\n            Trinity Forest Adventure Park 32.689810 -96.675766      1800 Dowdy Ferry Rd, Dallas, TX 75217, USA (214) 391-1000                                                                       http://trinitytreetops.com/ Dallas",
+          "keywords": [
+            "Dallas",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-006-restaurants-in-dallas",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:6",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Dallas",
+      "chunks": [
+        {
+          "heading": "Restaurants in Dallas",
+          "content": "                       Name  Average Cost                                               Cuisines  Aggregate Rating   City\n         Coconuts Fish Cafe            38                    Cafe, BBQ, Mediterranean, Fast Food               4.5 Dallas\n        1918 Bistro & Grill            90                               Tea, Pizza, BBQ, Seafood               4.4 Dallas\n             Yanki Sizzlers            96                       Cafe, French, Tea, Mediterranean               4.1 Dallas\n               Aravali Owls            53                Pizza, Italian, Bakery, Fast Food, Cafe               0.0 Dallas\n               Kebab Xpress            93                      Tea, Bakery, Pizza, Mediterranean               2.7 Dallas\n                 Haldiram's            94                                             Tea, Pizza               3.6 Dallas\n                  Delhicacy            67            Desserts, Mexican, Bakery, Chinese, Seafood               3.8 Dallas\n                    L'Opera            77                French, Bakery, BBQ, Fast Food, Seafood               3.8 Dallas\n            Cafe Gatherings            17                               Bakery, Indian, Desserts               4.4 Dallas\n              Drifters Cafe            21                    Tea, French, Mexican, Cafe, Seafood               3.9 Dallas\n           Uma Foodies' Hut            49                                French, Bakery, Seafood               3.1 Dallas\nBelfrance Luxury Chocolates            96             Desserts, Pizza, Fast Food, Cafe, American               4.4 Dallas\n                Puri Bakers            33        Pizza, Mexican, Bakery, Fast Food, Cafe, Indian               3.7 Dallas\n             Bikaner Sweets            23                     Tea, French, Bakery, Cafe, Seafood               3.3 Dallas\n            Metro Fast Food            45             Tea, Pizza, Mexican, Bakery, BBQ, American               2.7 Dallas\n                    Wheelyz            60        Tea, Pizza, Bakery, BBQ, Chinese, Mediterranean               2.5 Dallas\n              R. Ahmad Food            58 Desserts, Bakery, BBQ, Chinese, Mediterranean, Seafood               3.0 Dallas\n                   Castle 9            32        Mexican, Bakery, BBQ, Fast Food, Cafe, American               3.1 Dallas\n               Cafe Hawkers            72                                    Bakery, Indian, BBQ               3.7 Dallas\n              Firefly India            87                        Cafe, Bakery, American, Italian               3.4 Dallas\n            Zaaika Junction            48                                      Desserts, Seafood               2.6 Dallas\n                  Papa Buns            75                       French, Pizza, Indian, Fast Food               0.0 Dallas\n                TiffinToons            99            Seafood, Mediterranean, Desserts, Fast Food               0.0 Dallas\n               Mamma Drools            45           BBQ, Fast Food, Cafe, Mediterranean, Seafood               0.0 Dallas\n                 McDonald's            56                                          Cafe, Seafood               3.5 Dallas\n            Cafe Coffee Day            76                           Fast Food, Desserts, Italian               2.9 Dallas\n                   Hardwari            28               Desserts, Tea, Pizza, Mexican, Fast Food               0.0 Dallas\n               Baker's Stop            69                Cafe, American, Mediterranean, Desserts               3.8 Dallas\n          Delhi Biryani Hut            90                               Pizza, American, Seafood               0.0 Dallas\n             Tikka Junction            86  Tea, Bakery, Fast Food, Cafe, American, Mediterranean               3.5 Dallas\n            Nutrition Theka            77                             Pizza, American, Fast Food               3.3 Dallas\n               Relax Xpress            53           Desserts, Pizza, Bakery, Cafe, Mediterranean               3.2 Dallas\n              Lodhi Knights            18                       Tea, Pizza, French, Bakery, Cafe               3.1 Dallas\n           Tandoori Khazana            61              Tea, Pizza, BBQ, Chinese, Indian, Seafood               0.0 Dallas\n                Madras Cafe            90                     Bakery, Pizza, American, Fast Food               0.0 Dallas\n                  Bake Club           100                       Cafe, Indian, Mediterranean, BBQ               3.1 Dallas\n                   Yo Tibet            96         Desserts, Pizza, BBQ, Chinese, Indian, Seafood               3.3 Dallas\n                 The Kahuna            23                          Bakery, Pizza, BBQ, Fast Food               3.1 Dallas\n            Cafe Hera Pheri            18                                         Cafe, Desserts               3.8 Dallas\n  Chanana Ice Cream Parlour            77                           Chinese, Pizza, BBQ, Italian               2.9 Dallas\n               Dilli Darbar            64                      Tea, Cafe, Mediterranean, Italian               3.3 Dallas\n     New Tayal's Restaurant            67                        Mexican, Bakery, BBQ, Fast Food               2.8 Dallas\n              Subs n Shakes            74                 French, Bakery, Mediterranean, Seafood               3.1 Dallas\n                 Soya Grill            84                            Cafe, Pizza, BBQ, Fast Food               3.0 Dallas\n             Bikaner Sweets            33                        Bakery, Pizza, Indian, Desserts               0.0 Dallas\n                     Scoops            76                       Tea, Chinese, Seafood, Fast Food               2.8 Dallas\n              Food N Shakes            23                  Desserts, Pizza, French, BBQ, Seafood               0.0 Dallas\n              Cake Knighter            95     Pizza, Fast Food, American, Mediterranean, Seafood               0.0 Dallas\n            Cafe Coffee Day            22                           Cafe, BBQ, Desserts, Seafood               3.0 Dallas\n            Sona Restaurant            47                            Tea, Cafe, Pizza, Fast Food               3.2 Dallas\n           Pirates of Grill            72                   Desserts, Italian, BBQ, Bakery, Cafe               3.9 Dallas\n    Aim Cafe And Restaurant            85                                       Tea, French, BBQ               3.3 Dallas\n             Wich 'N' Shake            31                  Tea, Mexican, Bakery, Fast Food, Cafe               0.0 Dallas\n      Kolkata Biryani House            11                     Tea, French, Cafe, Indian, Seafood               2.8 Dallas\n          Flames of Tandoor            57                      Tea, Chinese, Desserts, Fast Food               3.5 Dallas\n                 Shahenshah            92                       Fast Food, Seafood, BBQ, Italian               3.5 Dallas\n                   MS Foods            55                                   Cafe, Pizza, Italian               3.1 Dallas\n               Food Weavers            71             Tea, Bakery, BBQ, Fast Food, Mediterranean               0.0 Dallas\n             The Grill @ 76            51                                         BBQ, Fast Food               3.5 Dallas\n                      MONKS            24               Tea, Pizza, Cafe, Mediterranean, Seafood               4.2 Dallas\n        Salsa Mexican Grill            63                  Desserts, BBQ, Bakery, Cafe, American               4.3 Dallas\n                Dem Karak韄y            44                                       Pizza, Fast Food               4.5 Dallas",
+          "keywords": [
+            "Dallas",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-006-accommodations-in-dallas",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:6",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Dallas",
+      "chunks": [
+        {
+          "heading": "Accommodations in Dallas",
+          "content": "                                            NAME  price       room type                                     house_rules  minimum nights  maximum occupancy  review rate number   city\n                1BR, elevator, kitchen, doorman!  475.0 Entire home/apt                                      No parties             1.0                  3                 2.0 Dallas\nLuxury Williamsburg duplex, private roof terrace  241.0 Entire home/apt                                     No visitors             4.0                  3                 5.0 Dallas\n               Take it now you won't find better  609.0 Entire home/apt                                         No pets             1.0                  4                 2.0 Dallas\n              E. W'burg Private Room near subway  272.0    Private room                        No visitors & No smoking            15.0                  2                 2.0 Dallas\n  Cozy&Central:EmpireState/Highline/Times Square  628.0 Entire home/apt              No visitors & No pets & No smoking             3.0                  4                 3.0 Dallas\n                              *Fresh Budget Room  262.0    Private room                        No visitors & No smoking             2.0                  1                 4.0 Dallas\n                   Chic Union Square One Bedroom 1096.0 Entire home/apt                                     No visitors             3.0                  5                 5.0 Dallas\n    Bright and modern apartment in Williamsburg!  865.0 Entire home/apt                                      No smoking             6.0                  5                 4.0 Dallas\n              Jackson Heights 2 bedrooms housing  747.0 Entire home/apt  No parties & No children under 10 & No smoking             2.0                  2                 3.0 Dallas\n            Exclusive Modern Penthouse Apartment  483.0 Entire home/apt                           No pets & No visitors             1.0                  3                 3.0 Dallas\n  SUNNY, SAFE and FRIENDLY minutes to Manhattan!  559.0 Entire home/apt                                         No pets             2.0                  4                 2.0 Dallas\n                             Sunny Brooklyn room  227.0    Private room                                         No pets             7.0                  2                 3.0 Dallas\n                 Charming Suite in Historic Home  348.0 Entire home/apt               No parties & No children under 10             1.0                  3                 3.0 Dallas\n              2 Bedroom Apt in downtown Brooklyn 1180.0 Entire home/apt No visitors & No children under 10 & No parties             4.0                  5                 2.0 Dallas\n              Quite & Cozy High Raise Atmosphere  635.0    Private room                                      No smoking             1.0                  1                 5.0 Dallas\n                          Upper east side duplex  819.0 Entire home/apt                                         No pets             3.0                  7                 2.0 Dallas\n                Central Park west. Big Cozy Room  709.0    Private room                                         No pets             1.0                  2                 4.0 Dallas\n            Huge Private Room Near Prospect Park   73.0    Private room                            No parties & No pets             7.0                  2                 2.0 Dallas\n Private room close to the center of Williamburg  231.0    Private room              No visitors & No children under 10             1.0                  1                 2.0 Dallas\n                         Spacious cozy apartment  314.0 Entire home/apt                            No children under 10             2.0                  3                 1.0 Dallas\nCharming Garden Apartment in Brooklyn Brownstone  434.0 Entire home/apt                                     No visitors             2.0                  2                 3.0 Dallas\n                                  Friendly hosts  806.0    Private room                                      No smoking             1.0                  2                 4.0 Dallas\n        Minutes from JFK airport and famous mall  711.0    Private room                        No visitors & No parties             2.0                  2                 3.0 Dallas",
+          "keywords": [
+            "Dallas",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-007-attractions-in-san-juan",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:7",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in San Juan",
+      "chunks": [
+        {
+          "heading": "Attractions in San Juan",
+          "content": "                                          Name  Latitude  Longitude                                                       Address                   Phone                                                              Website     City\n                 Castillo San Felipe del Morro 18.470628 -66.123920            501 Calle Norzagaray, San Juan, 00901, Puerto Rico          (787) 729-6960                                   https://www.nps.gov/saju/index.htm San Juan\n                          Paseo de La Princesa 18.463481 -66.116440  FV7M+9CV, Paseo de la Princesa, San Juan, 00901, Puerto Rico                 Unknown                                                              Unknown San Juan\n                         Parque de las Palomas 18.463989 -66.117749             FV7J+HWR, C. Tetuán, San Juan, 00901, Puerto Rico          (787) 480-2910              http://www.conoceapuertorico.com/parque-de-las-palomas/ San Juan\n                                   Casa Blanca 18.466402 -66.120072           1 C. de San Sebastián, San Juan, 00901, Puerto Rico          (787) 725-1454    https://www.discoverpuertorico.com/profile/museo-casa-blanca/8488 San Juan\n                        Castillo San Cristóbal 18.467365 -66.111008            501 Calle Norzagaray, San Juan, 00901, Puerto Rico          (787) 449-4049      https://www.nps.gov/saju/learn/historyculture/san-cristobal.htm San Juan\n               San Juan National Historic Site 18.470482 -66.123516                        FVCG+5HX, San Juan, 00901, Puerto Rico          (787) 729-6960                                   https://www.nps.gov/saju/index.htm San Juan\n                            Puerta de San Juan 18.465134 -66.119533     FV8J+354 Caleta de San Juan, San Juan, 00901, Puerto Rico                 Unknown                                                              Unknown San Juan\n                         Museo de las Américas 18.467724 -66.120186                 C. Beneficencia, San Juan, 00901, Puerto Rico          (787) 724-5052                                     http://www.museolasamericas.org/ San Juan\n                                  La Fortaleza 18.464106 -66.119230           63 C. de la Fortaleza, San Juan, 00901, Puerto Rico          (787) 721-7000                                                              Unknown San Juan\n                     Walkway of the Presidents 18.466197 -66.105886                        FV8V+FJH, San Juan, 00901, Puerto Rico                 Unknown                                                              Unknown San Juan\n                                   Plaza Colón 18.466027 -66.112069    FV8Q+C57, C. de la Fortaleza, San Juan, 00901, Puerto Rico                 Unknown https://www.discoverpuertorico.com/profile/plaza-colon-san-juan/8039 San Juan\n                        Jerrys Adventures llc. 18.455552 -66.088223 580 Av. Manuel Fernández Juncos, San Juan, 00907, Puerto Rico          (787) 455-1245                                     http://www.jerrysadventures.com/ San Juan\n                               Paseo del Morro 18.471818 -66.124852        FVCG+P3C Paseo del Morro, San Juan, 00901, Puerto Rico                 Unknown                                                              Unknown San Juan\n                  Museo de Arte de Puerto Rico 18.448276 -66.066284       299 Avenida José de Diego, San Juan, 00909, Puerto Rico          (787) 977-6277                                                https://www.mapr.org/ San Juan\n               Paseo de la Fama de Puerto Rico 18.457818 -66.075128                1053 Ashford Ave, San Juan, 00907, Puerto Rico                 Unknown                                                              Unknown San Juan\n                                 Museo del Mar 18.466328 -66.112820         360 C. de San Francisco, San Juan, 00901, Puerto Rico          (787) 977-4461                                        http://www.museodelmarpr.org/ San Juan\nCasa Ramón Power y Giralt – Para la Naturaleza 18.464202 -66.116441                   155 C. Tetuán, San Juan, 00901, Puerto Rico (787) 722-5834 ext. 242                                     http://www.paralanaturaleza.org/ San Juan\n                        Balneario El Escambrón 18.466860 -66.089968                        FW86+P2V, San Juan, 00910, Puerto Rico                 Unknown                                                              Unknown San Juan\n                                Plaza de Armas 18.465305 -66.116648                        FV8M+48H, San Juan, 00969, Puerto Rico                 Unknown                                                              Unknown San Juan\n                                     Casa Rosa 18.466495 -66.121154                       Casa Rosa, San Juan, 00901, Puerto Rico                 Unknown                                                              Unknown San Juan",
+          "keywords": [
+            "San Juan",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-007-restaurants-in-san-juan",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:7",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in San Juan",
+      "chunks": [
+        {
+          "heading": "Restaurants in San Juan",
+          "content": "                            Name  Average Cost                                                Cuisines  Aggregate Rating     City\n     Christian and Jake's Bistro            59                  Tea, French, Bakery, Fast Food, Indian               4.4 San Juan\nHoka-Hoka Japanese Steak & Sushi            27                             Tea, French, American, Cafe               4.4 San Juan\n                          Oh My!            18   Desserts, Tea, Cafe, American, Mediterranean, Seafood               0.0 San Juan\n               Coldpress Company            11                             Cafe, Pizza, BBQ, Fast Food               4.1 San Juan\n                      Go! Dimsum            54                               French, Bakery, Fast Food               0.0 San Juan\n                   Gulshan Dhaba            40                Desserts, French, BBQ, Bakery, Fast Food               3.4 San Juan\n                          Kofuku            59                               Fast Food, Pizza, Seafood               4.0 San Juan\n                         Pizzaon            79                             Bakery, American, Cafe, BBQ               3.0 San Juan\n               Nile Restro & Bar            45                          Tea, Pizza, American, Desserts               2.7 San Juan\n                 Cafe Coffee Day            97                              BBQ, Cafe, Pizza, Desserts               3.4 San Juan\n                Manchanda Bakery            76                       Fast Food, BBQ, Desserts, Italian               3.1 San Juan\n                       Cocoberry            41                     French, Bakery, Desserts, Fast Food               3.9 San Juan\n                      Sri Balaji            41                            French, Bakery, BBQ, Seafood               0.0 San Juan\n             Maison Des Desserts            70                           Cafe, Mexican, Pizza, Italian               3.9 San Juan\n                      Brunchilli            66                     Desserts, Tea, Italian, Bakery, BBQ               3.2 San Juan\n                 Paul's Homemade            54                                       Tea, BBQ, Seafood               3.1 San Juan\n                      Gopal's 56            10                                    French, Bakery, Cafe               3.8 San Juan\n          Amritsari Chaap Corner            97                                  Tea, Chinese, Desserts               2.9 San Juan\n                  Bhagwan Sweets            96 Desserts, Tea, Pizza, Italian, Fast Food, Mediterranean               2.8 San Juan\n            Chauhan Laxmi Sweets            63                           French, Bakery, Cafe, Seafood               3.0 San Juan\n      The Altitude Cafe and Deli           100    Tea, BBQ, Fast Food, Chinese, Mediterranean, Seafood               3.1 San Juan\n                        Frontier            16                 Desserts, Pizza, Bakery, Cafe, American               3.0 San Juan\n                   Roadside Cafe            69                               Tea, French, Indian, Cafe               2.8 San Juan\n            The Culinary Pitaara            52                         Cafe, French, Chinese, Desserts               2.8 San Juan\n                 Hyderabad House            43                  Desserts, Tea, French, Bakery, Seafood               3.5 San Juan\n               Mitthu Tikki Wala            38      Tea, Italian, Bakery, Cafe, Mediterranean, Seafood               3.4 San Juan\n                        Baadshah            85             Desserts, Pizza, Fast Food, Chinese, Indian               3.5 San Juan\n                        Mandrain            27                                            Cafe, Bakery               2.8 San Juan\n                 Shree Bhagatram            11               Desserts, Pizza, Mexican, Fast Food, Cafe               3.3 San Juan\n                            Swad            34                             Tea, French, Pizza, Seafood               2.8 San Juan\n                   Hookie Dookie            54                                         Cafe, Fast Food               0.0 San Juan\n                      Tea Trails            29                      Fast Food, Cafe, Desserts, Italian               0.0 San Juan\n               Effingut Brewerkz            56                               Cafe, Pizza, BBQ, Seafood               4.3 San Juan\n                      Chaophraya            66                                         Pizza, Desserts               4.3 San Juan",
+          "keywords": [
+            "San Juan",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-007-accommodations-in-san-juan",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:7",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in San Juan",
+      "chunks": [
+        {
+          "heading": "Accommodations in San Juan",
+          "content": "                                              NAME  price       room type                                    house_rules  minimum nights  maximum occupancy  review rate number     city\n*WINTER DISCOUNT WILLIAMSBURG CHIC W/PRIVATE PATIO  200.0 Entire home/apt                           No parties & No pets             3.0                  3                 2.0 San Juan\n                FLUSHING APT!! BEST DEAL IN NYC!!!  135.0 Entire home/apt                        No smoking & No parties             1.0                  2                 5.0 San Juan\n                    Charming 3bed/2ba Downtown/LES  832.0    Private room No children under 10 & No smoking & No parties             3.0                  1                 5.0 San Juan\n                               Home away from home  323.0 Entire home/apt                          No pets & No visitors             2.0                  3                 3.0 San Juan\n           BK's Finest SHARED ROOM 1 BED AVAILABLE   50.0     Shared room             No pets & No smoking & No visitors             1.0                  1                 1.0 San Juan\n            Spacious Brooklyn loft in Clinton Hill 1159.0    Private room                                     No smoking             2.0                  1                 5.0 San Juan\n                                  Artist Penthouse  846.0 Entire home/apt                                    No visitors             1.0                  5                 4.0 San Juan\n Colorful 1 Bedroom in the Heart of the E. Village  337.0 Entire home/apt                                     No smoking            30.0                  2                 5.0 San Juan\n        Cozy, Private 1 Bedroom Basement Apartment  650.0 Entire home/apt                                    No visitors             2.0                  2                 5.0 San Juan\n             2BR Getaway in Modern Luxury Building  826.0 Entire home/apt                                     No parties             3.0                  5                 5.0 San Juan\n               Cozy Studio 15 minutes to Manhattan  822.0    Private room                                        No pets             1.0                  2                 3.0 San Juan",
+          "keywords": [
+            "San Juan",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-008-attractions-in-philadelphia",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:8",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Philadelphia",
+      "chunks": [
+        {
+          "heading": "Attractions in Philadelphia",
+          "content": "                                                          Name  Latitude  Longitude                                                  Address          Phone                                                                             Website         City\n                                        The Franklin Institute 39.958211 -75.173135               222 N 20th St, Philadelphia, PA 19103, USA (215) 448-1200 https://www.fi.edu/?utm_source=google&utm_medium=googlemybusiness&utm_campaign=2021 Philadelphia\n                         Independence National Historical Park 39.949531 -75.149732                              Philadelphia, PA 19106, USA (215) 965-2305                                                  https://www.nps.gov/inde/index.htm Philadelphia\n                                  Philadelphia's Magic Gardens 39.942715 -75.159315               1020 South St, Philadelphia, PA 19147, USA (215) 733-0390                                                  http://www.phillymagicgardens.org/ Philadelphia\n                                    Philadelphia Museum of Art 39.965570 -75.180966 2600 Benjamin Franklin Pkwy, Philadelphia, PA 19130, USA (215) 763-8100                                                        https://www.philamuseum.org/ Philadelphia\n                                                  Liberty Bell 39.949610 -75.150282               526 Market St, Philadelphia, PA 19106, USA (215) 965-2305               https://www.nps.gov/inde/learn/historyculture/stories-libertybell.htm Philadelphia\n                                    Eastern State Penitentiary 39.968336 -75.172665          2027 Fairmount Ave, Philadelphia, PA 19130, USA (215) 236-3300                                                        http://www.easternstate.org/ Philadelphia\n                                         JFK Plaza (Love Park) 39.954132 -75.165640                     Arch St, Philadelphia, PA 19102, USA (215) 686-1776                                             http://www.phila.gov/Pages/default.aspx Philadelphia\n                                              Philadelphia Zoo 39.971496 -75.195538           3400 W Girard Ave, Philadelphia, PA 19104, USA (215) 243-1100                                                    https://www.philadelphiazoo.org/ Philadelphia\n                                               Franklin Square 39.955663 -75.150450                200 N 6th St, Philadelphia, PA 19106, USA (215) 629-4026                    http://www.historicphiladelphia.org/franklin-square/what-to-see/ Philadelphia\n                                                  Rodin Museum 39.961923 -75.173958 2151 Benjamin Franklin Pkwy, Philadelphia, PA 19130, USA (215) 763-8100                                                        https://www.rodinmuseum.org/ Philadelphia\n                                                  Rocky Statue 39.965133 -75.179288 2600 Benjamin Franklin Pkwy, Philadelphia, PA 19130, USA        Unknown                               http://www.associationforpublicart.org/artwork/rocky/ Philadelphia\n                                           Please Touch Museum 39.979496 -75.209147 4231 Avenue of the Republic, Philadelphia, PA 19131, USA (215) 581-3181                                                   http://www.pleasetouchmuseum.org/ Philadelphia\n                                        Elfreth's Alley Museum 39.952718 -75.142482         126 Elfreth's Alley, Philadelphia, PA 19106, USA        Unknown                                                           http://elfrethsalley.org/ Philadelphia\n                       African American Museum in Philadelphia 39.953261 -75.151756                 701 Arch St, Philadelphia, PA 19106, USA (215) 574-0380                                                              http://aampmuseum.org/ Philadelphia\nThe Mütter Museum at The College of Physicians of Philadelphia 39.953231 -75.176370                19 S 22nd St, Philadelphia, PA 19103, USA (215) 563-3737                                                           https://muttermuseum.org/ Philadelphia\n                             Museum of the American Revolution 39.948320 -75.145755                101 S 3rd St, Philadelphia, PA 19106, USA (215) 253-6731                                                        https://www.amrevmuseum.org/ Philadelphia\n                                                   Penn Museum 39.949239 -75.191367               3260 South St, Philadelphia, PA 19104, USA (215) 898-4000                                                             http://www.penn.museum/ Philadelphia\n                                      Benjamin Franklin Museum 39.949462 -75.146899             317 Chestnut St, Philadelphia, PA 19106, USA (267) 514-1522                    http://www.nps.gov/inde/planyourvisit/benjaminfranklinmuseum.htm Philadelphia\n                                             Barnes Foundation 39.960643 -75.172807 2025 Benjamin Franklin Pkwy, Philadelphia, PA 19130, USA (215) 278-7000                                                   https://www.barnesfoundation.org/ Philadelphia\n                                              Betsy Ross House 39.952227 -75.144652                 239 Arch St, Philadelphia, PA 19106, USA (215) 629-4026                                        http://historicphiladelphia.org/what-to-see/ Philadelphia",
+          "keywords": [
+            "Philadelphia",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-008-restaurants-in-philadelphia",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:8",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Philadelphia",
+      "chunks": [
+        {
+          "heading": "Restaurants in Philadelphia",
+          "content": "                         Name  Average Cost                                              Cuisines  Aggregate Rating         City\n               Hong Kong Cafe            47                        Tea, Pizza, Italian, BBQ, Cafe               3.6 Philadelphia\nRed Ginger Sushi, Grill & Bar            98                          Tea, Cafe, Indian, Fast Food               4.5 Philadelphia\n                Marukame Udon           100          Tea, Pizza, Italian, BBQ, Fast Food, Chinese               4.9 Philadelphia\n             Red Mesa Cantina            36                        Tea, Cafe, American, Fast Food               4.6 Philadelphia\n         The Moon Under Water            94 Pizza, Italian, BBQ, Bakery, Fast Food, Mediterranean               4.1 Philadelphia\n                Pind Balluchi            44             Desserts, Tea, French, Fast Food, Seafood               3.7 Philadelphia\n               Brothers Dhaba            52                               Cafe, Desserts, Seafood               3.8 Philadelphia\n       Gurdas Ram Jalebi Wala            20                           Cafe, Desserts, Bakery, BBQ               4.1 Philadelphia\n                    Fritrolla            58                                             Cafe, BBQ               0.0 Philadelphia\n           Chaska Food Corner            64                               French, Bakery, Seafood               0.0 Philadelphia\n                 Xpert Bakers            68                          Tea, Chinese, Pizza, Seafood               0.0 Philadelphia\n               Domino's Pizza            96     Tea, Pizza, Fast Food, Chinese, American, Seafood               2.7 Philadelphia\n                  Mini Mughal            30                          Seafood, American, Fast Food               3.5 Philadelphia\n                Rewari Sweets            91                Desserts, Pizza, BBQ, Chinese, Seafood               3.2 Philadelphia\n     Bikaner Sweets & Namkeen            83            Desserts, BBQ, Fast Food, Chinese, Seafood               2.9 Philadelphia\n          Bangla Sweet Corner            14                                  Cafe, BBQ, Fast Food               2.6 Philadelphia\n              Asian Chopstick            10                      BBQ, Bakery, Desserts, Fast Food               3.5 Philadelphia\n       Arabian & Turkish Caf愆            37                                          Cafe, Bakery               0.0 Philadelphia\n                     Momozone            17                                  Tea, Pizza, Desserts               0.0 Philadelphia\n                    Muncheezz            17                          Tea, Bakery, Indian, Seafood               0.0 Philadelphia\n           Pizza Hut Delivery            76                           Cafe, Desserts, Bakery, BBQ               2.7 Philadelphia\n                       Subway            96                           Tea, Cafe, Pizza, Fast Food               1.9 Philadelphia\n                Lajwab Bakery            54               Desserts, Tea, Italian, Bakery, Seafood               3.1 Philadelphia\n             Tandoori Mystery            91                       Tea, French, Fast Food, Seafood               0.0 Philadelphia\n                 Baker Street            54                                  Cafe, Mexican, Pizza               3.6 Philadelphia\n          Chandu Chat Bhandar            48                  Desserts, Tea, Italian, BBQ, Seafood               0.0 Philadelphia\n               Domino's Pizza            84                             Tea, Cafe, Pizza, Seafood               2.6 Philadelphia\n                    Pizza Hut            61                            Tea, Cafe, Bakery, Seafood               4.6 Philadelphia\n  Hippopotamus - Museum Hotel            61                                French, Pizza, Seafood               4.4 Philadelphia",
+          "keywords": [
+            "Philadelphia",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-008-accommodations-in-philadelphia",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:8",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Philadelphia",
+      "chunks": [
+        {
+          "heading": "Accommodations in Philadelphia",
+          "content": "                                              NAME  price       room type                                    house_rules  minimum nights  maximum occupancy  review rate number         city\nBrooklyn Room in Hip Neighborhood - Close to Train  742.0    Private room No parties & No children under 10 & No smoking             1.0                  1                 1.0 Philadelphia\n                     Industrial Loft Living in NYC  178.0 Entire home/apt                                     No smoking             4.0                  3                 3.0 Philadelphia\n                    Top floor of an amazing duplex  509.0    Private room                                     No parties             1.0                  2                 3.0 Philadelphia\n                Sunny room along riverside on 66th  217.0 Entire home/apt                       No visitors & No parties            12.0                  2                 1.0 Philadelphia\n  Modern Luxury Apartment in Heart of Williamsburg  567.0 Entire home/apt                                     No parties             2.0                  3                 2.0 Philadelphia\n                         Quiet Cozy Chelsea Studio 1029.0 Entire home/apt                                     No parties             3.0                  7                 5.0 Philadelphia\n                    2BR luxury apt in Midtown East  897.0 Entire home/apt                           No children under 10             4.0                  3                 3.0 Philadelphia\n2 BDRM PRESIDENTIAL LUXURY CONDO MIDTOWN 45  NYC *  609.0    Private room                          No visitors & No pets             3.0                  2                 2.0 Philadelphia\n Gorgeous Lower Manhattan studio for summer sublet  962.0 Entire home/apt                                        No pets            35.0                  4                 4.0 Philadelphia\nPRIVATE BEDROOM and BATHROOM crown heights Aprtmnt 1047.0    Private room                           No smoking & No pets             1.0                  2                 5.0 Philadelphia",
+          "keywords": [
+            "Philadelphia",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-009-attractions-in-st.-louis",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:9",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in St. Louis",
+      "chunks": [
+        {
+          "heading": "Attractions in St. Louis",
+          "content": "                                        Name  Latitude  Longitude                                          Address          Phone                                         Website      City\n                             Saint Louis Zoo 38.634917 -90.290977        1 Government Dr, St. Louis, MO 63110, USA (314) 781-0900                             https://stlzoo.org/ St. Louis\n                                 City Museum 38.633674 -90.200698          750 N 16th St, St. Louis, MO 63103, USA (314) 231-2489                     https://www.citymuseum.org/ St. Louis\n                                 Forest Park 38.637117 -90.284766          5595 Grand Dr, St. Louis, MO 63112, USA        Unknown              https://www.forestparkforever.org/ St. Louis\n                   Missouri Botanical Garden 38.612767 -90.259380         4344 Shaw Blvd, St. Louis, MO 63110, USA (314) 577-5100         http://www.missouribotanicalgarden.org/ St. Louis\n                      Saint Louis Art Museum 38.639306 -90.294491         1 Fine Arts Dr, St. Louis, MO 63110, USA (314) 721-0072                            http://www.slam.org/ St. Louis\n                   Citygarden Sculpture Park 38.626680 -90.193707          801 Market St, St. Louis, MO 63101, USA (314) 241-3337                   http://www.citygardenstl.org/ St. Louis\n                            The Gateway Arch 38.625127 -90.186750           Gateway Arch, St. Louis, MO 63102, USA (877) 982-1410                    https://www.gatewayarch.com/ St. Louis\n         St. Louis Union Station Mirror Maze 38.628375 -90.207508          201 S 18th St, St. Louis, MO 63103, USA        Unknown https://www.stlouisunionstation.com/mirror-maze St. Louis\n                            Tower Grove Park 38.606192 -90.254167      4257 Northeast Dr, St. Louis, MO 63110, USA (314) 771-2679                 https://www.towergrovepark.org/ St. Louis\n                         The St. Louis Wheel 38.627718 -90.209575          201 S 18th St, St. Louis, MO 63103, USA (314) 923-3960                     http://thestlouiswheel.com/ St. Louis\n                  Saint Louis Science Center 38.628992 -90.270419       5050 Oakland Ave, St. Louis, MO 63110, USA (314) 289-4400                           https://www.slsc.org/ St. Louis\n                        St. Louis Riverfront 38.624342 -90.183960              Poplar St, St. Louis, MO 63102, USA (877) 982-1410                     http://www.gatewayarch.com/ St. Louis\n                       Campbell House Museum 38.631330 -90.201827         1508 Locust St, St. Louis, MO 63103, USA (314) 421-0325             http://www.campbellhousemuseum.org/ St. Louis\n                  Gateway Arch National Park 38.624885 -90.185898                         St. Louis, MO 63102, USA (314) 655-1600              https://www.nps.gov/jeff/index.htm St. Louis\nThe Magic House, St. Louis Children’s Museum 38.573738 -90.405684      516 S Kirkwood Rd, St. Louis, MO 63122, USA (314) 822-8900                      http://www.magichouse.org/ St. Louis\n                Museum of Westward Expansion 38.625674 -90.189274            11 N 4th St, St. Louis, MO 63102, USA (314) 655-1614                     http://www.gatewayarch.com/ St. Louis\n                                    Art Hill 38.640339 -90.293711     35-43 Fine Arts Dr, St. Louis, MO 63110, USA (314) 367-7275               http://www.forestparkforever.org/ St. Louis\n                     Missouri History Museum 38.645248 -90.285738      5700 Lindell Blvd, St. Louis, MO 63112, USA (314) 746-4599                https://www.mohistory.org/museum St. Louis\n                Laclede's Landing Wax Museum 38.630765 -90.184336           720 N 2nd St, St. Louis, MO 63102, USA (314) 241-1155                    http://www.stlwaxmuseum.com/ St. Louis\n                    Compton Hill Water Tower 38.615023 -90.238940 1700-1898 S Grand Blvd, St. Louis, MO 63104, USA (314) 552-9000            http://www.watertowerfoundation.org/ St. Louis",
+          "keywords": [
+            "St. Louis",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-009-restaurants-in-st.-louis",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:9",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in St. Louis",
+      "chunks": [
+        {
+          "heading": "Restaurants in St. Louis",
+          "content": "                       Name  Average Cost                                          Cuisines  Aggregate Rating      City\n           El Super Burrito            43               Tea, Cafe, Mediterranean, Fast Food               4.1 St. Louis\nThe Latitude - Radisson Blu            18             Pizza, French, BBQ, American, Seafood               3.9 St. Louis\n           Wai Yu Mun Ching            89 Tea, Mexican, BBQ, Bakery, Mediterranean, Seafood               3.5 St. Louis\n                Burger King            21              Tea, BBQ, Chinese, American, Seafood               3.4 St. Louis\n                    M Cr砺me            42                       French, Pizza, BBQ, Seafood               0.0 St. Louis\n                  Om Sweets            24                 Fast Food, BBQ, Desserts, Seafood               3.2 St. Louis\n           Moti Mahal Delux            73                                       Bakery, BBQ               3.2 St. Louis\n                  Starbucks            92                      Tea, French, Cafe, Fast Food               4.1 St. Louis\n                  Starbucks           100     Desserts, Pizza, Cafe, Mediterranean, Seafood               3.9 St. Louis\n            Tingling Pepper            26                                         Tea, Cafe               3.4 St. Louis\n               Startup Cafe            31                     Bakery, Pizza, American, Cafe               3.7 St. Louis\n                  Keventers            23           Tea, Bakery, Fast Food, Chinese, Indian               3.5 St. Louis\n                 Tera Hotel            88                         Fast Food, Pizza, Seafood               3.5 St. Louis\nThe Tea Place by Manjushree            86                    Bakery, Indian, BBQ, Fast Food               4.1 St. Louis\n                      Giani            35            Desserts, Tea, Pizza, Bakery, American               3.6 St. Louis\n          Spaghetti Kitchen            97                     Chinese, Pizza, Cafe, Seafood               3.8 St. Louis\n        Balaji Eating Point            28                    Tea, French, Desserts, Italian               0.0 St. Louis\n            4th Street Cafe            42         Tea, Mexican, Bakery, Cafe, Mediterranean               3.5 St. Louis\n    Pooja Take Away Kitchen            61           Desserts, Cafe, BBQ, Fast Food, Chinese               2.7 St. Louis\n                     BonJuz            47               Bakery, BBQ, Mediterranean, Seafood               0.0 St. Louis\n                  IndoCheen            16                       Tea, Mediterranean, Seafood               3.2 St. Louis\n            Cafe Coffee Day            29             Desserts, Tea, Cafe, Mexican, Chinese               2.7 St. Louis\n                      Aroma            90                      Cafe, Mexican, Bakery, Pizza               3.0 St. Louis\n               Whatslife.in            92             Cafe, Mexican, Mediterranean, Seafood               0.0 St. Louis\n             Mandarin Trail            43                                  Cafe, Pizza, BBQ               3.7 St. Louis\n                  Teddy Boy            56   Cafe, Pizza, Bakery, Fast Food, Chinese, Indian               3.6 St. Louis",
+          "keywords": [
+            "St. Louis",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-009-accommodations-in-st.-louis",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:9",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in St. Louis",
+      "chunks": [
+        {
+          "heading": "Accommodations in St. Louis",
+          "content": "                                             NAME  price       room type                        house_rules  minimum nights  maximum occupancy  review rate number      city\n              Lux 2Bed/2.5Bath Central Park Views 1004.0 Entire home/apt              No pets & No visitors            30.0                  7                 5.0 St. Louis\n                                        Kan house  749.0    Private room                            No pets             1.0                  2                 4.0 St. Louis\n               Sublet in Furnished Master Bedroom  930.0    Private room  No smoking & No parties & No pets             1.0                  2                 5.0 St. Louis\n Private room in large, central Nolita penthouse!  342.0    Private room                        No visitors             3.0                  2                 5.0 St. Louis\n               1800sf Urban Goddess Brooklyn Loft  898.0 Entire home/apt               No pets & No parties             2.0                  4                 2.0 St. Louis\n                           Pet & Tony's Residence  271.0 Entire home/apt No parties & No visitors & No pets             1.0                  2                 3.0 St. Louis\n      Comfy room with WiFi. Mins to Central Park!  934.0    Private room               No children under 10            30.0                  2                 5.0 St. Louis\nBeloved Williamsburg, Brooklyn is calling to you!  332.0    Private room  No pets & No parties & No smoking             3.0                  2                 4.0 St. Louis\n            Modern Luxury Loft  3bd  Williamsburg  980.0 Entire home/apt No visitors & No children under 10             3.0                  4                 5.0 St. Louis\n               Huge two bedroom apt n Bayridge!!! 1088.0    Private room               No children under 10             1.0                  2                 2.0 St. Louis\n                        Peaceful room in Bushwick   79.0    Private room                         No parties             1.0                  1                 3.0 St. Louis\n                   Nice bedroom - Lower East Side  993.0    Private room                         No smoking             1.0                  2                 4.0 St. Louis\n            Studio Apt. near Empire State Bldg 4B  390.0 Entire home/apt                         No smoking            30.0                  3                 2.0 St. Louis\n    Cozy Escape in the thriving heart of Bed-Stuy  230.0 Entire home/apt              No pets & No visitors             2.0                  3                 5.0 St. Louis",
+          "keywords": [
+            "St. Louis",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-010-attractions-in-seattle",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:10",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Seattle",
+      "chunks": [
+        {
+          "heading": "Attractions in Seattle",
+          "content": "                                  Name  Latitude   Longitude                                          Address          Phone                                                                  Website    City\n                      Seattle Aquarium 47.607400 -122.342956 1483 Alaskan Way Pier 59, Seattle, WA 98101, USA (206) 386-4300                                         https://www.seattleaquarium.org/ Seattle\n               The Seattle Great Wheel 47.606134 -122.342525          1301 Alaskan Wy, Seattle, WA 98101, USA (206) 623-8607                                            http://seattlegreatwheel.com/ Seattle\n              Chihuly Garden and Glass 47.620560 -122.350448          305 Harrison St, Seattle, WA 98109, USA (206) 753-4940                                   https://www.chihulygardenandglass.com/ Seattle\n                Olympic Sculpture Park 47.616603 -122.355317         2901 Western Ave, Seattle, WA 98121, USA (206) 654-3100           https://www.seattleartmuseum.org/visit/olympic-sculpture-park/ Seattle\n                          The Gum Wall 47.608361 -122.340338          1428 Post Alley, Seattle, WA 98101, USA (206) 587-2414                               https://unexpectedproductions.org/gumwall/ Seattle\n                        Seattle Center 47.620598 -122.350505          305 Harrison St, Seattle, WA 98109, USA (206) 684-7200                                           https://www.seattlecenter.com/ Seattle\n                 Museum of Pop Culture 47.621482 -122.348124            325 5th Ave N, Seattle, WA 98109, USA (206) 770-2700                                                   https://www.mopop.org/ Seattle\n                   Beneath the Streets 47.602850 -122.334093            102 Cherry St, Seattle, WA 98104, USA (206) 624-1237                                      http://www.beneath-the-streets.com/ Seattle\n                    Seattle Art Museum 47.607525 -122.337960             1300 1st Ave, Seattle, WA 98101, USA (206) 654-3100                                        https://www.seattleartmuseum.org/ Seattle\n                            Kerry Park 47.629469 -122.359922        211 W Highland Dr, Seattle, WA 98119, USA (206) 684-4075                       http://www.seattle.gov/parks/find/parks/kerry-park Seattle\n                          Space Needle 47.620506 -122.349277             400 Broad St, Seattle, WA 98109, USA (206) 905-2100                                             https://www.spaceneedle.com/ Seattle\n                           Smith Tower 47.601853 -122.331858              506 2nd Ave, Seattle, WA 98104, USA (206) 624-0414                                               http://www.smithtower.com/ Seattle\n                     Pike Place Market 47.608965 -122.340582               85 Pike St, Seattle, WA 98101, USA (206) 682-7453                                         https://www.pikeplacemarket.org/ Seattle\n                               Pier 55 47.604747 -122.339716          1101 Alaskan Wy, Seattle, WA 98101, USA (206) 623-1445                        https://www.argosycruises.com/parking-directions/ Seattle\n      Original Selfie Museum | Seattle 47.607803 -122.339772              92 Union St, Seattle, WA 98101, USA (206) 487-4500                                        https://originalselfiemuseum.com/ Seattle\n             Washington Park Arboretum 47.636416 -122.295815      2300 Arboretum Dr E, Seattle, WA 98112, USA (206) 543-8800                 https://botanicgardens.uw.edu/washington-park-arboretum/ Seattle\nSky View Observatory - Columbia Center 47.604364 -122.331011              700 4th Ave, Seattle, WA 98104, USA (206) 386-5564                                           http://skyviewobservatory.com/ Seattle\n                        Discovery Park 47.661320 -122.417141                           Seattle, WA 98199, USA (206) 386-4236                    https://www.seattle.gov/parks/allparks/discovery-park Seattle\n                  The Museum of Flight 47.518538 -122.296854                           Seattle, WA 98108, USA (206) 764-5700                                          https://www.museumofflight.org/ Seattle\n                International Fountain 47.622523 -122.352032          305 Harrison St, Seattle, WA 98109, USA (206) 684-7200 https://www.seattlecenter.com/explore/attractions/international-fountain Seattle",
+          "keywords": [
+            "Seattle",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-010-restaurants-in-seattle",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:10",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Seattle",
+      "chunks": [
+        {
+          "heading": "Restaurants in Seattle",
+          "content": "                                Name  Average Cost                                          Cuisines  Aggregate Rating    City\n                  Ting's Red Lantern            24 Italian, Bakery, BBQ, Fast Food, Chinese, Seafood               4.2 Seattle\n      Ceviche Tapas Bar & Restaurant            86                            Tea, Chinese, Desserts               4.4 Seattle\n                      Mother Ringlet            63                 Tea, Cafe, Mediterranean, Seafood               2.5 Seattle\n                      Caf愆 Burger BC            43                 Tea, French, Bakery, BBQ, Seafood               3.7 Seattle\n                       The Godinho's            96           Tea, Pizza, American, BBQ, Cafe, Indian               3.8 Seattle\n                  Teddy Choco Studio            70                         Mexican, Bakery, Desserts               0.0 Seattle\n                 Goli Vada Pav No. 1            31                              Tea, Bakery, Seafood               3.4 Seattle\n                  Delhi Darbar Dhaba            69                        Cafe, Pizza, Mediterranean               3.2 Seattle\n                           Tawa King            74              Desserts, Tea, Cafe, Bakery, Chinese               0.0 Seattle\n                             Giani's            74                   Tea, Seafood, Desserts, Italian               3.6 Seattle\n                   Sarpal Restaurant            42                               Cafe, BBQ, Desserts               3.1 Seattle\n                            Depaul's            83                            BBQ, Desserts, Seafood               3.7 Seattle\n                Amul Sweets & Bakery            36                 Desserts, Tea, Pizza, BBQ, Indian               0.0 Seattle\n                         Hot Chimney            19            Tea, Pizza, Mexican, Bakery, Fast Food               2.5 Seattle\nCelebration Multi Cuisine Restaurant            65                         Pizza, American, Desserts               2.7 Seattle\n                            The Test            18                                Tea, Pizza, Bakery               2.9 Seattle\n                     Tandoori Zaaika            96                            Pizza, Indian, Seafood               3.0 Seattle\n                        Munch Nation            55       Desserts, BBQ, Cafe, Mediterranean, Seafood               3.8 Seattle\n                           Wow! Momo            28     Desserts, BBQ, Fast Food, Cafe, Mediterranean               3.2 Seattle\n                     Cafe Coffee Day            79              Pizza, Bakery, BBQ, Chinese, Seafood               3.0 Seattle\n                             Foodizm            68                      Cafe, Pizza, Bakery, Italian               0.0 Seattle\n                           Keventers            53                            Tea, Bakery, Fast Food               0.0 Seattle\n                         Durga Dhaba            95                Seafood, American, Cafe, Fast Food               2.9 Seattle\n                            FrenZone            44                                    Tea, Cafe, BBQ               3.9 Seattle\n                         Desi Kukkad            71                             Bakery, American, BBQ               0.0 Seattle\n                   The Golden Dragon            15                       BBQ, Mediterranean, Seafood               3.5 Seattle\n                           Deli Chic            91                                    Pizza, Seafood               0.0 Seattle\n                        Food Brigade            90                    Chinese, Pizza, BBQ, Fast Food               3.2 Seattle\n                     The Sassy Spoon            29                   Bakery, Mediterranean, Desserts               4.1 Seattle\n                            wagamama            21                     Tea, Pizza, Desserts, Seafood               3.7 Seattle",
+          "keywords": [
+            "Seattle",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-010-accommodations-in-seattle",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:10",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Seattle",
+      "chunks": [
+        {
+          "heading": "Accommodations in Seattle",
+          "content": "                                          NAME  price       room type                                     house_rules  minimum nights  maximum occupancy  review rate number    city\n    Shared Apartment by Times Square Manhattan 1050.0     Shared room              No visitors & No pets & No smoking             1.0                  1                 4.0 Seattle\n     Large quiet private studio in East Harlem  181.0 Entire home/apt                            No children under 10             7.0                  2                 3.0 Seattle\n             Nolita 1br near Little Italy/SoHo  380.0 Entire home/apt                           No visitors & No pets            20.0                  2                 1.0 Seattle\n                  private spacious LES bedroom  325.0    Private room                            No parties & No pets             2.0                  1                 4.0 Seattle\n            Peaceful, cozy studio in Chinatown  576.0 Entire home/apt    No pets & No children under 10 & No visitors            20.0                  2                 1.0 Seattle\n     Small Private Room in quiet Manhattan Apt  105.0    Private room                                     No visitors             4.0                  1                 5.0 Seattle\n Cozy Room Amazingly Located in Williamsburg !  448.0    Private room                                      No smoking             3.0                  2                 4.0 Seattle\n   NYC HUB HOME: Train @ 900ft; midtown 30min! 1184.0 Entire home/apt                            No parties & No pets             2.0                  7                 4.0 Seattle\n  New tidy  room attached by PRIVATE FULL BATH   73.0    Private room                         No parties & No smoking             3.0                  2                 5.0 Seattle\n     Sun Drenched Artist Loft in Williamsburg!  607.0 Entire home/apt No children under 10 & No visitors & No parties             4.0                  2                 5.0 Seattle\n**Cozy Room In Hip Ultra Location LES/NOLITA**  537.0    Private room                                     No visitors             2.0                  2                 5.0 Seattle\n                                 Comfort Haven  910.0    Private room           No smoking & No visitors & No parties             1.0                  2                 3.0 Seattle",
+          "keywords": [
+            "Seattle",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-011-attractions-in-appleton",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:11",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Appleton",
+      "chunks": [
+        {
+          "heading": "Attractions in Appleton",
+          "content": "                                                  Name  Latitude  Longitude                                      Address          Phone                                                                                         Website     City\n                      The History Museum at the Castle 44.262144 -88.401441   330 E College Ave, Appleton, WI 54911, USA (920) 735-9370                                                                 http://www.myhistorymuseum.org/ Appleton\n                     Hearthstone Historic House Museum 44.254306 -88.415009  625 W Prospect Ave, Appleton, WI 54911, USA (920) 730-8204                                                              https://www.hearthstonemuseum.org/ Appleton\n                           Atlas Science Center Center 44.254991 -88.411417      425 W Water St, Appleton, WI 54911, USA (920) 380-7491                                                              http://www.atlassciencecenter.org/ Appleton\n                                   Trout Museum of Art 44.261658 -88.406541   111 W College Ave, Appleton, WI 54911, USA (920) 733-4089                                                                         http://troutmuseum.org/ Appleton\n                                          Plamann Park 44.326638 -88.385082  1375 E Broadway Dr, Appleton, WI 54913, USA (920) 832-4791                     https://www.outagamie.org/visitors/parks-trails-fishing-nature/plamann-park Appleton\n                                Appleton Memorial Park 44.290910 -88.379773  1620 E Witzke Blvd, Appleton, WI 54911, USA (920) 832-5905                                                              http://www.appletonparkandrec.org/ Appleton\nAppleton Historical Society Museum and Resource Center 44.262780 -88.402497     128 N Durkee St, Appleton, WI 54911, USA (920) 540-3699                                                                     http://appletonhistory.com/ Appleton\n                                     Building For Kids 44.262013 -88.407004   100 W College Ave, Appleton, WI 54911, USA (920) 734-3226                                                                 http://www.buildingforkids.org/ Appleton\n                                              Erb Park 44.278216 -88.402817  1800 N Morrison St, Appleton, WI 54911, USA (920) 832-5905              http://appletonparkandrec.org/parks,-pavilions-and-trails/community-parks/erb-park Appleton\n                                           Pierce Park 44.252469 -88.422204 1035 W Prospect Ave, Appleton, WI 54914, USA (920) 832-5905       http://www.appletonparkandrec.org/parks,-pavilions-and-trails/community-parks/pierce-park Appleton\n                         Butterfly Garden of Wisconsin 44.331363 -88.413920         N2550 WI-47, Appleton, WI 54913, USA (920) 733-2929                                                     http://www.butterflygardensofwisconsin.com/ Appleton\n                         Gordon Bubolz Nature Preserve 44.311604 -88.449619  4815 N Lynndale Dr, Appleton, WI 54913, USA (920) 731-6041                                                                  http://www.bubolzpreserve.org/ Appleton\n                                             City Park 44.264821 -88.399589   500 E Franklin St, Appleton, WI 54911, USA (920) 832-5905      http://www.appletonparkandrec.org/parks,-pavilions-and-trails/neighborhood-parks/city-park Appleton\n                                          Telulah Park 44.263819 -88.380847  1300 E Newberry St, Appleton, WI 54915, USA (920) 832-5905      http://www.appletonparkandrec.org/parks,-pavilions-and-trails/community-parks/telulah-park Appleton\n    Segway the Fox Tours-Appleton, Neenah, & Green Bay 44.265183 -88.398023   500 E Franklin St, Appleton, WI 54911, USA (920) 376-0256                                https://glidenew.com/segway-the-lake/appleton-fun-historic-tour/ Appleton\n                                             Lutz Park 44.249620 -88.421758      1320 S Lutz Dr, Appleton, WI 54914, USA (920) 832-5905      http://www.appletonparkandrec.org/parks,-pavilions-and-trails/neighborhood-parks/lutz-park Appleton\n                                          Peabody Park 44.268644 -88.388290  601 N Green Bay Rd, Appleton, WI 54911, USA (920) 832-5905   http://www.appletonparkandrec.org/parks,-pavilions-and-trails/neighborhood-parks/peabody-park Appleton\n                        Appleton Memorial Park Gardens 44.294011 -88.383593  1313 E Witzke Blvd, Appleton, WI 54911, USA (920) 832-5905                    https://appletonparkandrec.org/parks-pavilions-trails/scheig-center-gardens/ Appleton\n                                         Highview Park 44.305755 -88.404939   110 E Wayfarer Ln, Appleton, WI 54913, USA (920) 832-5905 http://www.appletonparkandrec.org/parks,-pavilions-and-trails/neighborhood-parks/highview-park- Appleton\n                                          Patriot Park 44.277110 -88.449594   2950 W Darling St, Appleton, WI 54914, USA (920) 832-1581                     https://www.grandchute.net/departments/parks-recreation/parks/patriot-park/ Appleton",
+          "keywords": [
+            "Appleton",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-011-restaurants-in-appleton",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:11",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Appleton",
+      "chunks": [
+        {
+          "heading": "Restaurants in Appleton",
+          "content": "                         Name  Average Cost                                               Cuisines  Aggregate Rating     City\n   Mikata Japanese Steakhouse            72                           Cafe, Pizza, Bakery, Italian               3.6 Appleton\n                     Brick 29            97      Desserts, Tea, BBQ, Cafe, American, Mediterranean               4.4 Appleton\n                       Colony           110 Pizza, BBQ, Fast Food, Chinese, Mediterranean, Seafood               3.8 Appleton\n                 Swati Snacks            84             Desserts, Bakery, BBQ, Fast Food, American               4.4 Appleton\n             Destination Live            30                                       Tea, Indian, BBQ               3.3 Appleton\n     Sardaar Ji Chaap & Rolls            39                               Bakery, Indian, Desserts               3.1 Appleton\n               Parantha Gurus            49                   Cafe, Mexican, BBQ, Chinese, Seafood               3.3 Appleton\nI-Kandy - Le Meridien Gurgaon            62                Desserts, Tea, Bakery, Chinese, Seafood               3.6 Appleton\n        Zync - Rosewood Hotel            58                              Chinese, Bakery, Desserts               3.0 Appleton\n                   Fat Lulu's            23                          Tea, Cafe, Seafood, Fast Food               3.7 Appleton\n      The Millionaire Express            56                        Chinese, French, BBQ, Fast Food               4.0 Appleton\n                       Southy           100            Tea, Pizza, Mexican, BBQ, Fast Food, Indian               2.6 Appleton\n           New Bakers Shoppee            15                                   Chinese, Pizza, Cafe               3.2 Appleton\n             A Piece of Paris            62                                    Cafe, BBQ, Desserts               3.6 Appleton\n                 Bliss Bakery            47                             Cafe, Bakery, BBQ, Seafood               3.8 Appleton\n            Hari Mirch Masala            81                             Tea, French, BBQ, Desserts               2.8 Appleton\n                     Side Wok            15                 Tea, Italian, Bakery, Chinese, Seafood               3.9 Appleton\n               Homely Delight            34    Desserts, Cafe, Mexican, Bakery, Fast Food, Chinese               3.1 Appleton\n       Shiv Shakti Restaurant            34                                     French, Pizza, BBQ               3.0 Appleton\n    Muradabadi Chicken Corner            97                           Cafe, Pizza, Bakery, Seafood               0.0 Appleton\n                       Subway            62             Desserts, Bakery, Chinese, Indian, Seafood               3.4 Appleton\n                  Asian Curry            62                        Tea, Fast Food, Bakery, Seafood               3.0 Appleton\n                Shanghai Moon            28                              Indian, Desserts, Seafood               2.6 Appleton\n              Da Pizza Bakers            58                   Tea, Italian, Bakery, Cafe, American               3.1 Appleton\n                          BTW            83                     Tea, Pizza, Italian, Mexican, Cafe               2.8 Appleton\n                   The Kathis            15              Desserts, Pizza, Mexican, Bakery, Seafood               2.4 Appleton\n                Mathew's Cafe            13                     Mexican, Bakery, BBQ, Cafe, Indian               3.7 Appleton\n                     Yaadgaar            26                                Cafe, Desserts, Italian               0.0 Appleton\n                 Gareeb Dhaba            64                          Fast Food, Cafe, BBQ, Seafood               0.0 Appleton\n                   Chawla's 2            84                            Cafe, Bakery, American, BBQ               0.0 Appleton\n                   Sadda Adda            77                                        Pizza, Desserts               3.5 Appleton\n             Green Chick Chop            60                  Tea, Italian, Bakery, Indian, Seafood               2.7 Appleton\n   Peshawari Delux Restaurant            30                                   Tea, French, Seafood               2.4 Appleton\n               Punjabi Chaska            45                                  Tea, Bakery, Desserts               3.0 Appleton\n                   Fire n Ice            22                                Mexican, BBQ, Fast Food               0.0 Appleton\n                      Valonia            73           Desserts, Fast Food, Cafe, American, Seafood               4.2 Appleton",
+          "keywords": [
+            "Appleton",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-011-accommodations-in-appleton",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:11",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Appleton",
+      "chunks": [
+        {
+          "heading": "Accommodations in Appleton",
+          "content": "                                                        NAME  price       room type                                    house_rules  minimum nights  maximum occupancy  review rate number     city\n                                  Nice bedroom in Brooklyn !  932.0    Private room                                        No pets             4.0                  1                 5.0 Appleton\n               Cozy room + bright apartment + rooftop lounge  666.0    Private room                                     No smoking             1.0                  1                 4.0 Appleton\n           Large Rooms with Bar and PullOut Prime Greenpoint  174.0    Private room             No visitors & No smoking & No pets             4.0                  2                 4.0 Appleton\n                           Luxury Apartment in Williamsburg!  436.0 Entire home/apt No parties & No children under 10 & No smoking             5.0                  2                 3.0 Appleton\nThoughtful UWS Studio w/ Gym near Central Park by Blueground 1105.0 Entire home/apt                                    No visitors            30.0                  8                 5.0 Appleton\n                      Brooklyn Duplex with Terrace near Park  156.0 Entire home/apt                                     No smoking            30.0                  2                 2.0 Appleton\n           Stylish, convenient, renovated- 2 min to subway -   64.0 Entire home/apt    No smoking & No pets & No children under 10             1.0                  2                 5.0 Appleton\n               One bedroom apartment in the heart of astoria  824.0 Entire home/apt                           No children under 10            14.0                  7                 2.0 Appleton\n                                               Cozy place II  737.0    Private room    No children under 10 & No parties & No pets             1.0                  1                 5.0 Appleton\n                               (B) Room for 2 - sharing bath  628.0    Private room                                        No pets             2.0                  1                 3.0 Appleton\n                              Bedroom in the East Village ❤️  743.0    Private room                                    No visitors             1.0                  2                 5.0 Appleton\n                 Private Room in Beautiful Williamsburg Apt.  690.0    Private room             No visitors & No children under 10             5.0                  2                 1.0 Appleton\n                                                    Cozy Inn  611.0    Private room                 No pets & No children under 10             1.0                  2                 4.0 Appleton\n              MODERN GARDEN 1BR IN NEWLY RENOVATED TOWNHOUSE  949.0 Entire home/apt                           No children under 10             2.0                  2                 5.0 Appleton",
+          "keywords": [
+            "Appleton",
+            "Accommodations"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-012-attractions-in-baltimore",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:12",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Attractions in Baltimore",
+      "chunks": [
+        {
+          "heading": "Attractions in Baltimore",
+          "content": "                                              Name  Latitude  Longitude                                             Address          Phone                                             Website      City\n                                 National Aquarium 39.285393 -76.608398            501 E Pratt St, Baltimore, MD 21202, USA (410) 576-3800                                   https://aqua.org/ Baltimore\nFort McHenry National Monument and Historic Shrine 39.264101 -76.580641           2400 E Fort Ave, Baltimore, MD 21230, USA (410) 962-4290                  https://www.nps.gov/fomc/index.htm Baltimore\n                            The Walters Art Museum 39.296425 -76.616498                            Baltimore, MD 21201, USA (410) 547-9000                             https://thewalters.org/ Baltimore\n                      Baltimore Museum of Industry 39.273957 -76.601616              1415 Key Hwy, Baltimore, MD 21230, USA (410) 727-4808                              http://www.thebmi.org/ Baltimore\n                       Historic Ships in Baltimore 39.285605 -76.611005            301 E Pratt St, Baltimore, MD 21202, USA (410) 539-1797                           http://historicships.org/ Baltimore\n                     The Maryland Zoo in Baltimore 39.322707 -76.649810               1 Safari Pl, Baltimore, MD 21217, USA (410) 396-7102                        https://www.marylandzoo.org/ Baltimore\n                Top of the World Observation Level 39.286017 -76.609475 401 E Pratt St 27th floor, Baltimore, MD 21202, USA (410) 837-8439                       http://www.viewbaltimore.org/ Baltimore\n                     American Visionary Art Museum 39.280420 -76.606895               800 Key Hwy, Baltimore, MD 21230, USA (410) 244-1900                               https://www.avam.org/ Baltimore\n                               B&O Railroad Museum 39.285468 -76.632612            901 W Pratt St, Baltimore, MD 21223, USA (410) 752-2490                              http://www.borail.org/ Baltimore\n                           Maryland Science Center 39.281415 -76.611917              601 Light St, Baltimore, MD 21230, USA (410) 685-2370                               http://www.mdsci.org/ Baltimore\n                           Baltimore Museum of Art 39.326167 -76.619344          10 Art Museum Dr, Baltimore, MD 21218, USA (443) 573-1700                                 https://artbma.org/ Baltimore\n                                      Inner Harbor 39.283033 -76.611734              401 Light St, Baltimore, MD 21202, USA        Unknown                                             Unknown Baltimore\n                                      Fell's Point 39.282234 -76.591677            1724 Thames St, Baltimore, MD 21231, USA (410) 675-6751                           http://www.fellspoint.us/ Baltimore\n                                     Pierce's Park 39.285333 -76.605509            701 E Pratt St, Baltimore, MD 21202, USA (443) 743-3308                                             Unknown Baltimore\n                            The Baltimore Basilica 39.294408 -76.616175          409 Cathedral St, Baltimore, MD 21201, USA (410) 727-3565             https://www.americasfirstcathedral.org/ Baltimore\n                                  Baltimore Harbor 39.285723 -76.611665               Harborplace, Baltimore, MD 21230, USA        Unknown                                             Unknown Baltimore\n                  Port Discovery Children's Museum 39.289069 -76.606289              35 Market Pl, Baltimore, MD 21202, USA (410) 727-8120                       http://www.portdiscovery.org/ Baltimore\n                                 Federal Hill Park 39.279721 -76.608462            300 Warren Ave, Baltimore, MD 21230, USA        Unknown                   http://www.federalhillonline.com/ Baltimore\n                                    Patterson Park 39.289684 -76.579878       2601 E Baltimore St, Baltimore, MD 21224, USA (410) 276-3676 https://bcrp.baltimorecity.gov/parks/patterson-park Baltimore\n                       Oriole Park at Camden Yards 39.283819 -76.621678           333 W Camden St, Baltimore, MD 21201, USA (410) 685-9800                          http://www.mlb.com/orioles Baltimore",
+          "keywords": [
+            "Baltimore",
+            "Attractions"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-012-restaurants-in-baltimore",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:12",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Restaurants in Baltimore",
+      "chunks": [
+        {
+          "heading": "Restaurants in Baltimore",
+          "content": "                                      Name  Average Cost                                           Cuisines  Aggregate Rating      City\n                                Los Pablos            47               Indian, BBQ, Cafe, American, Seafood               4.1 Baltimore\nMr. Dunderbak's Biergarten and Marketplatz            74                              Cafe, Pizza, American               4.9 Baltimore\n                             The Thai Bowl            66                      BBQ, Pizza, Desserts, Italian               3.5 Baltimore\n                                      Salt            56          Tea, Bakery, Fast Food, Chinese, American               4.2 Baltimore\n             Tresind - Nassima Royal Hotel            67                    Cafe, Pizza, American, Desserts               4.9 Baltimore\n                       Three Dots & A Dash            47              Cafe, Chinese, Mediterranean, Seafood               3.9 Baltimore\n                                Farzi Cafe            96                   Desserts, American, BBQ, Seafood               4.4 Baltimore\n                             The Retriever            12                             Seafood, Cafe, Italian               0.0 Baltimore\n                        Shiv Saras Vyanjan            65                      American, Desserts, Fast Food               2.9 Baltimore\n                     Rred Hot Asian Bistro            56                                        Tea, Bakery               3.5 Baltimore\n                                     bu愆no            93                     French, Pizza, Cafe, Fast Food               3.7 Baltimore\n                                 Mocha Bar            32                             BBQ, Desserts, Italian               4.2 Baltimore\n                 JAL - A Jungle Restaurant            46          Mexican, Bakery, Fast Food, Cafe, Seafood               4.1 Baltimore\n                                Chai Tapri            37                Fast Food, Seafood, Bakery, Italian               3.4 Baltimore\n                            The Sweeet Jar            39                   Bakery, Pizza, Desserts, Seafood               3.9 Baltimore\n                       Rajdhani Restaurant            30                 French, Pizza, Desserts, Fast Food               0.0 Baltimore\n                            28 Capri Italy            28                          Cafe, Desserts, Fast Food               3.9 Baltimore\n                                 RollsKing            20                                    Tea, Pizza, BBQ               4.1 Baltimore\n                            Tibb's Frankie            24                                     Tea, Cafe, BBQ               3.6 Baltimore\n                                    Amalfi            17                                  French, BBQ, Cafe               3.9 Baltimore\n                                New Kadimi            91           Desserts, Pizza, BBQ, Fast Food, Chinese               2.5 Baltimore\n                       The Viraj Food Zone            75                             Chinese, BBQ, Desserts               3.2 Baltimore\n                                   Chatore            59                    Bakery, Mexican, Pizza, Seafood               3.6 Baltimore\n                               Cook Du Kdu            86                 Desserts, Pizza, BBQ, Cafe, Indian               3.2 Baltimore\n                       Sunil Punjabi Dhaba            62                          Cafe, Pizza, BBQ, Seafood               0.0 Baltimore\n                                   Shaolin            64      Tea, Pizza, Indian, Bakery, American, Seafood               3.4 Baltimore\n                                  Bhukkhar            46         Desserts, Fast Food, Cafe, Indian, Seafood               3.9 Baltimore\n                                  Rajshree            13 Italian, Bakery, BBQ, Cafe, Mediterranean, Seafood               3.1 Baltimore\n                            Domino's Pizza            42                                   Tea, Indian, BBQ               3.4 Baltimore\n                                     Giani            16                   Bakery, Mediterranean, Fast Food               0.0 Baltimore\n                              King's Kabab            54         Tea, Italian, Fast Food, American, Seafood               3.2 Baltimore\n                                        G+            33          Desserts, Italian, Bakery, BBQ, Fast Food               0.0 Baltimore\n            Aggarwal Bikaner Sweets Corner            25                          Cafe, Desserts, Fast Food               0.0 Baltimore\n               Bikaner Sweets & Restaurant            74            Tea, Pizza, Mexican, BBQ, Mediterranean               0.0 Baltimore\n                       Aggarwal Restaurant            21          Desserts, Pizza, Mexican, Bakery, Seafood               3.1 Baltimore\n                           Sai Juice Point            90                                      BBQ, Desserts               3.1 Baltimore\n                 The Pirates Of China Town            31                            Chinese, Cafe, Desserts               3.2 Baltimore\n                          Green Chick Chop            15     Pizza, Mexican, Bakery, Mediterranean, Seafood               3.0 Baltimore\n                           Finest Pizzeria            72                                       Tea, Seafood               3.1 Baltimore\n                                   Berco's            21                 Fast Food, Bakery, Indian, Italian               3.7 Baltimore\n                       Shree Ganesh M Cafe            39                             Pizza, Indian, Seafood               3.1 Baltimore\n                  The Punjabiis Restro Bar            85                     French, Bakery, BBQ, Fast Food               4.0 Baltimore\n                 The Manhattan Fish Market            31                                   Tea, French, BBQ               4.0 Baltimore",
+          "keywords": [
+            "Baltimore",
+            "Restaurants"
+          ]
+        }
+      ]
+    },
+    {
+      "external_document_id": "travelplanner-validation-row-012-accommodations-in-baltimore",
+      "document_type": "benchmark_reference",
+      "source": "osunlp/TravelPlanner",
+      "source_id": "validation.csv:12",
+      "source_url": "https://huggingface.co/datasets/osunlp/TravelPlanner/tree/8736504ecfc31b7f8b7e40122873c337e83fff7c",
+      "title": "Accommodations in Baltimore",
+      "chunks": [
+        {
+          "heading": "Accommodations in Baltimore",
+          "content": "                                             NAME  price       room type                                     house_rules  minimum nights  maximum occupancy  review rate number      city\nBeautiful Double Room - Heart of Clinton Hill, BK  658.0    Private room  No smoking & No children under 10 & No parties             1.0                  2                 3.0 Baltimore\n   Contemporary Home Away from Home, Entire house  290.0 Entire home/apt                                     No visitors             2.0                  2                 3.0 Baltimore\n Cute Family Friendly Vintage Brownstone Living!!  920.0     Shared room               No parties & No children under 10             2.0                  1                 1.0 Baltimore\n                Cozy Bedroom in best area of FiDi  290.0    Private room                            No smoking & No pets             5.0                  1                 5.0 Baltimore\n          1 bedroom apartment on West 34th street  107.0 Entire home/apt                                     No visitors            30.0                  2                 5.0 Baltimore\n  Sun soaked private room with all the amenities!  605.0    Private room               No smoking & No children under 10             1.0                  1                 4.0 Baltimore\n                     Manhattan Sunny Private Room  650.0    Private room                                      No smoking             5.0                  1                 2.0 Baltimore\n       Bright Zen Bedroom with TV, nr JMZ Subways  726.0    Private room                                         No pets             4.0                  1                 5.0 Baltimore\n                Beautiful 2 bedroom private suite  289.0 Entire home/apt                            No children under 10            28.0                  3                 1.0 Baltimore\n                     Charming Duplex in Manhattan   72.0 Entire home/apt     No children under 10 & No pets & No smoking             3.0                  3                 1.0 Baltimore\n                Bronx Retreat in Contemporary Apt  660.0    Private room No parties & No visitors & No children under 10             2.0                  1                 4.0 Baltimore\nHistoric UES Penthouse/Rooftop Terrace by the MET  933.0 Entire home/apt           No parties & No visitors & No smoking             1.0                  9                 4.0 Baltimore\n            Private Room near Columbia University  975.0    Private room                                         No pets            20.0                  1                 2.0 Baltimore\n                     Spacious Williamsburg Beauty  687.0 Entire home/apt No visitors & No smoking & No children under 10             4.0                  2                 3.0 Baltimore\n    Large Brooklyn Rm- Prospect Park & F/G Train!  718.0     Shared room              No visitors & No pets & No smoking             2.0                  1                 4.0 Baltimore\n         Luxury room w/ balcony, 5 mins to subway   84.0    Private room                         No smoking & No parties             5.0                  2                 3.0 Baltimore\n Cozy Shared Studio 10 minutes from Times Square!  373.0     Shared room  No children under 10 & No parties & No smoking             1.0                  1                 2.0 Baltimore",
+          "keywords": [
+            "Baltimore",
+            "Accommodations"
+          ]
+        }
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "case_id": "travelplanner-validation-row-000-plan",
+      "query": "Please create a travel plan for me where I'll be departing from Washington and heading to Myrtle Beach for a 3-day trip from March 13th to March 15th, 2022. Can you help me keep this journey within a budget of $1,400?",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-000-accommodations-in-myrtle-beach#chunk-0",
+        "travelplanner-validation-row-000-attractions-in-myrtle-beach#chunk-0",
+        "travelplanner-validation-row-000-restaurants-in-myrtle-beach#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-000-accommodations-in-myrtle-beach#chunk-0",
+        "travelplanner-validation-row-000-attractions-in-myrtle-beach#chunk-0",
+        "travelplanner-validation-row-000-restaurants-in-myrtle-beach#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 0,
+        "destination": "Myrtle Beach",
+        "days": 3,
+        "budget": 1400.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-001-plan",
+      "query": "Please draw up a 3-day travel itinerary for one person, beginning in Oakland and heading to Tucson from March 15th to March 17th, 2022, with a budget of $1,400.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-001-accommodations-in-tucson#chunk-0",
+        "travelplanner-validation-row-001-attractions-in-tucson#chunk-0",
+        "travelplanner-validation-row-001-restaurants-in-tucson#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-001-accommodations-in-tucson#chunk-0",
+        "travelplanner-validation-row-001-attractions-in-tucson#chunk-0",
+        "travelplanner-validation-row-001-restaurants-in-tucson#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 1,
+        "destination": "Tucson",
+        "days": 3,
+        "budget": 1400.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-002-plan",
+      "query": "Can you help me with a travel plan departing from Buffalo to Atlanta for a duration of 3 days, specifically from March 2nd to March 4th, 2022? I plan to travel alone and my planned budget for the trip is around $1,100.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-002-accommodations-in-atlanta#chunk-0",
+        "travelplanner-validation-row-002-attractions-in-atlanta#chunk-0",
+        "travelplanner-validation-row-002-restaurants-in-atlanta#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-002-accommodations-in-atlanta#chunk-0",
+        "travelplanner-validation-row-002-attractions-in-atlanta#chunk-0",
+        "travelplanner-validation-row-002-restaurants-in-atlanta#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 2,
+        "destination": "Atlanta",
+        "days": 3,
+        "budget": 1100.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-003-plan",
+      "query": "Could you arrange a 3-day solo trip for me starting from Ontario and heading to Honolulu spanning from March 4th to March 6th, 2022, with a total budget of $3,200?",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-003-accommodations-in-honolulu#chunk-0",
+        "travelplanner-validation-row-003-attractions-in-honolulu#chunk-0",
+        "travelplanner-validation-row-003-restaurants-in-honolulu#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-003-accommodations-in-honolulu#chunk-0",
+        "travelplanner-validation-row-003-attractions-in-honolulu#chunk-0",
+        "travelplanner-validation-row-003-restaurants-in-honolulu#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 3,
+        "destination": "Honolulu",
+        "days": 3,
+        "budget": 3200.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-005-plan",
+      "query": "Please assist in crafting a travel plan for a solo traveller, journeying from Detroit to San Diego for 3 days, from March 5th to March 7th, 2022. The travel plan should accommodate a total budget of $3,000.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-005-accommodations-in-san-diego#chunk-0",
+        "travelplanner-validation-row-005-attractions-in-san-diego#chunk-0",
+        "travelplanner-validation-row-005-restaurants-in-san-diego#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-005-accommodations-in-san-diego#chunk-0",
+        "travelplanner-validation-row-005-attractions-in-san-diego#chunk-0",
+        "travelplanner-validation-row-005-restaurants-in-san-diego#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 5,
+        "destination": "San Diego",
+        "days": 3,
+        "budget": 3000.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-006-plan",
+      "query": "Please create a travel plan for a 3-day trip from Missoula to Dallas scheduled from March 23rd to March 25th, 2022. The budget for this trip is set at $1,900.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-006-accommodations-in-dallas#chunk-0",
+        "travelplanner-validation-row-006-attractions-in-dallas#chunk-0",
+        "travelplanner-validation-row-006-restaurants-in-dallas#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-006-accommodations-in-dallas#chunk-0",
+        "travelplanner-validation-row-006-attractions-in-dallas#chunk-0",
+        "travelplanner-validation-row-006-restaurants-in-dallas#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 6,
+        "destination": "Dallas",
+        "days": 3,
+        "budget": 1900.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-007-plan",
+      "query": "Could you arrange a 3-day travel from Boston to San Juan, Puerto Rico, for one person between March 28th and March 30th, 2022? The budget for this trip is set to $1,400.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-007-accommodations-in-san-juan#chunk-0",
+        "travelplanner-validation-row-007-attractions-in-san-juan#chunk-0",
+        "travelplanner-validation-row-007-restaurants-in-san-juan#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-007-accommodations-in-san-juan#chunk-0",
+        "travelplanner-validation-row-007-attractions-in-san-juan#chunk-0",
+        "travelplanner-validation-row-007-restaurants-in-san-juan#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 7,
+        "destination": "San Juan",
+        "days": 3,
+        "budget": 1400.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-008-plan",
+      "query": "Can you help me plan a trip that begins in Sarasota and ends in Philadelphia? The trip should span over 3 days, from March 2nd to March 4th, 2022, and adhere to a budget of $2,100.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-008-accommodations-in-philadelphia#chunk-0",
+        "travelplanner-validation-row-008-attractions-in-philadelphia#chunk-0",
+        "travelplanner-validation-row-008-restaurants-in-philadelphia#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-008-accommodations-in-philadelphia#chunk-0",
+        "travelplanner-validation-row-008-attractions-in-philadelphia#chunk-0",
+        "travelplanner-validation-row-008-restaurants-in-philadelphia#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 8,
+        "destination": "Philadelphia",
+        "days": 3,
+        "budget": 2100.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-009-plan",
+      "query": "Could you help me create a travel plan starting from Minneapolis to St. Louis, spanning 3 days from March 15th to March 17th, 2022? The budget is set at $1,000.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-009-accommodations-in-st.-louis#chunk-0",
+        "travelplanner-validation-row-009-attractions-in-st.-louis#chunk-0",
+        "travelplanner-validation-row-009-restaurants-in-st.-louis#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-009-accommodations-in-st.-louis#chunk-0",
+        "travelplanner-validation-row-009-attractions-in-st.-louis#chunk-0",
+        "travelplanner-validation-row-009-restaurants-in-st.-louis#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 9,
+        "destination": "St. Louis",
+        "days": 3,
+        "budget": 1000.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-010-plan",
+      "query": "Please create a travel plan departing from Minneapolis and heading to Seattle for 3 days, from March 29th to March 31st, 2022, with a budget of $1,800.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-010-accommodations-in-seattle#chunk-0",
+        "travelplanner-validation-row-010-attractions-in-seattle#chunk-0",
+        "travelplanner-validation-row-010-restaurants-in-seattle#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-010-accommodations-in-seattle#chunk-0",
+        "travelplanner-validation-row-010-attractions-in-seattle#chunk-0",
+        "travelplanner-validation-row-010-restaurants-in-seattle#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 10,
+        "destination": "Seattle",
+        "days": 3,
+        "budget": 1800.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-011-plan",
+      "query": "Please devise a travel plan that starts from St. Petersburg and heads to Appleton, taking place across 3 days from March 19th to March 21st, 2022. This itinerary is for an individual, with a budget allocated at $1,200.",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-011-accommodations-in-appleton#chunk-0",
+        "travelplanner-validation-row-011-attractions-in-appleton#chunk-0",
+        "travelplanner-validation-row-011-restaurants-in-appleton#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-011-accommodations-in-appleton#chunk-0",
+        "travelplanner-validation-row-011-attractions-in-appleton#chunk-0",
+        "travelplanner-validation-row-011-restaurants-in-appleton#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 11,
+        "destination": "Appleton",
+        "days": 3,
+        "budget": 1200.0,
+        "level": "easy"
+      }
+    },
+    {
+      "case_id": "travelplanner-validation-row-012-plan",
+      "query": "Can you assist with a travel plan for one person departing from Pittsburgh to Baltimore for 3 days, from March 4th to March 6th, 2022, with a maximum budget of $1,200?",
+      "relevant_chunk_ids": [
+        "travelplanner-validation-row-012-accommodations-in-baltimore#chunk-0",
+        "travelplanner-validation-row-012-attractions-in-baltimore#chunk-0",
+        "travelplanner-validation-row-012-restaurants-in-baltimore#chunk-0"
+      ],
+      "required_citation_ids": [
+        "travelplanner-validation-row-012-accommodations-in-baltimore#chunk-0",
+        "travelplanner-validation-row-012-attractions-in-baltimore#chunk-0",
+        "travelplanner-validation-row-012-restaurants-in-baltimore#chunk-0"
+      ],
+      "answerable": true,
+      "metadata": {
+        "origin": "external_dataset",
+        "row": 12,
+        "destination": "Baltimore",
+        "days": 3,
+        "budget": 1200.0,
+        "level": "easy"
+      }
+    }
+  ],
+  "selection": {
+    "rows": [
+      0,
+      1,
+      2,
+      3,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "included_reference_types": [
+      "Attractions",
+      "Restaurants",
+      "Accommodations"
+    ],
+    "excluded_reference_types": [
+      "Flight",
+      "Self-driving",
+      "Taxi"
+    ],
+    "excluded_reason": "TripMate treats dynamic transport facts as realtime-tool facts, not RAG knowledge."
+  }
+}
