@@ -14,7 +14,8 @@ FastAPI API ── ToolGateway 信任边界 ── 只读查询 / 待确认动�
   ▼
 AgentRun + LangGraph Worker
   ├─ 意图识别 → 槽位排序 → 工具选择 → 多方案规划 → 约束校验
-  ├─ PostgreSQL checkpoint / lease / CAS / idempotency
+  ├─ PostgreSQL：Run 元数据、lease、CAS、幂等记录
+  ├─ Redis Stack：LangGraph checkpoint、短期记忆和恢复索引
   └─ Run events → SSE（支持 Last-Event-ID 续接）
   │
   ├─ PostgreSQL：库存、价格快照、预约、动作、事件和 Run 的权威事实
