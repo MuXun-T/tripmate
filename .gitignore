@@ -14,3 +14,8 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+
+# v1 planner
+third_party/
+.venv-planner/
+runs/
