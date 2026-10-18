@@ -98,7 +98,7 @@ class LLMClient:
                 break
             except RETRYABLE as exc:
                 if attempt >= self.cfg.max_retries:
-                    raise LLMRequestError(f"retries exhausted: {type(exc).__name__}") from exc
+                    raise LLMRequestError(f"retries exhausted: {type(exc).__name__}: {str(exc)[:200]}") from exc
                 with self._lock:
                     jitter = self._rng.uniform(0, 0.5)
                 self._sleep(BACKOFF_SECONDS[min(attempt, len(BACKOFF_SECONDS) - 1)] + jitter)

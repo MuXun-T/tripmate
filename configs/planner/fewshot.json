@@ -1,0 +1,15 @@
+[
+  {"uid": "m20241028164637595271",
+   "message": "当前位置杭州。我一个人想去上海玩2天，想尝试当地的特色菜，请给我一个旅行规划。",
+   "output": {"spec": {"start_city": "杭州", "target_city": "上海", "days": 2, "people_number": 1,
+                       "cuisines": ["本帮菜"]},
+              "changed_fields": ["start_city", "target_city", "days", "people_number", "cuisines"],
+              "resolved_references": [], "preference_candidates": []}},
+  {"uid": "h20241204223651527057",
+   "message": "当前位置重庆。我带我孩子想去苏州玩3天，住一间大床房，酒店要有儿童乐园，请给我一个旅行规划。",
+   "output": {"spec": {"start_city": "重庆", "target_city": "苏州", "days": 3, "people_number": 2,
+                       "rooms": 1, "room_type": 1, "hotel_features": ["儿童乐园"]},
+              "changed_fields": ["start_city", "target_city", "days", "people_number", "rooms", "room_type",
+                                 "hotel_features"],
+              "resolved_references": [], "preference_candidates": []}}
+]

@@ -3,7 +3,13 @@
 import subprocess
 
 from chinatravel.environment.language import city_names
-from chinatravel.environment.tools import Accommodations, Attractions, IntercityTransport, Restaurants, Transportation
+from chinatravel.environment.tools import (
+    Accommodations,
+    Attractions,
+    IntercityTransport,
+    Restaurants,
+    Transportation,
+)
 
 from tripmate_planner.paths import ROOT
 
@@ -20,9 +26,9 @@ for city in city_names("zh"):
     print(f"{city}: attractions={n_a} restaurants={n_r} accommodations={n_h}")
 print("totals:", totals, "paper: 3413/4655/4124")
 
-from datasets import load_dataset  # noqa: E402
-
 import json  # noqa: E402
+
+from datasets import load_dataset  # noqa: E402
 
 q = json.loads((ROOT / "configs/planner/versions.json").read_text())["query_dataset"]
 ds = load_dataset(q["repo"], name="default", revision=q["revision"])
