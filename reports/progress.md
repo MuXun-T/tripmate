@@ -11,3 +11,4 @@
 | 2026-10-18 | T1.1 | (本提交) | 枚举：景点类型 14、菜系 42、酒店特色 74；TripSpec + 规范化 | 0 | 0.6348 | |
 | 2026-10-18 | T1.2 | p1-extract-devmini-llm, -v2 | 规则解析 20 例 + 改写单测通过；dev_mini F1 0.967→0.990（修正单程交通沿用） | 0.093 | 0.6348 | 偏差：新增 meal_price_max_per_person；v1 有 8 条网络瞬断导致退回规则 |
 | 2026-10-18 | T1.3 | p1-extract-dev-rule-v2, p1-extract-dev-llm | dev：rule F1 0.950/EM 0.756；llm+rule F1 0.984/EM 0.909；覆盖率 0.999 | 0.539 | 0.6348 | 报告 reports/p1_extraction_dev.md |
+| 2026-10-18 | T1.4 | (本提交) | TripSpec→DSL 编译 + 官方执行器；等价性测试通过（16 个同域计划 + 费用×10 变体，30+ 个 uid） | 0 | 0.64 | 新增自定义模板：avoid_cuisines |
