@@ -14,3 +14,6 @@
 | 2026-10-18 | T1.4 | (本提交) | TripSpec→DSL 编译 + 官方执行器；等价性测试通过（16 个同域计划 + 费用×10 变体，30+ 个 uid） | 0 | 0.64 | 新增自定义模板：avoid_cuisines |
 | 2026-10-18 | T0.5 | p0-rulenesy-easy20 | 封装与官方 CLI 6 项指标一致（easy 300，RuleNeSy 20 条）；RuleNeSy 不依赖 oracle，可作 test 零成本基线 | 0 | 0.6348 | 偏差：官方 eval_exp 需两处加载器 monkeypatch（见 reports/p0_metric_consistency.md） |
 | 2026-10-18 | T2.1–T2.6 | p2-retrieval-dev | 语料 11,934；hybrid nDCG@10 0.624（bm25 0.502 / dense 0.459）；重排 +0.152 但 P95 超限→关闭；召回后过滤 0 不足（负结果） | 0 | 0.64 | 报告 reports/p2_retrieval_dev.md；POI-Ret test 已构建、未评测 |
+| 2026-10-19 | T3.6（进行中） | p3-full-dev | dev 全量 full（旧权重）：FPR 94.89 [92.67, 96.89]，DR 99.33，EPR-macro 99.11，门禁通过 | 0.008 | 1.1986 | 期间修正：允许跨夜城际车次、取消返程 14:00 限制和一日游 4 小时限制 |
+| 2026-10-19 | T3.6 网格 | p3-grid_*-devmini | w_transit=0.01 三组均 100%；并列时保持默认 w_price=0.002，写回 full.json | 0.01 | 1.1986 | 60 条样本差 2 条属噪声，以 dev 全量复核为准 |
+| 2026-10-19 | T4.1–T4.4 | data/mt | SQLite 记忆库 + 15 场景单测；CLI；MT dev 60/60、test 154/154（test 仅 1 条含偏好） | 0.55 | 1.1986 | 人工抽检 dev 30 条：2 条交通方式被篡改，已加检查并重新生成；报告 reports/p4_mt_build.md |

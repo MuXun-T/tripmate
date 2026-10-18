@@ -1,0 +1,15 @@
+{
+ "split": "dev",
+ "source": 60,
+ "kept": 60,
+ "dropped": 0,
+ "attempts": {
+  "1": 41,
+  "2": 19
+ },
+ "with_preference": 13,
+ "turns": {
+  "3": 50,
+  "2": 10
+ }
+}
