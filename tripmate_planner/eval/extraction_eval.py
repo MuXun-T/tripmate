@@ -10,7 +10,7 @@ from typing import Any
 from tripmate_planner.config import config_hash, load_config
 from tripmate_planner.data.splits import load_queries
 from tripmate_planner.env.enums import get_enums
-from tripmate_planner.eval.labels import Label, oracle_labels, spec_to_labels
+from tripmate_planner.eval.labels import Label, gold_from_record, spec_to_labels
 from tripmate_planner.eval.oracle import load_oracle_records
 from tripmate_planner.llm.client import build_client
 from tripmate_planner.paths import RUNS
@@ -83,7 +83,7 @@ def main() -> None:
         rows = list(pool.map(run_one, queries))
     gold, pred, nd, unc = {}, {}, {}, {}
     for row in rows:
-        g, n_nd, u = oracle_labels(records[row["uid"]]["hard_logic_py"])
+        g, n_nd, u = gold_from_record(records[row["uid"]])
         gold[row["uid"]], nd[row["uid"]], unc[row["uid"]] = g, n_nd, u
         pred[row["uid"]] = spec_to_labels(TripSpec.model_validate(row["spec"]))
     metrics = extraction_metrics(gold, pred, nd, unc)

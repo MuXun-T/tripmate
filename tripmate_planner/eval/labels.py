@@ -85,3 +85,8 @@ def spec_to_labels(spec: TripSpec) -> set[Label]:
     if spec.must_stay_at:
         labels.add(Label("must_stay_at", spec.must_stay_at))
     return labels
+
+
+def gold_from_record(record: dict) -> tuple[set[Label], int, list[str]]:
+    """Gold labels for one oracle record (the only place that reads the oracle field)."""
+    return oracle_labels(record["hard_logic_py"])
