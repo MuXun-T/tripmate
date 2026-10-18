@@ -421,7 +421,7 @@ class RunWorker:
 
     async def _invoke_graph(self, claim: dict[str, Any]) -> dict[str, Any]:
         config: RunnableConfig = {
-            "configurable": {"thread_id": claim["thread_id"]},
+            "configurable": {"thread_id": f"{claim['thread_id']}:run:{claim['run_id']}"},
             "recursion_limit": 50,
         }
         snapshot = await self.graph.aget_state(config)
