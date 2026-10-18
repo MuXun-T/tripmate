@@ -12,6 +12,7 @@ export SENTENCE_TRANSFORMERS_HOME="$HF_HOME/sentence-transformers"
 export TORCH_HOME="$TRIPMATE_ROOT/.cache/torch"
 export XDG_CACHE_HOME="$TRIPMATE_ROOT/.cache/xdg"
 export TMPDIR="$TRIPMATE_ROOT/.deps-tmp"
+export HF_HUB_DISABLE_XET=1
 export TOKENIZERS_PARALLELISM=false
 export OMP_NUM_THREADS=8
 mkdir -p "$UV_CACHE_DIR" "$HF_HOME" "$TORCH_HOME" "$XDG_CACHE_HOME" "$TMPDIR" "$TRIPMATE_ROOT/.cache/llm" "$TRIPMATE_ROOT/.cache/jieba"

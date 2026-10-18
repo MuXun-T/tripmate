@@ -1,0 +1,25 @@
+{
+  "chinatravel_git": "f445e0011f42594fcc29b8c752ece06ded9a8218",
+  "query_dataset": {
+    "repo": "LAMDA-NeSy/ChinaTravel",
+    "revision": "a7d893afb628af6ca181625b6c7cca2d60a6bccb"
+  },
+  "sandbox_dataset": {
+    "repo": "LAMDA-NeSy/ChinaTravel-Sandbox",
+    "revision": "885c7dad143bf040238ddca263f4788d582ee0f4"
+  },
+  "dense_model": {
+    "repo": "BAAI/bge-small-zh-v1.5",
+    "revision": "7999e1d3359715c523056ef9478215996d62a620"
+  },
+  "rerank_model": {
+    "repo": "BAAI/bge-reranker-base",
+    "revision": "2cfc18c9415c912f9d8155881c133215df768a70"
+  },
+  "model_paths": {
+    "dense_model": "/media/zzq/新加卷/tripmate/.cache/hf/hub/models--BAAI--bge-small-zh-v1.5/snapshots/7999e1d3359715c523056ef9478215996d62a620",
+    "rerank_model": "/media/zzq/新加卷/tripmate/.cache/models/bge-reranker-base"
+  },
+  "python": "3.12.15",
+  "torch": "2.5.1+cpu"
+}

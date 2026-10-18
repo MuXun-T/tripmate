@@ -1,0 +1,14 @@
+# v1 planner 依赖（官方包依赖另由 third_party/ChinaTravel/requirements.txt 安装）
+torch==2.5.1+cpu
+sentence-transformers==3.3.1
+transformers==4.46.3
+bm25s==0.2.14
+jieba==0.42.1
+langgraph==1.0.10
+openai==1.109.1
+pydantic==2.11.7
+pytest==8.4.1
+ruff==0.12.2
+mypy==1.20.2
+# 传递依赖：官方包固定 numpy==1.26.4，pyarrow>=22 需要 numpy 2
+pyarrow==21.0.0
