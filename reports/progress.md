@@ -12,3 +12,4 @@
 | 2026-10-18 | T1.2 | p1-extract-devmini-llm, -v2 | 规则解析 20 例 + 改写单测通过；dev_mini F1 0.967→0.990（修正单程交通沿用） | 0.093 | 0.6348 | 偏差：新增 meal_price_max_per_person；v1 有 8 条网络瞬断导致退回规则 |
 | 2026-10-18 | T1.3 | p1-extract-dev-rule-v2, p1-extract-dev-llm | dev：rule F1 0.950/EM 0.756；llm+rule F1 0.984/EM 0.909；覆盖率 0.999 | 0.539 | 0.6348 | 报告 reports/p1_extraction_dev.md |
 | 2026-10-18 | T1.4 | (本提交) | TripSpec→DSL 编译 + 官方执行器；等价性测试通过（16 个同域计划 + 费用×10 变体，30+ 个 uid） | 0 | 0.64 | 新增自定义模板：avoid_cuisines |
+| 2026-10-18 | T0.5 | p0-rulenesy-easy20 | 封装与官方 CLI 6 项指标一致（easy 300，RuleNeSy 20 条）；RuleNeSy 不依赖 oracle，可作 test 零成本基线 | 0 | 0.6348 | 偏差：官方 eval_exp 需两处加载器 monkeypatch（见 reports/p0_metric_consistency.md） |

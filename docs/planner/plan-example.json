@@ -1,0 +1,290 @@
+{
+ "people_number": 1,
+ "start_city": "广州",
+ "target_city": "深圳",
+ "itinerary": [
+  {
+   "day": 1,
+   "activities": [
+    {
+     "start_time": "05:03",
+     "end_time": "06:55",
+     "start": "广州北站",
+     "end": "深圳东站",
+     "price": 41.68,
+     "cost": 41.68,
+     "tickets": 1,
+     "transports": [],
+     "TrainID": "K9259",
+     "type": "train"
+    },
+    {
+     "position": "宝安公园",
+     "type": "attraction",
+     "price": 0,
+     "cost": 0,
+     "start_time": "07:57",
+     "end_time": "09:27",
+     "transports": [
+      {
+       "start": "深圳东站",
+       "end": "布吉-地铁站",
+       "mode": "walk",
+       "start_time": "06:55",
+       "end_time": "06:58",
+       "cost": 0,
+       "distance": 0.28,
+       "price": 0
+      },
+      {
+       "start": "布吉-地铁站",
+       "end": "兴东-地铁站",
+       "mode": "metro",
+       "start_time": "06:58",
+       "end_time": "07:39",
+       "cost": 5,
+       "distance": 20.91,
+       "price": 5,
+       "tickets": 1
+      },
+      {
+       "start": "兴东-地铁站",
+       "end": "宝安公园",
+       "mode": "walk",
+       "start_time": "07:39",
+       "end_time": "07:57",
+       "cost": 0,
+       "distance": 1.52,
+       "price": 0
+      }
+     ],
+     "tickets": 1
+    },
+    {
+     "position": "深圳蛇口海洋科普馆",
+     "type": "attraction",
+     "price": 0,
+     "cost": 0,
+     "start_time": "10:11",
+     "end_time": "11:30",
+     "transports": [
+      {
+       "start": "宝安公园",
+       "end": "兴东-地铁站",
+       "mode": "walk",
+       "start_time": "09:27",
+       "end_time": "09:45",
+       "cost": 0,
+       "distance": 1.52,
+       "price": 0
+      },
+      {
+       "start": "兴东-地铁站",
+       "end": "湾厦-地铁站",
+       "mode": "metro",
+       "start_time": "09:45",
+       "end_time": "10:05",
+       "cost": 4,
+       "distance": 10.0,
+       "price": 4,
+       "tickets": 1
+      },
+      {
+       "start": "湾厦-地铁站",
+       "end": "深圳蛇口海洋科普馆",
+       "mode": "walk",
+       "start_time": "10:05",
+       "end_time": "10:11",
+       "cost": 0,
+       "distance": 0.55,
+       "price": 0
+      }
+     ],
+     "tickets": 1
+    },
+    {
+     "position": "克茗冰室(中心城店)",
+     "type": "lunch",
+     "price": 57,
+     "cost": 57,
+     "start_time": "12:04",
+     "end_time": "13:04",
+     "transports": [
+      {
+       "start": "深圳蛇口海洋科普馆",
+       "end": "湾厦-地铁站",
+       "mode": "walk",
+       "start_time": "11:30",
+       "end_time": "11:36",
+       "cost": 0,
+       "distance": 0.55,
+       "price": 0
+      },
+      {
+       "start": "湾厦-地铁站",
+       "end": "会展中心-地铁站",
+       "mode": "metro",
+       "start_time": "11:36",
+       "end_time": "12:02",
+       "cost": 4,
+       "distance": 13.41,
+       "price": 4,
+       "tickets": 1
+      },
+      {
+       "start": "会展中心-地铁站",
+       "end": "克茗冰室(中心城店)",
+       "mode": "walk",
+       "start_time": "12:02",
+       "end_time": "12:04",
+       "cost": 0,
+       "distance": 0.21,
+       "price": 0
+      }
+     ]
+    },
+    {
+     "position": "O·POWER文化艺术中心",
+     "type": "attraction",
+     "price": 0,
+     "cost": 0,
+     "start_time": "13:27",
+     "end_time": "14:57",
+     "transports": [
+      {
+       "start": "克茗冰室(中心城店)",
+       "end": "会展中心-地铁站",
+       "mode": "walk",
+       "start_time": "13:04",
+       "end_time": "13:06",
+       "cost": 0,
+       "distance": 0.21,
+       "price": 0
+      },
+      {
+       "start": "会展中心-地铁站",
+       "end": "深云-地铁站",
+       "mode": "metro",
+       "start_time": "13:06",
+       "end_time": "13:20",
+       "cost": 3,
+       "distance": 7.34,
+       "price": 3,
+       "tickets": 1
+      },
+      {
+       "start": "深云-地铁站",
+       "end": "O·POWER文化艺术中心",
+       "mode": "walk",
+       "start_time": "13:20",
+       "end_time": "13:27",
+       "cost": 0,
+       "distance": 0.59,
+       "price": 0
+      }
+     ],
+     "tickets": 1
+    },
+    {
+     "position": "紫荆坊香港国际风情街",
+     "type": "attraction",
+     "price": 0,
+     "cost": 0,
+     "start_time": "15:22",
+     "end_time": "16:52",
+     "transports": [
+      {
+       "start": "O·POWER文化艺术中心",
+       "end": "深云-地铁站",
+       "mode": "walk",
+       "start_time": "14:57",
+       "end_time": "15:04",
+       "cost": 0,
+       "distance": 0.59,
+       "price": 0
+      },
+      {
+       "start": "深云-地铁站",
+       "end": "福田口岸-地铁站",
+       "mode": "metro",
+       "start_time": "15:04",
+       "end_time": "15:21",
+       "cost": 3,
+       "distance": 8.75,
+       "price": 3,
+       "tickets": 1
+      },
+      {
+       "start": "福田口岸-地铁站",
+       "end": "紫荆坊香港国际风情街",
+       "mode": "walk",
+       "start_time": "15:21",
+       "end_time": "15:22",
+       "cost": 0,
+       "distance": 0.14,
+       "price": 0
+      }
+     ],
+     "tickets": 1
+    },
+    {
+     "start_time": "19:14",
+     "end_time": "19:50",
+     "start": "深圳北站",
+     "end": "广州南站",
+     "price": 67.73,
+     "cost": 67.73,
+     "tickets": 1,
+     "transports": [
+      {
+       "start": "紫荆坊香港国际风情街",
+       "end": "福田口岸-地铁站",
+       "mode": "walk",
+       "start_time": "16:52",
+       "end_time": "16:53",
+       "cost": 0,
+       "distance": 0.14,
+       "price": 0
+      },
+      {
+       "start": "福田口岸-地铁站",
+       "end": "深圳北站-地铁站",
+       "mode": "metro",
+       "start_time": "16:53",
+       "end_time": "17:15",
+       "cost": 4,
+       "distance": 11.04,
+       "price": 4,
+       "tickets": 1
+      },
+      {
+       "start": "深圳北站-地铁站",
+       "end": "深圳北站",
+       "mode": "walk",
+       "start_time": "17:15",
+       "end_time": "17:16",
+       "cost": 0,
+       "distance": 0.15,
+       "price": 0
+      }
+     ],
+     "TrainID": "G9642",
+     "type": "train"
+    }
+   ]
+  }
+ ],
+ "search_time_sec": 2.04903244972229,
+ "llm_inference_time_sec": 0,
+ "input_token_count": 0,
+ "output_token_count": 0,
+ "input_token_maxx": 0,
+ "llm_rec_count": 0,
+ "llm_rec_format_error_count": 0,
+ "search_nodes": 1786,
+ "backtrack_count": 53,
+ "constraints_validation_count": 1,
+ "commonsense_pass_count": 1,
+ "logical_pass_count": 1,
+ "all_constraints_pass": 1
+}
