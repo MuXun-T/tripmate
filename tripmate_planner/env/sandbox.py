@@ -29,6 +29,9 @@ class Sandbox:
             self.accommodations = Accommodations()
             self.intercity = IntercityTransport()
             self.transport = Transportation()
+            from chinatravel.environment.tools import Poi
+
+            self.poi = Poi()
         finally:
             os.chdir(old)
 
@@ -62,3 +65,16 @@ class Sandbox:
 @lru_cache(maxsize=1)
 def get_sandbox() -> Sandbox:
     return Sandbox()
+
+
+def coords(city: str, name: str) -> tuple[float, float] | None:
+    return _coords(city, name)
+
+
+@lru_cache(maxsize=100_000)
+def _coords(city: str, name: str) -> tuple[float, float] | None:
+    try:
+        lat, lon = get_sandbox().poi.search(city, name)
+        return float(lat), float(lon)
+    except Exception:
+        return None

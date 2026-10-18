@@ -13,3 +13,4 @@
 | 2026-10-18 | T1.3 | p1-extract-dev-rule-v2, p1-extract-dev-llm | dev：rule F1 0.950/EM 0.756；llm+rule F1 0.984/EM 0.909；覆盖率 0.999 | 0.539 | 0.6348 | 报告 reports/p1_extraction_dev.md |
 | 2026-10-18 | T1.4 | (本提交) | TripSpec→DSL 编译 + 官方执行器；等价性测试通过（16 个同域计划 + 费用×10 变体，30+ 个 uid） | 0 | 0.64 | 新增自定义模板：avoid_cuisines |
 | 2026-10-18 | T0.5 | p0-rulenesy-easy20 | 封装与官方 CLI 6 项指标一致（easy 300，RuleNeSy 20 条）；RuleNeSy 不依赖 oracle，可作 test 零成本基线 | 0 | 0.6348 | 偏差：官方 eval_exp 需两处加载器 monkeypatch（见 reports/p0_metric_consistency.md） |
+| 2026-10-18 | T2.1–T2.6 | p2-retrieval-dev | 语料 11,934；hybrid nDCG@10 0.624（bm25 0.502 / dense 0.459）；重排 +0.152 但 P95 超限→关闭；召回后过滤 0 不足（负结果） | 0 | 0.64 | 报告 reports/p2_retrieval_dev.md；POI-Ret test 已构建、未评测 |
