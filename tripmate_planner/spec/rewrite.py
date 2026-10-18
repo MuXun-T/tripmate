@@ -121,7 +121,7 @@ def build_messages(message: str, *, prev_spec: TripSpec | None, prefs: list[dict
 def _merge(rule: TripSpec, llm: TripSpecCore, prev_spec: TripSpec | None,
            changed: list[str]) -> tuple[TripSpec, list[str]]:
     data = llm.model_dump()
-    sources = {k: "llm" for k, v in data.items() if v not in (None, [], "normal")}
+    sources: dict[str, Any] = {k: "llm" for k, v in data.items() if v not in (None, [], "normal")}
     issues: list[str] = []
     for key in RULE_PRIORITY_FIELDS:
         rule_value = getattr(rule, key)

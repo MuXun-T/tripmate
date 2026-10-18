@@ -204,8 +204,13 @@ def smoke() -> None:
     messages = [{"role": "user", "content": "只输出 json：{\"ok\": true}"}]
     request = client._request(messages, 20)
     resp = client._openai().chat.completions.create(
-        model=request["model"], messages=messages, temperature=0, max_tokens=20,
-        response_format=request["response_format"], extra_body=request["extra_body"])
+        model=request["model"],
+        messages=messages,  # type: ignore[arg-type]
+        temperature=0,
+        max_tokens=20,
+        response_format=request["response_format"],
+        extra_body=request["extra_body"],
+    )
     message_extra = resp.choices[0].message.model_extra or {}
     reasoning = message_extra.get("reasoning_content")
     usage = resp.usage.model_dump() if resp.usage else {}

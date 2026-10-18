@@ -46,7 +46,7 @@ def _longest_names(text: str, names: tuple[str, ...]) -> list[str]:
 
 
 def _enum_hits(text: str, values: tuple[str, ...]) -> list[str]:
-    hits = []
+    hits: list[str] = []
     for value in sorted(values, key=len, reverse=True):
         parts = [p for p in value.split("/") if len(p) >= 2 and p not in {"其它", "其他"}]
         if any(p in text for p in parts) and not any(value in h for h in hits):

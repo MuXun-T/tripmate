@@ -22,7 +22,8 @@ class Enums:
     def for_city(self, field: str, city: str | None) -> tuple[str, ...]:
         if city is None:
             return self.union(field)
-        return getattr(self, field)[city]
+        result: tuple[str, ...] = getattr(self, field)[city]
+        return result
 
 
 @lru_cache(maxsize=1)

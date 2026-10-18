@@ -17,3 +17,7 @@
 | 2026-10-19 | T3.6（进行中） | p3-full-dev | dev 全量 full（旧权重）：FPR 94.89 [92.67, 96.89]，DR 99.33，EPR-macro 99.11，门禁通过 | 0.008 | 1.1986 | 期间修正：允许跨夜城际车次、取消返程 14:00 限制和一日游 4 小时限制 |
 | 2026-10-19 | T3.6 网格 | p3-grid_*-devmini | w_transit=0.01 三组均 100%；并列时保持默认 w_price=0.002，写回 full.json | 0.01 | 1.1986 | 60 条样本差 2 条属噪声，以 dev 全量复核为准 |
 | 2026-10-19 | T4.1–T4.4 | data/mt | SQLite 记忆库 + 15 场景单测；CLI；MT dev 60/60、test 154/154（test 仅 1 条含偏好） | 0.55 | 1.1986 | 人工抽检 dev 30 条：2 条交通方式被篡改，已加检查并重新生成；报告 reports/p4_mt_build.md |
+| 2026-10-19 | T3.6 | p3-final-full-dev, p3-A1…A8-dev, p3-A9_llm_direct-devmini | full dev FPR 95.56 [93.56, 97.33]；A3 纯规则 82.89（p≈1e-17）；A9 LLM 直出 1.67（dev_mini）；A1/A2/A4/A5/A7/A8 差异 ≤0.7 个点、不显著 | 0.56 | 2.1228 | A6 按规则不运行（重排已关闭）；报告 reports/p3_dev.md |
+| 2026-10-19 | T4.5 | p4-mt-full-dev, M1, M2 | MT dev：full 98.33（等于同批单轮）；M1 0.00；M2 93.33（p=0.25） | 0.37 | 2.1228 | 报告 reports/p4_mt_dev.md |
+| 2026-10-19 | T4.6 | - | 规划 46.6%、检索 42.0%；SQLite 读写 P50 58/193 ms（NTFS fuseblk 单次提交约 34 ms），约为 LLM 调用的 1/20 和 1/6 | 0 | 2.1228 | 报告 reports/p4_latency.md |
+| 2026-10-19 | T5.1 预检 | p5-precheck-replay-devmini | mypy/ruff/54 测试通过；replay_only 重跑 dev_mini 60/60 计划逐条一致 | 0 | 2.1228 | |

@@ -2,6 +2,7 @@
 
 import json
 from collections import Counter
+from typing import Any
 
 from tripmate_planner.data.splits import uid_list
 from tripmate_planner.eval.labels import gold_from_record
@@ -17,11 +18,12 @@ FIELD_MAP = {"attraction_types": ("attraction", "attraction_type", "type"),
              "must_stay_at": ("hotel", "position", "name")}
 
 
-def build(split: str) -> tuple[list[dict], Counter]:
+def build(split: str) -> tuple[list[dict[str, Any]], Counter[str]]:
     docs = build_corpus()
     uids = uid_list(split)
     records = load_oracle_records(uids)
-    items, dropped = [], Counter()
+    items: list[dict[str, Any]] = []
+    dropped: Counter[str] = Counter()
     for uid in uids:
         rec = records[uid]
         labels, _, _ = gold_from_record(rec)

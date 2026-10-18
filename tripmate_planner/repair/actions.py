@@ -41,7 +41,11 @@ def apply_repair(d: Directives, plan: dict[str, Any] | None, v: VerifyResult, ta
             names = [a["position"] for a in acts if a.get("type") in kinds and a.get("position") and a["position"] in msgs]
             if not names and acts:  # repeated choices: blacklist duplicates
                 seen: set[str] = set()
-                names = [a["position"] for a in acts if a.get("type") in kinds and (a["position"] in seen or seen.add(a["position"]))]
+                for a in acts:
+                    if a.get("type") in kinds and a.get("position"):
+                        if a["position"] in seen:
+                            names.append(a["position"])
+                        seen.add(a["position"])
             for n in names:
                 d.blacklist.add(n)
             actions.append(f"blacklist {typ}: {names[:5]}")

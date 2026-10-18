@@ -18,7 +18,8 @@ class QueryText:
 
 @lru_cache(maxsize=1)
 def _versions() -> dict[str, Any]:
-    return json.loads((CONFIGS / "versions.json").read_text(encoding="utf-8"))
+    data: dict[str, Any] = json.loads((CONFIGS / "versions.json").read_text(encoding="utf-8"))
+    return data
 
 
 @lru_cache(maxsize=4)

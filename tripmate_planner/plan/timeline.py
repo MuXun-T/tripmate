@@ -56,6 +56,7 @@ def transport(city: str, start: str, end: str, start_min: int, people: int, mode
         return None
     sb = get_sandbox()
     t = m2t(start_min)
+    chosen: tuple[dict[str, Any], ...] | None
     if mode is None:
         walk = sb.goto(city, start, end, t, "walk")
         if walk is not None and len(walk) == 1 and float(walk[0]["distance"]) <= walk_max_km:

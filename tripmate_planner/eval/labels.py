@@ -2,6 +2,7 @@
 
 import re
 from dataclasses import dataclass
+from typing import Any
 
 from tripmate_planner.spec.tripspec import TripSpec
 
@@ -87,6 +88,6 @@ def spec_to_labels(spec: TripSpec) -> set[Label]:
     return labels
 
 
-def gold_from_record(record: dict) -> tuple[set[Label], int, list[str]]:
+def gold_from_record(record: dict[str, Any]) -> tuple[set[Label], int, list[str]]:
     """Gold labels for one oracle record (the only place that reads the oracle field)."""
     return oracle_labels(record["hard_logic_py"])

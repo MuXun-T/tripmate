@@ -31,7 +31,7 @@ def _ndcg10(ranked: list[str], rel: set[str]) -> float:
     return dcg / ideal if ideal else 0.0
 
 
-def pure_retrieval(items: list[dict], retr: Retriever) -> dict[str, Any]:
+def pure_retrieval(items: list[dict[str, Any]], retr: Retriever) -> dict[str, Any]:
     per: dict[str, list[dict[str, float]]] = defaultdict(list)
     lat: list[float] = []
     for it in items:
@@ -61,7 +61,7 @@ def pure_retrieval(items: list[dict], retr: Retriever) -> dict[str, Any]:
     return out
 
 
-def filter_experiment(spec_rows: list[dict], retr: Retriever) -> dict[str, Any]:
+def filter_experiment(spec_rows: list[dict[str, Any]], retr: Retriever) -> dict[str, Any]:
     stats: dict[str, dict[str, float]] = {}
     for mode in ("pre", "post", "none"):
         n = short = short_eligible = viol_docs = ret_docs = succ = 0

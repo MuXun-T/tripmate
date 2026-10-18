@@ -10,7 +10,8 @@ from tripmate_planner.paths import RUNS
 
 
 def load(run_id: str) -> dict[str, Any]:
-    return json.loads((RUNS / run_id / "metrics.json").read_text(encoding="utf-8"))
+    data: dict[str, Any] = json.loads((RUNS / run_id / "metrics.json").read_text(encoding="utf-8"))
+    return data
 
 
 def table(run_ids: list[str], baseline: str | None, labels: dict[str, str] | None = None) -> str:

@@ -237,7 +237,7 @@ def build_graph(ctx: TurnContext) -> Any:
                      ("compile", compile_node), ("retrieve", retrieve), ("plan", plan_node), ("verify", verify_node),
                      ("repair", repair_node), ("reflect", reflect_node), ("confirm_memory", confirm_memory),
                      ("save_memory", save_memory), ("finalize", finalize)):
-        g.add_node(name, timed(name, fn))
+        g.add_node(name, timed(name, fn))  # type: ignore[call-overload]
     g.add_edge(START, "load_memory")
     g.add_edge("load_memory", "rewrite")
     g.add_edge("rewrite", "apply_memory")

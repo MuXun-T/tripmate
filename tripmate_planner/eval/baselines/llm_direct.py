@@ -57,8 +57,9 @@ def llm_direct_plan(spec: TripSpec, pools: CandidatePools, cfg: dict[str, Any], 
              "open": c.doc.meta["opentime"], "close": c.doc.meta["endtime"]} for c in pools.restaurants[:15]]
     hotels = [{"name": c.doc.name, "feature": c.doc.meta["featurehoteltype"], "price": _num(c.doc.meta["price"]),
                "beds": int(c.doc.meta["numbed"])} for c in pools.hotels[:8]]
-    legs = lambda opts: [{"id": o.get("TrainID") or o.get("FlightID"), "type": o["kind"], "from": o["From"], "to": o["To"],
-                          "depart": o["BeginTime"], "arrive": o["EndTime"], "price": _num(o["Cost"])} for o in opts]
+    def legs(opts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        return [{"id": o.get("TrainID") or o.get("FlightID"), "type": o["kind"], "from": o["From"], "to": o["To"],
+                 "depart": o["BeginTime"], "arrive": o["EndTime"], "price": _num(o["Cost"])} for o in opts]
     user = (f"【需求】{json.dumps(spec.core().model_dump(exclude_defaults=True), ensure_ascii=False)}\n"
             f"【去程候选】\n{_table(legs(go))}\n【返程候选】\n{_table(legs(back))}\n【景点】\n{_table(attr)}\n"
             f"【餐厅】\n{_table(rest)}\n【酒店】\n{_table(hotels)}\n请输出 json 行程。")

@@ -39,7 +39,7 @@ def apply_preferences(spec: TripSpec, prefs: list[dict[str, Any]]) -> tuple[Trip
             spec.field_sources["hotel_features"] = "memory"
             applied.append(key)
         elif key == "room_type" and spec.room_type is None:
-            spec.room_type = int(value)
+            spec.room_type = 1 if int(value) == 1 else 2
             spec.field_sources["room_type"] = "memory"
             applied.append(key)
         elif key == "pace" and spec.pace == "normal" and not _explicit(spec, "pace"):

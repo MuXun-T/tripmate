@@ -4,6 +4,7 @@ import json
 from functools import lru_cache
 
 import numpy as np
+import numpy.typing as npt
 
 from tripmate_planner.paths import CACHE, CONFIGS
 from tripmate_planner.retrieval.corpus import build_corpus, corpus_hash
@@ -32,13 +33,15 @@ class DenseIndex:
             np.save(cache_file, self.matrix)
             (cache_file.with_suffix(".ids.json")).write_text(json.dumps([d.doc_id for d in docs]), encoding="utf-8")
 
-    def encode_query(self, text: str) -> np.ndarray:
+    def encode_query(self, text: str) -> npt.NDArray[np.float32]:
         vec = self.model.encode([self.instruction + text], normalize_embeddings=True, convert_to_numpy=True,
                                 show_progress_bar=False)
-        return vec[0].astype(np.float32)
+        out: npt.NDArray[np.float32] = vec[0].astype(np.float32)
+        return out
 
-    def scores(self, idx: list[int], query: str) -> np.ndarray:
-        return self.matrix[idx] @ self.encode_query(query)
+    def scores(self, idx: list[int], query: str) -> npt.NDArray[np.float32]:
+        out: npt.NDArray[np.float32] = self.matrix[idx] @ self.encode_query(query)
+        return out
 
 
 @lru_cache(maxsize=1)

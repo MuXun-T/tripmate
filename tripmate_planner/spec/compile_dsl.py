@@ -5,6 +5,7 @@ Each constraint carries a tag so the repair loop can map a failed index to an ac
 """
 
 import math
+from collections.abc import Sequence
 
 from tripmate_planner.spec.tripspec import TripSpec
 
@@ -15,11 +16,11 @@ def _num(value: float) -> str:
     return str(int(value)) if float(value).is_integer() else str(value)
 
 
-def _set(values: list[str]) -> str:
+def _set(values: Sequence[str]) -> str:
     return "{" + ", ".join(repr(v) for v in sorted(values)) + "}"
 
 
-def _subset(var: str, add_cond: str, add_expr: str, values: list[str]) -> str:
+def _subset(var: str, add_cond: str, add_expr: str, values: Sequence[str]) -> str:
     return (f"{var}=set()\nfor activity in allactivities(plan):\n  if {add_cond}: {var}.add({add_expr})\n"
             f"result=({_set(values)}<={var})")
 

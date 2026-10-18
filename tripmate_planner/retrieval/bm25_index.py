@@ -4,6 +4,7 @@ from functools import lru_cache
 
 import bm25s
 import numpy as np
+import numpy.typing as npt
 
 from tripmate_planner.retrieval.corpus import KINDS, PoiDoc, build_corpus
 from tripmate_planner.retrieval.tokenize import tokenize
@@ -24,7 +25,7 @@ class BM25Index:
             model.index(bm25s.tokenization.Tokenized(ids=ids, vocab=vocab), show_progress=False)
             self.models[key], self.vocab[key] = model, vocab
 
-    def scores(self, city: str, kind: str, query: str) -> tuple[list[int], np.ndarray]:
+    def scores(self, city: str, kind: str, query: str) -> tuple[list[int], npt.NDArray[np.float32]]:
         """Return (global doc indexes, scores) for every doc of (city, kind)."""
         key = (city, kind)
         vocab = self.vocab[key]

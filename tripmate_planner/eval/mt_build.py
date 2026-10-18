@@ -94,8 +94,8 @@ def main() -> None:
                         {"role": "user", "content": "不符合要求：" + "；".join(errors) + "。请重新输出完整 json。"}]
         return None
 
-    with ThreadPoolExecutor(max_workers=4) as pool:
-        rows = list(pool.map(gen, queries))
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        rows = list(executor.map(gen, queries))
     kept = [r for r in rows if r]
     out = DATA / "mt" / f"{args.split}.jsonl"
     out.parent.mkdir(parents=True, exist_ok=True)
