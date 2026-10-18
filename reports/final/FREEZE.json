@@ -1,0 +1,99 @@
+{
+  "config_hash": "f898a57f6bfae82dcfd957861474dd5b441e0f0a3aaace8d8c913cb269c95f45",
+  "freeze_hash": "3d7a0c2f1b13b39f7e1c9b0e5d021eecaf7c7197a2793cc87cc130f098653cc1",
+  "git_head_at_freeze": "e52a7db3950d19c7d3695316032ba49a465c6027",
+  "config": {
+    "name": "full",
+    "llm": {
+      "model": "deepseek-flash",
+      "base_url": "https://api.deepseek.com",
+      "temperature": 0,
+      "timeout_s": 60,
+      "max_retries": 2,
+      "cache_mode": "read_write",
+      "max_tokens": {
+        "rewrite": 1024,
+        "reflect": 1024,
+        "llm_direct": 4096,
+        "mt_build": 1200
+      }
+    },
+    "rewrite": {
+      "mode": "llm+rule",
+      "max_history_turns": 6,
+      "max_history_chars": 1800,
+      "max_prev_spec_chars": 1200,
+      "max_pref_chars": 600,
+      "schema_retry": 1
+    },
+    "retrieval": {
+      "mode": "hybrid",
+      "filter_mode": "pre",
+      "bm25": {
+        "k1": 1.5,
+        "b": 0.75
+      },
+      "dense_model": "BAAI/bge-small-zh-v1.5",
+      "query_instruction": "为这个句子生成表示以用于检索相关文章：",
+      "channel_topn": 100,
+      "rrf_k": 60,
+      "fused_topn": 50,
+      "rerank": {
+        "enabled": false,
+        "model": "BAAI/bge-reranker-base",
+        "max_length": 128,
+        "batch_size": 32
+      },
+      "pool_sizes": {
+        "attraction_general": 30,
+        "restaurant_general": 30,
+        "hotel_general": 15,
+        "per_constraint": 10,
+        "per_named": 1,
+        "hotel_feature": 8
+      }
+    },
+    "planner": {
+      "mode": "search",
+      "beam_width": 8,
+      "candidates_per_step": 6,
+      "intercity_candidates": 5,
+      "max_combos": 25,
+      "attractions_per_day": {
+        "relaxed": 2,
+        "normal": 3,
+        "intense": 4
+      },
+      "weights": {
+        "rel": 1.0,
+        "transit_per_min": 0.01,
+        "price_per_yuan": 0.002,
+        "required_bonus": 2.0
+      },
+      "walk_max_km": 1.0,
+      "back_buffer_min": 30,
+      "meal_minutes": 60,
+      "time_budget_s": 20
+    },
+    "verify": {
+      "commonsense": true,
+      "spec": true
+    },
+    "repair": {
+      "max_rounds": 3,
+      "reflect": true
+    },
+    "memory": {
+      "enabled": true,
+      "long_term": true,
+      "auto_confirm": true,
+      "plan_on_intermediate_turns": false
+    },
+    "runtime": {
+      "max_workers": 4,
+      "query_timeout_s": 120,
+      "seed": 20261018
+    }
+  },
+  "frozen_at": "2026-10-19"
+}
