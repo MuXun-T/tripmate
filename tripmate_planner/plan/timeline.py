@@ -34,7 +34,7 @@ def _segments(raw: tuple[dict[str, Any], ...], people: int) -> list[dict[str, An
     out = []
     for seg in raw:
         s = {"start": seg["start"], "end": seg["end"], "mode": seg["mode"], "start_time": seg["start_time"],
-             "end_time": seg["end_time"], "distance": seg["distance"]}
+             "end_time": seg["end_time"], "distance": float(seg["distance"])}
         unit = float(seg["cost"])
         if seg["mode"] == "walk":
             s["price"], s["cost"] = 0, 0

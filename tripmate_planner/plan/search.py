@@ -66,15 +66,20 @@ def _intercity(spec: TripSpec, src: str, dst: str, kind: str | None, back: bool,
         for row in sb.intercity_options(src, dst, k):
             ident = row.get("TrainID") or row.get("FlightID")
             dep, arr = t2m(row["BeginTime"]), t2m(row["EndTime"])
-            if ident in blacklist or arr <= dep:
+            if ident in blacklist:
                 continue
-            opts.append({**row, "kind": k, "_dep": dep, "_arr": arr})
+            # official time check allows next-day arrival for intercity legs (CC Is_time_correct)
+            overnight = arr <= dep
+            opts.append({**row, "kind": k, "_dep": dep, "_arr": arr, "_overnight": overnight})
     if back:
-        opts = [o for o in opts if o["_dep"] >= 14 * 60]
-        opts.sort(key=lambda o: (0 if 16 * 60 <= o["_dep"] <= 21 * 60 else 1, float(o["Cost"]), -o["_dep"]))
+        # any departure time is allowed; afternoon/evening departures (more time on the last day) are preferred
+        opts.sort(key=lambda o: (o["_overnight"], 0 if 16 * 60 <= o["_dep"] <= 21 * 60 else 1 if o["_dep"] >= 12 * 60 else 2,
+                                 float(o["Cost"]), -o["_dep"]))
     else:
-        opts = [o for o in opts if 5 * 60 <= o["_dep"] and o["_arr"] <= 18 * 60]
-        opts.sort(key=lambda o: (0 if 6 * 60 <= o["_dep"] <= 12 * 60 else 1, float(o["Cost"]), o["_arr"]))
+        # same-day arrival by 18:00, or an overnight train/flight arriving 05:00-12:00 (day 1 starts on arrival)
+        opts = [o for o in opts if (not o["_overnight"] and 5 * 60 <= o["_dep"] and o["_arr"] <= 18 * 60)
+                or (o["_overnight"] and 5 * 60 <= o["_arr"] <= 12 * 60)]
+        opts.sort(key=lambda o: (o["_overnight"], 0 if 6 * 60 <= o["_dep"] <= 12 * 60 else 1, float(o["Cost"]), o["_arr"]))
     return opts
 
 
@@ -226,7 +231,7 @@ class Planner:
             if arrival > back["_dep"] - int(self.pc["back_buffer_min"]):
                 return None
             days[-1].append(_intercity_activity(back, self.people, segs))
-            return replace(s, days=days, time=back["_arr"], cost=s.cost + tcost + back["Cost"] * self.people)
+            return replace(s, days=days, time=DAY_END, cost=s.cost + tcost + float(back["Cost"]) * self.people)
         assert hotel is not None
         tr = transport(self.city, s.pos, hotel["name"], s.time, self.people, self.mode, float(self.pc["walk_max_km"]))
         if tr is None:
@@ -311,7 +316,7 @@ class Planner:
         hotels: list[dict[str, Any] | None] = list(self._hotels()) if self.n_days > 1 else [None]
         combos = []
         for go, back, hotel in itertools.product(go_opts, back_opts, hotels):
-            if self.n_days == 1 and back["_dep"] < go["_arr"] + 4 * 60:
+            if self.n_days == 1 and (go["_overnight"] or back["_dep"] <= go["_arr"]):
                 continue
             fixed = (float(go["Cost"]) + float(back["Cost"])) * self.people + (
                 float(hotel["price"]) * hotel["_rooms"] * (self.n_days - 1) if hotel else 0.0)

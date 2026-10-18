@@ -2,10 +2,8 @@
 
 import contextlib
 import io
-import os
 from typing import Any
 
-from tripmate_planner.paths import CT_ROOT
 from tripmate_planner.spec.tripspec import TripSpec
 from tripmate_planner.verify.result import VerifyResult
 from tripmate_planner.verify.spec_checks import run_spec_checks
@@ -14,17 +12,12 @@ _FUNCS: list[Any] = []
 
 
 def _funcs() -> list[Any]:
-    if not _FUNCS:
-        old = os.getcwd()
-        os.chdir(CT_ROOT)
-        try:
-            from chinatravel.symbol_verification import commonsense_constraint as cc
+    if not _FUNCS:  # official verifiers do not depend on the working directory
+        from chinatravel.symbol_verification import commonsense_constraint as cc
 
-            _FUNCS.extend([cc.Is_activity_grounded, cc.Is_intercity_transport_correct, cc.Is_attractions_correct,
-                           cc.Is_hotels_correct, cc.Is_restaurants_correct, cc.Is_transport_correct,
-                           cc.Is_time_correct, cc.Is_space_correct])
-        finally:
-            os.chdir(old)
+        _FUNCS.extend([cc.Is_activity_grounded, cc.Is_intercity_transport_correct, cc.Is_attractions_correct,
+                       cc.Is_hotels_correct, cc.Is_restaurants_correct, cc.Is_transport_correct,
+                       cc.Is_time_correct, cc.Is_space_correct])
     return _FUNCS
 
 
