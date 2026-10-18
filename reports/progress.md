@@ -5,3 +5,4 @@
 | 2026-10-18 | T0.1 | (本提交) | 分支/骨架/env 脚本/AGENTS.md 完成；旧测试 51 passed 29 skipped | 0 | 0 | |
 | 2026-10-18 | T0.2 | (本提交) | .venv-planner/官方仓库@f445e00/沙盒@885c7da/查询@a7d893a/两模型就绪；酒店 3,866 条（论文 4,124，差异如实记录） | 0 | 0 | 偏差：pyarrow 锁 21.0.0（官方 numpy 1.26.4 与 pyarrow≥22 冲突）；hf_xet 卡住→HF_HUB_DISABLE_XET=1，reranker 用 curl 断点续传；新增 tripmate_root.pth 让 tripmate_planner 可导入 |
 | 2026-10-18 | T0.3 | (本提交) | worker.py 一行修复 + 回归测试；旧测试 52 passed 29 skipped | 0 | 0 | |
+| 2026-10-18 | T0.4 | smoke | LLM 客户端 8 项离线测试通过；冒烟：thinking=disabled、无 reasoning_content | 0.0001 | 0.0001 | 首次冒烟遇 1 次瞬时连接错误，重跑成功 |
