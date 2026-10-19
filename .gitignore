@@ -19,3 +19,4 @@ htmlcov/
 third_party/
 .venv-planner/
 runs/
+.taste-skill/

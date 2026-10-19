@@ -25,6 +25,23 @@ TripMate 是一个中文行程规划 Agent。用户用自然语言描述出行�
 
 完整结果、置信区间、失败分析和消融见 [reports/final/summary.md](reports/final/summary.md)。
 
+## 工作台界面
+
+![TripMate 工作台：逐日行程时间轴、官方规则校验结果与多轮对话](docs/images/workbench.jpg)
+
+本地运行的单页工作台（Python 标准库 HTTP 服务 + 原生 HTML/CSS/JS，无构建步骤）：
+
+- 左侧是用自然语言多轮描述需求的对话区，右侧是逐日行程；
+- 时间轴上标出了官方规则规定的三餐时段，能直接看到每项安排为什么符合规则；
+- 页面同时展示 8 组官方常识检查和每项需求约束的结果、修复过程、系统理解出的需求字段及其来源；
+- LLM 提出的长期偏好要在页面上确认后才会写入，写入后可以在"长期偏好"页查看版本记录，也可以删除。
+
+```bash
+source scripts/planner_env.sh
+python -m tripmate_planner.web.server          # 打开 http://127.0.0.1:8765
+python -m tripmate_planner.web.server --rule   # 不调用 API，只用规则解析需求
+```
+
 ## 总体架构
 
 ```mermaid
@@ -223,6 +240,7 @@ flowchart LR
 tripmate_planner/
   graph.py            LangGraph 编排
   cli.py              命令行：plan（单轮）/ chat（多轮，交互确认偏好）
+  web/                本地工作台：标准库 HTTP 服务、视图整理、静态页面
   spec/               TripSpec、规则解析、LLM 改写、DSL 编译、记忆合并
   retrieval/          POI 语料、分词、BM25、稠密检索、RRF、重排
   plan/               时间轴模拟、打分、beam search
@@ -248,6 +266,8 @@ python scripts/check_planner_env.py
 python -m tripmate_planner.cli plan --text "当前位置上海。我们两个人想去杭州玩两天，预算 3000 元，想吃杭帮菜。"
 # 多轮对话（偏好写入前会逐条询问确认）
 python -m tripmate_planner.cli chat --user demo --conversation c1
+# 网页工作台
+python -m tripmate_planner.web.server
 
 pytest tests_planner -q                # 离线测试
 python -m tripmate_planner.eval.run_benchmark --config configs/planner/full.json --split dev --run-id my-dev
