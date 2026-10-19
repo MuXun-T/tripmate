@@ -27,14 +27,22 @@ TripMate 是一个中文行程规划 Agent。用户用自然语言描述出行�
 
 ## 工作台界面
 
-![TripMate 工作台：逐日行程时间轴、官方规则校验结果与多轮对话](docs/images/workbench.jpg)
+![TripMate 工作台：费用与校验概览、逐日行程时间轴和多轮对话](docs/images/workbench-trip.png)
 
 本地运行的单页工作台（Python 标准库 HTTP 服务 + 原生 HTML/CSS/JS，无构建步骤）：
 
-- 左侧是用自然语言多轮描述需求的对话区，右侧是逐日行程；
+- 左侧主栏是费用与校验概览、逐日行程和校验结果，右侧是用自然语言多轮描述需求的对话区；
 - 时间轴上标出了官方规则规定的三餐时段，能直接看到每项安排为什么符合规则；
 - 页面同时展示 8 组官方常识检查和每项需求约束的结果、修复过程、系统理解出的需求字段及其来源；
 - LLM 提出的长期偏好要在页面上确认后才会写入，写入后可以在"长期偏好"页查看版本记录，也可以删除。
+
+| 逐日行程：时间轴、明细与费用构成 | 规则校验与系统理解的需求 |
+|---|---|
+| ![逐日行程面板：时间轴上标出官方三餐时段，下方是每项安排的时间、交通和费用](docs/images/workbench-itinerary.png) | ![规则校验：8 组官方常识检查、每项需求约束、修复过程与系统理解出的需求字段](docs/images/workbench-checks.png) |
+| 新行程：示例需求与待运行的检查 | 长期偏好：确认后写入，保留版本记录 |
+| ![新行程起始页：右侧是示例需求和输入框，左侧列出待运行的 8 组官方检查](docs/images/workbench-new.png) | ![长期偏好页：已记住的偏好、变更记录和偏好的合并规则](docs/images/workbench-prefs.png) |
+
+<p><img src="docs/images/workbench-mobile.png" width="260" alt="手机端：逐日行程的时间轴和两行排布的明细"></p>
 
 ```bash
 source scripts/planner_env.sh
