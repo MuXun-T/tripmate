@@ -13,7 +13,7 @@ from tripmate_planner.env.enums import get_enums
 from tripmate_planner.eval.labels import Label, gold_from_record, spec_to_labels
 from tripmate_planner.eval.oracle import load_oracle_records
 from tripmate_planner.llm.client import build_client
-from tripmate_planner.paths import RUNS
+from tripmate_planner.paths import REPORTS, RUNS
 from tripmate_planner.spec.rewrite import rewrite
 from tripmate_planner.spec.tripspec import TripSpec
 
@@ -53,15 +53,22 @@ def extraction_metrics(gold: dict[str, set[Label]], pred: dict[str, set[Label]],
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--split", required=True, choices=["dev", "dev_mini"])
+    parser.add_argument("--split", required=True, choices=["dev", "dev_mini", "test"])
     parser.add_argument("--config", required=True)
     parser.add_argument("--mode", choices=["rule", "llm+rule"], default=None)
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--scope", default="p1")
+    parser.add_argument("--final", action="store_true")
+    parser.add_argument("--config-hash", default=None)
     args = parser.parse_args()
     cfg = load_config(args.config)
     if args.mode:
         cfg["rewrite"]["mode"] = args.mode
+    # T5.3: on test this only produces specs.jsonl for retrieval_eval; the rewrite calls are the same as in the
+    # test benchmark run, so they are served by the local LLM cache.
+    lock = REPORTS / "final" / "TEST_LOCK_extraction.json"
+    if args.split == "test" and (not args.final or args.config_hash != config_hash(cfg) or lock.exists()):
+        raise SystemExit(f"test split requires --final --config-hash {config_hash(cfg)} and no lock (R6)")
     out_dir = RUNS / args.run_id
     out_dir.mkdir(parents=True, exist_ok=True)
     enums = get_enums()
@@ -105,6 +112,8 @@ def main() -> None:
         for row in rows:
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
     (out_dir / "extraction_metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+    if args.split == "test":
+        lock.write_text(json.dumps({"run_id": args.run_id, "config_hash": config_hash(cfg)}), encoding="utf-8")
     print(json.dumps({k: metrics[k] for k in ("n", "micro", "exact_match_rate", "coverage", "sources", "cost_peak",
                                                "latency_ms_p50", "latency_ms_p95")}, ensure_ascii=False))
 
