@@ -1,0 +1,43 @@
+{
+ "pack": "reports/final/llm_replay.jsonl.gz",
+ "config_hash": "f898a57f6bfae82dcfd957861474dd5b441e0f0a3aaace8d8c913cb269c95f45",
+ "all_metrics_identical": false,
+ "runs": [
+  {
+   "original": "p5-full-test",
+   "replay": "p5-full-test-replay-20261019b",
+   "official_equal": true,
+   "per_uid_equal": true,
+   "plans_differing": [],
+   "official": {
+    "DR": 96.75,
+    "EPR_micro": 96.75,
+    "EPR_macro": 96.75,
+    "LPR_micro": 92.68,
+    "LPR_macro": 79.22,
+    "C_LPR": 92.68,
+    "FPR": 79.22
+   },
+   "api_cost_peak_replay": 0.0
+  },
+  {
+   "original": "p5-mt-full-test",
+   "replay": "p5-mt-full-test-replay-20261019b",
+   "official_equal": false,
+   "per_uid_equal": false,
+   "plans_differing": [
+    "h20241029143502525564.json"
+   ],
+   "official": {
+    "DR": 90.91,
+    "EPR_micro": 90.72,
+    "EPR_macro": 88.96,
+    "LPR_micro": 87.12,
+    "LPR_macro": 77.92,
+    "C_LPR": 85.51,
+    "FPR": 77.27
+   },
+   "api_cost_peak_replay": 0.0
+  }
+ ]
+}

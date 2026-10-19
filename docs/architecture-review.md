@@ -1,3 +1,5 @@
+> 本文描述 v0 原型（已冻结）。v1 实施与结果见 docs/optimization-plan.md 与 reports/final/summary.md。
+
 # TripMate 周末出游管家 Agent 架构评审报告
 
 > 评审日期：2026-10-13（Asia/Shanghai）  

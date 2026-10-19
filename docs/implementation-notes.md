@@ -1,3 +1,5 @@
+> 本文描述 v0 原型（已冻结）。v1 实施与结果见 docs/optimization-plan.md 与 reports/final/summary.md。其中 TravelPlanner 子集检索指标已证实无区分度（标题城市名规则基线即可满分），不再作为能力证据。
+
 # 实现与验证现状
 
 | 项目 | 内容 |

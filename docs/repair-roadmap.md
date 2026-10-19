@@ -1,3 +1,5 @@
+> 本文描述 v0 原型（已冻结）。v1 实施与结果见 docs/optimization-plan.md 与 reports/final/summary.md。
+
 # TripMate 修复实施路线图
 
 > 用途：按阶段补齐设计与实现差距，形成可在本机运行、可用测试证明、可用于实习作品展示的 TripMate Agent。

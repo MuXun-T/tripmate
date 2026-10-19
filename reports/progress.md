@@ -22,3 +22,11 @@
 | 2026-10-19 | T4.6 | - | 规划 46.6%、检索 42.0%；SQLite 读写 P50 58/193 ms（NTFS fuseblk 单次提交约 34 ms），约为 LLM 调用的 1/20 和 1/6 | 0 | 2.1228 | 报告 reports/p4_latency.md |
 | 2026-10-19 | T5.1 预检 | p5-precheck-replay-devmini | mypy/ruff/54 测试通过；replay_only 重跑 dev_mini 60/60 计划逐条一致 | 0 | 2.1228 | |
 | 2026-10-19 | T5.2 冒烟 | p5-react0-smoke-easy2, -v2 | 官方 ReAct0 + deepseek-flash（thinking=disabled 已断言，request_shape.json 记录键名）；2 条 easy 计划与账本正常，FPR 0/2；每条约 32 次调用、14.6 万输入 token（缓存命中约 94%） | 0.188 | 2.3111 | 修正：官方 LLM 封装会吞掉异常，预算超限改为置标志后中止；AgentReturnInfo 只支持下标访问（v1 冒烟因此丢计划，v2 重跑）；新增 baselines/score.py；RuleNeSy 加 test 锁 |
+| 2026-10-19 | T5.3 单轮 | p5-full-test | test 154：FPR 79.22 [72.73, 85.71]，DR 96.75，EPR-macro 96.75，LPR-macro 79.22；passed 148 / no_plan 5 / best_effort 1；抽取 F1 0.877；每条 1.21 次调用、1,440 输入 token | 0.2443 | - | config_hash f898a57f…，锁 TEST_LOCK_benchmark_full.json |
+| 2026-10-19 | T5.3 多轮 | p5-mt-full-test | MT-test 154：FPR 76.62 [69.48, 83.12]，DR 90.91；约束保持率 0.9135；含偏好对话 1 段 | 0.4921 | - | 锁 TEST_LOCK_mt_full.json |
+| 2026-10-19 | T5.3 抽取 | p5-extract-test | 仅用于生成检索评测的 specs；F1 0.880（llm+rule 150、rule_fallback 4），调用基本命中本地缓存 | 0.0036 | - | 偏差：extraction_eval 新增 test 选项（需 --final 与 config_hash，写锁）；锁 TEST_LOCK_extraction.json |
+| 2026-10-19 | T5.3 检索 | p5-retrieval-test | POI-Ret test：nDCG@10 hybrid 0.419 / bm25 0.297 / dense 0.383 / hybrid+rerank 0.532；召回前、召回后过滤的不足率均为 0，不过滤违规率 8.98% | 0 | 4.7258（含进行中的 ReAct0） | 锁 TEST_LOCK_retrieval.json |
+| 2026-10-19 | T5.2 ReAct0 | p5-react0-test | 官方 ReAct0（deepseek-flash，thinking 关闭）test 154：FPR 0.00，DR 93.51，EPR-micro 63.97；每条 53.41 次调用、345,447 输入 token（API 缓存命中 95.8%） | 12.076 | 15.179 | 锁 TEST_LOCK_react0.json；论文参考 ReAct one-shot 2.6、NeSy Planning 37.0 |
+| 2026-10-19 | T5.2 RuleNeSy | p5-rulenesy-test（未完成） | 前 12 条每条撞到官方 300 s 搜索时限，均失败；全量预计约 13 小时，主动终止，未写锁，不列入主表 | 0 | 15.179 | 偏差：计划为条件运行；它不读自然语言，作为参照价值有限 |
+| 2026-10-19 | T5.4 回放 | p5-full-test-replay-20261019b, p5-mt-full-test-replay-20261019b | 单轮：指标与 154 个计划逐条一致；多轮：153/154 一致，1 段对话（best_effort 难例）受规划器墙钟时间预算影响 | 0 | 15.179 | 首次回放（tag 20261019）不一致：原始运行中网络失败的请求后来被抽取运行补进缓存。修正：回放包按运行窗口标注、只加载对应运行的记录；CacheMiss 改为 LLMRequestError 子类（与原始请求失败同样处理）。报告数字取原始运行 |
+| 2026-10-19 | T5.4 | (本提交) | reports/final/summary.md、resume.md、llm_replay.jsonl.gz、replay_check.json；README 重写；6 个 v0 文档加冻结标注 | 0 | 15.179 | 按用户要求，简历中不写延迟和存储写入耗时的数值，只写设计要点；测试里的假密钥去掉 sk- 前缀 |

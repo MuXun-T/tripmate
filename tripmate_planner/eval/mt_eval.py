@@ -24,11 +24,16 @@ def main() -> None:
     parser.add_argument("--scope", default="p4")
     parser.add_argument("--final", action="store_true")
     parser.add_argument("--config-hash", default=None)
+    parser.add_argument("--replay", action="store_true",
+                        help="reproduce a finished run from cached responses only (no API calls, no lock written)")
     args = parser.parse_args()
     cfg = load_config(args.config)
     chash = config_hash(cfg)
     lock = REPORTS / "final" / f"TEST_LOCK_mt_{cfg['name']}.json"
-    if args.split == "test":
+    if args.replay:
+        if args.config_hash != chash or (RUNS / args.run_id).exists():
+            raise SystemExit(f"--replay requires --config-hash {chash} and a new --run-id")
+    elif args.split == "test":
         if not args.final or args.config_hash != chash:
             raise SystemExit(f"test split requires --final --config-hash {chash} (rule R6)")
         if lock.exists():
@@ -39,7 +44,7 @@ def main() -> None:
         (out / sub).mkdir(parents=True, exist_ok=True)
     (out / "config.json").write_text(json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8")
     enums, retriever = get_enums(), Retriever(cfg["retrieval"])
-    llm = build_client(cfg["llm"])
+    llm = build_client(cfg["llm"], cache_mode="replay_only" if args.replay else None)
     llm.set_context(run_id=args.run_id, scope=args.scope)
     plans: dict[str, Any] = {}
     traces: dict[str, Any] = {}
@@ -89,7 +94,7 @@ def main() -> None:
                     "prefs_stored_rate": round(sum(traces[u]["prefs_stored"] > 0 for u in with_pref) / max(len(with_pref), 1), 4),
                     "constraint_retention": metrics["extraction"]["micro"]["recall"]})
     (out / "metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
-    if args.split == "test":
+    if args.split == "test" and not args.replay:
         lock.write_text(json.dumps({"run_id": args.run_id, "config_hash": chash}), encoding="utf-8")
     print(json.dumps({"run_id": args.run_id, **metrics["official"], "retention": metrics["constraint_retention"],
                       "prefs_stored_rate": metrics["prefs_stored_rate"], "cost": metrics["cost_peak_this_run"]},

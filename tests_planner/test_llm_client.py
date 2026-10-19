@@ -10,7 +10,7 @@ from tripmate_planner.llm.client import LLMClient, LLMConfig
 from tripmate_planner.llm.cost import Budget, CostLedger
 from tripmate_planner.llm.errors import BudgetExceeded, CacheMiss, LLMOutputError, LLMRequestError
 
-FAKE_KEY = "sk-test-FAKEKEY-123456"
+FAKE_KEY = "test-FAKEKEY-123456"
 
 
 class Out(BaseModel):

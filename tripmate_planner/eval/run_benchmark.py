@@ -82,10 +82,16 @@ def main() -> None:
     parser.add_argument("--final", action="store_true")
     parser.add_argument("--config-hash", default=None)
     parser.add_argument("--cache-mode", default=None, choices=["read_write", "replay_only", "off"])
+    parser.add_argument("--replay", action="store_true",
+                        help="reproduce a finished run from cached responses only (no API calls, no lock written)")
     args = parser.parse_args()
     cfg = load_config(args.config)
     chash = config_hash(cfg)
-    if args.split == "test":
+    if args.replay:
+        if args.config_hash != chash or not args.run_id or (RUNS / args.run_id).exists():
+            raise SystemExit(f"--replay requires --config-hash {chash} and a new --run-id")
+        args.cache_mode = "replay_only"
+    elif args.split == "test":
         if not args.final or args.config_hash != chash:
             raise SystemExit(f"test split requires --final --config-hash {chash} (rule R6)")
         if args.limit:
@@ -135,7 +141,7 @@ def main() -> None:
     metrics.update({"run_id": run_id, "config_name": cfg["name"], "config_hash": chash, "split": args.split,
                     "n": len(uids), "wall_s": round(time.time() - started, 1)})
     (out / "metrics.json").write_text(json.dumps(metrics, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
-    if args.split == "test":
+    if args.split == "test" and not args.replay:
         lock = REPORTS / "final" / f"TEST_LOCK_benchmark_{cfg['name']}.json"
         lock.write_text(json.dumps({"run_id": run_id, "config_hash": chash}), encoding="utf-8")
     print(json.dumps({"run_id": run_id, **metrics["official"], "ci95_FPR": metrics["ci95_pct"]["FPR"],
