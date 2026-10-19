@@ -11,10 +11,10 @@ mkdir -p "$LOGS"
 case "${1:-}" in
   baselines)
     python -m tripmate_planner.eval.baselines.official_react0 --split test --final --run-id p5-react0-test \
-      2>&1 | grep -E '^\[[0-9]+/[0-9]+\]|budget|Traceback|Error' > "$LOGS/react0.log" || true
+      > "$LOGS/react0.log" 2>&1
     python -m tripmate_planner.eval.baselines.score --run-id p5-react0-test > "$LOGS/react0_score.log" 2>&1
     python -m tripmate_planner.eval.baselines.official_rulenesy --uids-file data/splits/test.txt --final \
-      --run-id p5-rulenesy-test 2>&1 | grep -E '^\[[0-9]+/[0-9]+\]|method|Traceback' > "$LOGS/rulenesy.log" || true
+      --run-id p5-rulenesy-test > "$LOGS/rulenesy.log" 2>&1
     python -m tripmate_planner.eval.baselines.score --run-id p5-rulenesy-test > "$LOGS/rulenesy_score.log" 2>&1
     ;;
   ours)
