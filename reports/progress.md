@@ -21,3 +21,4 @@
 | 2026-10-19 | T4.5 | p4-mt-full-dev, M1, M2 | MT dev：full 98.33（等于同批单轮）；M1 0.00；M2 93.33（p=0.25） | 0.37 | 2.1228 | 报告 reports/p4_mt_dev.md |
 | 2026-10-19 | T4.6 | - | 规划 46.6%、检索 42.0%；SQLite 读写 P50 58/193 ms（NTFS fuseblk 单次提交约 34 ms），约为 LLM 调用的 1/20 和 1/6 | 0 | 2.1228 | 报告 reports/p4_latency.md |
 | 2026-10-19 | T5.1 预检 | p5-precheck-replay-devmini | mypy/ruff/54 测试通过；replay_only 重跑 dev_mini 60/60 计划逐条一致 | 0 | 2.1228 | |
+| 2026-10-19 | T5.2 冒烟 | p5-react0-smoke-easy2, -v2 | 官方 ReAct0 + deepseek-flash（thinking=disabled 已断言，request_shape.json 记录键名）；2 条 easy 计划与账本正常，FPR 0/2；每条约 32 次调用、14.6 万输入 token（缓存命中约 94%） | 0.188 | 2.3111 | 修正：官方 LLM 封装会吞掉异常，预算超限改为置标志后中止；AgentReturnInfo 只支持下标访问（v1 冒烟因此丢计划，v2 重跑）；新增 baselines/score.py；RuleNeSy 加 test 锁 |

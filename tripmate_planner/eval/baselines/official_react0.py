@@ -13,15 +13,15 @@ import time
 from pathlib import Path
 from typing import Any
 
-from tripmate_planner.config import config_hash
 from tripmate_planner.data.splits import load_queries
 from tripmate_planner.llm.cost import PEAK, STD, Budget, CallRecord, CostLedger, cost_of
+from tripmate_planner.llm.errors import BudgetExceeded
 from tripmate_planner.paths import CT_ROOT, REPORTS, RUNS
 
 THINKING_OFF = {"thinking": {"type": "disabled"}}
 
 
-def _patch(run_id: str, scope: str, out: Path) -> None:
+def _patch(run_id: str, scope: str, out: Path) -> dict[str, Any]:
     import chinatravel.agent.llms as L
 
     alias = L.ModelAlias(name="deepseek-flash-nothink", model="deepseek-flash", base_url="https://api.deepseek.com",
@@ -31,7 +31,9 @@ def _patch(run_id: str, scope: str, out: Path) -> None:
     ledger = CostLedger()
     budget = Budget(ledger)
     orig_send, orig_record = L.OpenAICompatibleLLM._send_request, L.OpenAICompatibleLLM._record_usage
-    state = {"first": True}
+    # The official wrapper swallows request exceptions (returns REQUEST_ERROR_RESPONSE), so a cap hit is
+    # remembered here, every later request fails fast without calling the API, and main() stops the loop.
+    state: dict[str, Any] = {"first": True, "budget_hit": False, "calls": 0}
 
     def send(self: Any, messages: list[dict[str, Any]], request_args: dict[str, Any]) -> dict[str, Any]:
         if request_args.get("extra_body") != THINKING_OFF:
@@ -39,8 +41,15 @@ def _patch(run_id: str, scope: str, out: Path) -> None:
         if state["first"]:
             (out / "request_shape.json").write_text(json.dumps(sorted(request_args), ensure_ascii=False))
             state["first"] = False
+        if state["budget_hit"]:
+            raise BudgetExceeded("p5_baseline cap already reached")
         chars = sum(len(str(m.get("content", ""))) for m in messages)
-        budget.check(scope, chars * PEAK["miss"] + int(request_args.get("max_tokens", 4096)) * PEAK["out"])
+        try:
+            budget.check(scope, chars * PEAK["miss"] + int(request_args.get("max_tokens", 4096)) * PEAK["out"])
+        except BudgetExceeded:
+            state["budget_hit"] = True
+            raise
+        state["calls"] += 1
         self._t0 = time.perf_counter()
         result: dict[str, Any] = orig_send(self, messages, request_args)
         return result
@@ -62,6 +71,7 @@ def _patch(run_id: str, scope: str, out: Path) -> None:
 
     L.OpenAICompatibleLLM._send_request = send
     L.OpenAICompatibleLLM._record_usage = record
+    return state
 
 
 def main() -> None:
@@ -81,7 +91,7 @@ def main() -> None:
     (out / "plans").mkdir(parents=True, exist_ok=True)
     (out / "logs").mkdir(parents=True, exist_ok=True)
     scope = "p5_baseline"
-    _patch(args.run_id, scope, out)
+    state = _patch(args.run_id, scope, out)
     queries = load_queries("human" if args.split == "test" else "easy")[: args.limit]
     os.chdir(CT_ROOT)
     from chinatravel.agent.load_model import create_agent_runtime
@@ -90,11 +100,10 @@ def main() -> None:
     runtime = create_agent_runtime("ReAct0", "deepseek-flash-nothink", project_root_path=str(CT_ROOT), lang="zh",
                                    oracle_translation=False, preference_search=False, refine_steps=10)
     agent = runtime.agent
-    from tripmate_planner.llm.errors import BudgetExceeded
-
+    timing: dict[str, float] = {}
     for i, q in enumerate(queries):
         started = time.perf_counter()
-        before_in, before_out = agent.backbone_llm.input_token_count, agent.backbone_llm.output_token_count
+        calls_before = state["calls"]
         try:
             plan_log = agent(q.text)
             plan = plan_log["ans"]
@@ -103,22 +112,29 @@ def main() -> None:
                     plan = json.loads(plan)
                 except Exception:
                     plan = {"plan": plan}
-            save_json_file(json_data=plan_log.get("log"), file_path=str(out / "logs" / f"{q.uid}.json"))
-        except BudgetExceeded:
-            print("budget cap reached; stopping (remaining queries count as empty plans)", flush=True)
-            break
+            # AgentReturnInfo supports item access only (run_exp.py uses plan_log["log"]).
+            save_json_file(json_data=plan_log["log"], file_path=str(out / "logs" / f"{q.uid}.json"))
         except Exception as exc:
             plan = {"error": f"{type(exc).__name__}: {exc}"}
         finally:
             sys.stdout = sys.__stdout__
+        if state["budget_hit"]:
+            # This query was cut by the cap: no plan is saved, so it is scored as an empty plan.
+            print("budget cap reached; stopping (this and remaining queries count as empty plans)", flush=True)
+            break
         if isinstance(plan, dict):
-            plan["input_token_count"] = agent.backbone_llm.input_token_count - before_in
-            plan["output_token_count"] = agent.backbone_llm.output_token_count - before_out
+            # agent.run() resets the counters per query, so these are per-query values (as in run_exp.py).
+            plan["input_token_count"] = agent.backbone_llm.input_token_count
+            plan["output_token_count"] = agent.backbone_llm.output_token_count
+            plan["input_token_maxx"] = agent.backbone_llm.input_token_maxx
+            plan["llm_calls"] = state["calls"] - calls_before
         save_json_file(json_data=plan, file_path=str(out / "plans" / f"{q.uid}.json"))
-        print(f"[{i + 1}/{len(queries)}] {q.uid} {time.perf_counter() - started:.1f}s", flush=True)
+        timing[q.uid] = round((time.perf_counter() - started) * 1000, 1)
+        print(f"[{i + 1}/{len(queries)}] {q.uid} {timing[q.uid] / 1000:.1f}s", flush=True)
+    (out / "timing.json").write_text(json.dumps({"method": "ReAct0_deepseek-flash-nothink", "ms": timing,
+                                                 "stopped_by_budget": state["budget_hit"]}, ensure_ascii=False, indent=1))
     if args.split == "test":
         (REPORTS / "final" / "TEST_LOCK_react0.json").write_text(json.dumps({"run_id": args.run_id}))
-    _ = config_hash
 
 
 if __name__ == "__main__":

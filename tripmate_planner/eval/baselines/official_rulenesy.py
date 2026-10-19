@@ -9,7 +9,7 @@ import sys
 import time
 
 from tripmate_planner.eval.oracle import load_oracle_records
-from tripmate_planner.paths import CT_ROOT, RUNS
+from tripmate_planner.paths import CT_ROOT, DATA, REPORTS, RUNS
 
 
 def main() -> None:
@@ -17,6 +17,7 @@ def main() -> None:
     parser.add_argument("--uids-file", required=True)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--run-id", required=True)
+    parser.add_argument("--final", action="store_true", help="required for the test split (R6)")
     parser.add_argument("--also-official-results", action="store_true",
                         help="copy plans into third_party results/<method>/ for the official CLI check")
     args = parser.parse_args()
@@ -25,6 +26,11 @@ def main() -> None:
     from chinatravel.data.load_datasets import _strip_oracle_fields, save_json_file
 
     uids = [u.strip() for u in open(args.uids_file, encoding="utf-8") if u.strip()][: args.limit]
+    test_uids = {u.strip() for u in (DATA / "splits" / "test.txt").read_text(encoding="utf-8").splitlines() if u.strip()}
+    lock = REPORTS / "final" / "TEST_LOCK_rulenesy.json"
+    is_test = bool(test_uids & set(uids))
+    if is_test and (not args.final or args.limit or lock.exists() or set(uids) != test_uids):
+        raise SystemExit("test requires --final, the full test split, no --limit, and no existing lock (R6)")
     os.chdir(CT_ROOT)  # official agents use repository-relative paths
     records = load_oracle_records(uids)
     runtime = create_agent_runtime("RuleNeSy", "rule", project_root_path=str(CT_ROOT), lang="zh",
@@ -50,6 +56,8 @@ def main() -> None:
     (RUNS / args.run_id / "timing.json").write_text(json.dumps({"method": runtime.method, "timing": timing},
                                                                ensure_ascii=False, indent=1))
     print("method:", runtime.method)
+    if is_test:
+        lock.write_text(json.dumps({"run_id": args.run_id}), encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -36,7 +36,8 @@ def _oracle_verdict(record: dict, plan: dict) -> bool:
     from chinatravel.symbol_verification.hard_constraint import evaluate_constraints_py
 
     from tripmate_planner.paths import CT_ROOT
-    old = os.getcwd(); os.chdir(CT_ROOT)
+    old = os.getcwd()
+    os.chdir(CT_ROOT)
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             codes = [c for c in record_codes(record)]
